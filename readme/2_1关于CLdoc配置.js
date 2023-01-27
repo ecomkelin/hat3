@@ -15,6 +15,12 @@ const CLdoc =  {
         MIN: Number,        // (所属字段必须为 String 类型) 字段的最小长度  的正整数
         MAX: Number,        //  (所属字段必须为 String 类型) 字段的最大长度  的正整数
         REGEXP: "正则表达式", //  (所属字段必须为 String 类型) 字段要符合的正则表达式
+        CONF: {
+            vals: [],       // 此字段可以被设置的值
+            desp: {         // 每个值对应的描述
+
+            }
+        },
 
         IS_change: Boolean,     //  保存之前 要更改数据 (如果是需要改变的 则此字段需要在 ${Controller}文件中控制 writePre会根据此字段不判定)
 

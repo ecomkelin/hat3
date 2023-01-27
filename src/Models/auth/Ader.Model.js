@@ -1,12 +1,13 @@
-const DB = require("../../../bin/DB");
+const DB = require(path.join(process.cwd(), "bin/DB"));
+
 const CLname = "Ader";
 
 const CLdoc = {
     code: {
-        type: "string"
+        type: String
     },
     pwd: {
-        type: "string"
+        type: String
     }
 }
 

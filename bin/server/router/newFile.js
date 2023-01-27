@@ -14,9 +14,10 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
    let dirStr = '';
    for (let level = 1; level <= n; level++) dirStr += '/' + paths[level];
 
-   let restfulMethod = 'get';             // restfulMethod 默认为 get
-   /** url 默认为 从第二层级文件夹开始 order/op/.... + / + 文件名称（不加后缀）*/
-   let url = dirStr + '/' + fileName
+   let restfulMethod = 'post';             // restfulMethod 默认为 post
+   /** urlPre 默认为 从第二层级文件夹开始 order/op/.... + / + 文件名称（不加后缀）*/
+   const urlPre = dirStr + '/' + fileName
+   let routePath = urlPre;
 
    let reqFunc = reqFile;                 // 路由的 执行函数 
 
@@ -24,20 +25,20 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
    if (fileType === 'api') {
       /** 如果文件的中间名为 api 则说明 此文件为 exports.function 文件
        * 里面的函数 名称 如果不包含 下划线 则方法为 get 函数名为路由路径名称
-       * 否则 第一个下划线 左边为 方法（get/post/put/delete) 如果不是这四种 则为默认 get
+       * 否则 第一个下划线 左边为 方法（get/post/put/delete) 如果不是这四种 则为默认 post
        * 第一个下划线 右边的方法 为 路由路径名称
        * 路由的路径名称为 文件夹名称 + 文件名称 + 方法名称
        */
       for (funcName in reqFile) {
          let fns = funcName.split('_');
          reqFunc = reqFile[funcName];     // 找出需要调用的方法
-         if (fns.length === 1) {          // 如果函数的对象名 不包含下划线 则默认为 get  url直接用对象名
-            url = dirStr + '/' + fileName + '/' + fns[0];
-         } else if (fns.length > 1) {     // 如果包含下划线 下划线左边 为 restfulMethod 右边的名称被url使用
+         if (fns.length === 1) {          // 如果函数的对象名 不包含下划线 则默认为 post  urlPre直接用对象名
+            routePath = urlPre + '/' + fns[0];
+         } else if (fns.length > 1) {     // 如果包含下划线 下划线左边 为 restfulMethod 右边的名称被urlPre使用
             restfulMethod = fns[0];
-            url = dirStr + '/' + fileName + '/' + fns[1];
+            routePath = urlPre + '/' + fns[1];
          }
-         newRoute(restfulMethod, url, reqFunc);
+         newRoute(restfulMethod, routePath, reqFunc);
       }
       return;
    } else if (restfulMethods.includes(fileType)) {
@@ -45,19 +46,13 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
        * 路由的路径名称为 文件夹名称 + 文件名称
        */
       restfulMethod = fileType;
-      return newRoute(restfulMethod, url, reqFunc);
-   } else if (fileType === 'Conf') {
-      /** 生成 Config 路由 方法 
-       * 路由的路径名称为 文件夹名称 + 文件名称
-      */
-      reqFunc = ctx => resSUCCESS(ctx, { Config: reqFile });
-      return newRoute(restfulMethod, url, reqFunc);
+      return newRoute(restfulMethod, routePath, reqFunc);
    } else if (fileType === 'Model') {
       /** 生成 Model 模型 路由 方法 */
 
       reqFunc = ctx => resSUCCESS(ctx, { model: reqFile.CLdoc });
 
-      newRoute(restfulMethod, url, reqFunc);
+      newRoute(restfulMethod, routePath, reqFunc);
 
       /** 如果 模型需要则自动生成一些 基础的 api路由 Model文件的 reqFile 就是其 CLmodel */
       genApiFromModel(reqFile, fileName, newRoute);

@@ -1,4 +1,4 @@
-const UserCL = require("../../Models/User.Model");
+const UserCL = require("../../Models/auth/User.Model");
 
 module.exports = async ctx => {
     try {        

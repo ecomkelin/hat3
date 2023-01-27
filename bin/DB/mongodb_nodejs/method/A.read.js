@@ -40,6 +40,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
 
             let docs = await cursor.toArray();
             await cursor.close();
+            // console.log(docs);
             return resolve(docs);
         } catch (e) {
             return reject(e);

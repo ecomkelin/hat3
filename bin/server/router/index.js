@@ -13,23 +13,23 @@ const routeObjs = [];   // 为了方便查看 所有路由 每当有新的路由
 const restfulMethods = ['get', 'post', 'put', 'delete'];
 /** 自动新增一个路由
  * @param {*} restfulMethod 路由的类型
- * @param {*} url    路由的路径
+ * @param {*} routePath    路由的路径
  * @param {*} reqFunc   路由的执行函数
  * @returns 并把此路由收集到 routeObjs中 交由最后一个路由统一暴露
  */
-const newRoute = (restfulMethod, url, reqFunc) => {
+const newRoute = (restfulMethod, routePath, reqFunc) => {
    if (!restfulMethods.includes(restfulMethod)) {
-      console.log(`注意：${url} 此路径的 方法不对 没有加载到系统`)
+      console.log(`注意：${routePath} 此路径的 方法不对 没有加载到系统`)
       return;
    };
-   let routeObj = restfulMethod + " - " + url.toLowerCase();
+   let routeObj = restfulMethod + " - " + routePath.toLowerCase();
    if (routeObjs.includes(routeObj)) {
       console.log("注意: 有相同路径的路由", routeObj);
       return;
    }
    routeObjs.push(routeObj);
 
-   router[restfulMethod](url, reqFunc);
+   router[restfulMethod](routePath, reqFunc);
 }
 
 const newFile = require("./newFile");
