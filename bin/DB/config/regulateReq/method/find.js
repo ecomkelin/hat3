@@ -15,13 +15,13 @@ module.exports = (req, MToptions) => {
     if(hasSort === 0) delete req.sort;
 
     /** limit */
-    if(isNaN(req.limit) || req.limit == 0) req.limit = 60;
+    if(isNaN(req.limit)) req.limit = 60;
     req.limit = parseInt(req.limit);
-    if(req.limit < 0) req.limit = -req.limit;
+    if(req.limit < 1) req.limit = 60;
 
     /** skip */
     if(isNaN(req.skip)) req.skip = 0;
     req.skip = parseInt(req.skip);
-    if(req.skip < 0) req.skip = -req.skip;
+    if(req.skip < 0) req.skip = 0;
 
 }

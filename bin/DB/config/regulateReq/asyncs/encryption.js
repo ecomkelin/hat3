@@ -19,7 +19,8 @@ const encryptHash_Pstr = (str_bcrypt) => new Promise((resolve, reject) => {
 module.exports = (doc, needEncryption) =>
     new Promise(async (resolve, reject) => {
         try {
-            const {fields} = needEncryption;
+            let {fields} = needEncryption;
+            if((typeof fields) === 'string') fields = [fields];
             if (!(fields instanceof Array)) return reject({ errMsg: "DB regulate asyncs bcrypt: CLoptions needEncryption 对象错误" })
 
             for (let i = 0; i < fields.length; i++) {

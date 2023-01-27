@@ -4,17 +4,19 @@ const Encryption = require("../../config/regulateReq/asyncs/encryption");
 const Exist = require("../../config/exist");
 
 
-module.exports = (COLLECTION, CLdoc, CLoptions) => ({
+module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
 
     deleteMany: (req, MToptions) => new Promise(async (resolve, reject) => {
         try {
             if (!isObject(req)) return reject("CLmodel find req 要为 对象");
 
             /** 调整 req */
-            let errMsg = regulateReq(req, { CLdoc, payload: MToptions.payload, regulates: ["filter"] });
+            MToptions.CLdoc = CLdoc;
+            MToptions.regulates = ["filter"];
+            let errMsg = regulateReq(req, MToptions);
             if (errMsg) return reject(errMsg);
 
-            let deletedObj = await COLLECTION.deleteMany(req.match, MToptions);
+            let deletedObj = await COLLECTION.deleteMany(req.match, options);
             return resolve(deletedObj);
         } catch (e) {
             return reject(e);
@@ -28,10 +30,12 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
             if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
 
             /** 调整 req */
-            let errMsg = regulateReq(req, { CLdoc, payload: MToptions.payload, regulates: ["filter"] });
+            MToptions.CLdoc = CLdoc;
+            MToptions.regulates = ["filter"];
+            let errMsg = regulateReq(req, MToptions);
             if (errMsg) return reject(errMsg);
 
-            let deletedObj = await COLLECTION.deleteOne(req.match, MToptions);
+            let deletedObj = await COLLECTION.deleteOne(req.match, options);
             return resolve(deletedObj);
         } catch (e) {
             return reject(e);
@@ -56,7 +60,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
             /** 是否能够批量添加 未写*/
             // console.log(documents)
 
-            let result = await COLLECTION.insertMany(documents, MToptions);
+            let result = await COLLECTION.insertMany(documents, options);
             return resolve(result);
         } catch (e) {
             return reject(e);
@@ -86,7 +90,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
 
             // if(CLoptions)
             /** 原生数据库的 数据库操作 */
-            const options = {};
             let result = await COLLECTION.insertOne(document, options);
 
             return resolve(result);
@@ -115,7 +118,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
             }
 
 
-            let result = await COLLECTION.updateMany(req.match, req.update, MToptions);
+            let result = await COLLECTION.updateMany(req.match, req.update, options);
             return resolve(result);
         } catch (e) {
             return reject(e);
@@ -146,7 +149,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
                 await Exist(req, MToptions);
             }
 
-            const options = {};
             let result = await COLLECTION.updateOne(req.match, req.update, options);
             return resolve(result);
         } catch (e) {

@@ -15,7 +15,9 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
    for (let level = 1; level <= n; level++) dirStr += '/' + paths[level];
 
    let restfulMethod = 'get';             // restfulMethod 默认为 get
-   let url = dirStr + '/' + fileName;   // url 默认为 从第二层级文件夹开始 order/op/.... + / + 文件名称（不加后缀）
+   /** url 默认为 从第二层级文件夹开始 order/op/.... + / + 文件名称（不加后缀）*/
+   let url = dirStr + '/' + fileName
+
    let reqFunc = reqFile;                 // 路由的 执行函数 
 
 
@@ -53,7 +55,7 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
    } else if (fileType === 'Model') {
       /** 生成 Model 模型 路由 方法 */
 
-      reqFunc = ctx => resSUCCESS(ctx, { model: reqFile.CLmodel });
+      reqFunc = ctx => resSUCCESS(ctx, { model: reqFile.CLdoc });
 
       newRoute(restfulMethod, url, reqFunc);
 

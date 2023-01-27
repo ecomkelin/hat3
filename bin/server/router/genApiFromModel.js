@@ -12,7 +12,7 @@ module.exports = (CLmodel, fileName, newRoute) => {
     if (!GenRoute) return;
 
     /** 路由的路径 */
-    let urlPre = "/generate/" + fileName + "/"
+    let urlPre = "/Models/" + fileName + "/"
 
     /** 如果此操作配置中 有 find findOne delete 等操作信息 则进行路由配置 加入一个新的路由并 配置 路由执行函数 */
     Object.keys(GenRoute).forEach(routeMethod => {

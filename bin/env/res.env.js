@@ -63,27 +63,31 @@ resNOACCESS = (ctx, next) => {
 resSUCCESS = (ctx, ctxBody, next) => {
     ctx.status = 200;
 
-    ctx.body = { status: 200, ...ctxBody, request: getRequest(ctx) };
-
+    if(IS_DEV) {
+        ctx.body = { status: 200, ...ctxBody, request: getRequest(ctx) };
+    } else {
+        ctx.body = { status: 200, ...ctxBody};
+    }
     if (next) next();
 }
 
 
 resERR = (ctx, e, next) => {
     let errMsg = e.stack
+    let request = IS_DEV ? getRequest(ctx) : {};
 
     if (errMsg) {
         let status = e.status || 500;
-        ctx.body = { status, errMsg };
+        ctx.body = { status, errMsg, request };
         console.error("[errs] e.stack: ", errMsg);
     } else {
         let status = e.status || 400;
         if (isObject(e) === '[object Object]') {
-            ctx.body = { status, ...e };
+            ctx.body = { status, ...e, request };
         } else if (typeof (e) == 'string') {
-            ctx.body = { status, errMsg: e };
+            ctx.body = { status, errMsg: e, request };
         } else {
-            ctx.body = { status, error: e };
+            ctx.body = { status, error: e, request };
         }
 
         if (status === 500) console.error("[errs] e: ", e);

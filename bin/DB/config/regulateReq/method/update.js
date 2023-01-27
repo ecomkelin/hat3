@@ -23,21 +23,19 @@ module.exports = (req, MToptions) => {
     /** 如果前端没有给update方法 upd_keys 则默认 update对象为 update的 set方法 */
     if (hasMethod[1] === 1) req.update = {"$set": update};
 
-    let options = {
-        is_upd: true,
-        ...MToptions
-    }
+    MToptions.is_upd = true;
+
     keys = Object.keys(req.update);
 
     for (let i = 0; i < keys.length; i++) {
         let doc = req.update[keys[i]]
 
         /** 根据 doc数据 判断是否正确 */
-        errMsg = regDocument(doc, options);
+        errMsg = regDocument(doc, MToptions);
         if (errMsg) return errMsg;
     
         /** 根据数据模型 判断数据是否正确 */
-        errMsg = regCLdoc(doc, options);
+        errMsg = regCLdoc(doc, MToptions);
         if (errMsg) return errMsg;
     }
 

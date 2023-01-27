@@ -29,7 +29,7 @@ const CLoptions = {
     /** 对哪个字段加密 */
     needEncryption: {
         method: "md5",
-        fields: ["pwd"]
+        fields: "pwd"
     },
     /** 创建索引 */
     indexesObj: [{

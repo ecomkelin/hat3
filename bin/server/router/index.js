@@ -69,7 +69,6 @@ const recuRoutes = (dirPath, paths, n) => {
 const pathAbsolute = path.join(process.cwd(), "src/")
 recuRoutes(pathAbsolute, ['src'], 0);
 
-
 // const arrs = ['kelin', 'KELIN', "Like", "likelin", "feng"]
 router.get('/', ctx => {
    let { filter } = ctx.query;

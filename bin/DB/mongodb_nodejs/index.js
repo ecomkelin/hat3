@@ -7,17 +7,15 @@ const Aread = require("./method/A.read");
 const Awrite = require("./method/A.write");
 const Cindexes = require("./method/C.indexes");
 
-const findSearchJS = require("./method/HR.findSearch");
-
 /** 复制集配置 */
-let replicationOptions = require("../config/replication") || {};
+let replication = require("../config/replication") || {};
 
 /**
  * 这些参数 是 XXX.Model.js 传递过来的
  * @param {*} CLname  集合名称
  * @param {*} CLdoc 集合模型
  * @param {*} CLoptions 其他参数
- *          replicationOptions： 复制集参数
+ *          replication： 复制集参数
  *          // GenRoute: {'find': {}, 'findOne', 'deleteOne', 'insertOne' 等信息}
  * @returns 
  */
@@ -27,7 +25,7 @@ let replicationOptions = require("../config/replication") || {};
      * @param {*} query 
      * @param {*} MToptions 
      *          payload: 身份参数
-     *          replicationOptions： 如果有复制集参数 则覆盖 CLoptions
+     *          replication： 如果有复制集参数 则覆盖 CLoptions
      *          session: trasaction 事务 这个还有点问题
      * @returns 
      */
@@ -35,8 +33,12 @@ let DB = mongoClient.db(process.env.DBname);
 const DBnames = [process.env.DBname];
 module.exports = (CLname, CLdoc, CLoptions = {}) => {
     /** 如果 集合的复制集配置有特殊要求 则覆盖全局 */
-    if(CLoptions.replicationOptions) replicationOptions = { ...replicationOptions, ...CLoptions.replicationOptions };
-    CLoptions.replicationOptions = replicationOptions;
+    const options = {replication}
+
+    if(CLoptions.replication) {
+        options.replication = CLoptions.replication;
+        delete CLoptions.replication;
+    }
 
     /** 如果 有不是本数据库的 集合 则创建新的数据库 */
     if(CLoptions.DBname && !DBnames.includes(CLoptions.DBname))  {  
@@ -48,9 +50,9 @@ module.exports = (CLname, CLdoc, CLoptions = {}) => {
     const COLLECTION = DB.collection(CLname);
 
     /** 一些数据库的 读方法 */
-    const readMethod = Aread(COLLECTION, CLdoc, CLoptions);
-    const writeMethod = Awrite(COLLECTION, CLdoc, CLoptions);
-    const indexesMethod = Cindexes(COLLECTION, CLdoc, CLoptions);
+    const readMethod = Aread(COLLECTION, CLdoc, CLoptions, options);
+    const writeMethod = Awrite(COLLECTION, CLdoc, CLoptions, options);
+    const indexesMethod = Cindexes(COLLECTION, CLdoc, CLoptions, options);
 
     /** 暴露数据模型 */
     return {
@@ -68,8 +70,5 @@ module.exports = (CLname, CLdoc, CLoptions = {}) => {
 
         /** 关于索引的方法 */
         ...indexesMethod,
-        
-        /** 一些自定义方法 */
-        findSearch: findSearchJS(COLLECTION, CLdoc, CLoptions),
     }
 };
