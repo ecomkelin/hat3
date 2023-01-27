@@ -8,6 +8,12 @@ const CLdoc = {
         MIN: 2,
         MAX: 4
     },
+    pwd: {
+        required: true,
+        type: String,
+        MIN: 2,
+        MAX: 4
+    },
     name: {
         type: String,
         // IS_fixed: true,
@@ -20,6 +26,18 @@ const CLdoc = {
 }
 
 const CLoptions = {
+    /** 对哪个字段加密 */
+    needEncryption: {
+        method: "md5",
+        fields: ["pwd"]
+    },
+    /** 创建索引 */
+    indexesObj: [{
+        "code": 1
+    }, {
+        "name": 1
+    }],
+
     GenRoute: {
         countDocuments: {},
         find: {
@@ -36,6 +54,8 @@ const CLoptions = {
         updateOne: {},
 
         indexes: {},
+        createIndex:{},
+        // dropIndex: {},
     }
 }
 

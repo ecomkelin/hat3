@@ -1,14 +1,13 @@
+/** 数据库连接 */
 const { MongoClient } = require("mongodb");
 const mongoClient = new MongoClient(process.env.DB_URL);
 
-
-
+/** 加载连接的方法 */
 const Aread = require("./method/A.read");
 const Awrite = require("./method/A.write");
 const Cindexes = require("./method/C.indexes");
 
 const findSearchJS = require("./method/HR.findSearch");
-const findByIdJS = require("./method/HR.findById");
 
 /** 复制集配置 */
 let replicationOptions = require("../config/replication") || {};
@@ -19,7 +18,7 @@ let replicationOptions = require("../config/replication") || {};
  * @param {*} CLdoc 集合模型
  * @param {*} CLoptions 其他参数
  *          replicationOptions： 复制集参数
- *          // GenRoute: {'find': {}, 'findOne', 'deleteOne', 'insertOne', 'updateOne'} // 自动生成基础方法 在router那配置 还没想好 先不用 只让User通过
+ *          // GenRoute: {'find': {}, 'findOne', 'deleteOne', 'insertOne' 等信息}
  * @returns 
  */
 
@@ -53,21 +52,24 @@ module.exports = (CLname, CLdoc, CLoptions = {}) => {
     const writeMethod = Awrite(COLLECTION, CLdoc, CLoptions);
     const indexesMethod = Cindexes(COLLECTION, CLdoc, CLoptions);
 
-    /** 暴露集合方法 */
+    /** 暴露数据模型 */
     return {
-        mongoClient,
+        /** CLmodel 的配置信息 */
+        mongoClient,    // 在做数据库事物时，会用到
         // DB,
-        COLLECTION,      // 如果暴露此信息 则可以使用原生数据库方法
-        CLname,             // 暴露此信息 以便知道在用哪个 Model
-        CLdoc,
-        CLoptions,
+        COLLECTION,      // 方便调用原生数据库方法
+        CLname,          // 暴露此信息 以便知道在用哪个 Model
+        CLdoc,           // 数据模型中的文档
+        CLoptions,       // 方便通过 CLmodel 数据文档的一些配置
 
+        /** 数据库的读写方法 */
         ...readMethod,
         ...writeMethod,
 
+        /** 关于索引的方法 */
         ...indexesMethod,
-
+        
+        /** 一些自定义方法 */
         findSearch: findSearchJS(COLLECTION, CLdoc, CLoptions),
-        findById: findByIdJS(COLLECTION, CLdoc, CLoptions),
     }
 };

@@ -1,4 +1,5 @@
-const reqRegulate = require("../../config/reqRegulate");
+const regulateReq = require("../../config/regulateReq");
+const Encryption = require("../../config/regulateReq/asyncs/encryption");
 
 const Exist = require("../../config/exist");
 
@@ -10,8 +11,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
             if (!isObject(req)) return reject("CLmodel find req 要为 对象");
 
             /** 调整 req */
-            let errMsg = reqRegulate(req, {CLdoc, payload: MToptions.payload, regulates: ["filter"] });
-            if(errMsg) return reject(errMsg);
+            let errMsg = regulateReq(req, { CLdoc, payload: MToptions.payload, regulates: ["filter"] });
+            if (errMsg) return reject(errMsg);
 
             let deletedObj = await COLLECTION.deleteMany(req.match, MToptions);
             return resolve(deletedObj);
@@ -23,12 +24,12 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
 
     deleteOne: (req = {}, MToptions) => new Promise(async (resolve, reject) => {
         try {
-            let { filter ={} } = req;
+            let { filter = {} } = req;
             if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
 
             /** 调整 req */
-            let errMsg = reqRegulate(req, {CLdoc, payload: MToptions.payload, regulates: ["filter"] });
-            if(errMsg) return reject(errMsg);
+            let errMsg = regulateReq(req, { CLdoc, payload: MToptions.payload, regulates: ["filter"] });
+            if (errMsg) return reject(errMsg);
 
             let deletedObj = await COLLECTION.deleteOne(req.match, MToptions);
             return resolve(deletedObj);
@@ -44,11 +45,16 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
             if (!(documents instanceof Array)) return reject({ errMsg: "insertMany 错误: 第一个参数documents 必须是： Array 即 [] ", errParam: documents });
 
             /** 调整 req 中的 documents*/
-            let errMsg = reqRegulate(req, { CLdoc, payload: MToptions.payload, regulates: ["documents"] });
+            MToptions.CLdoc = CLdoc;
+            MToptions.regulates = ["documents"]
+            let errMsg = regulateReq(req, MToptions);
             if (errMsg) return reject(errMsg);
 
+            /** 加密: 如果模型配置中有此相 则进行加密 */
+            if (CLoptions.needEncryption) await Encryption(documents, CLoptions.needEncryption);
+
             /** 是否能够批量添加 未写*/
-            // 
+            // console.log(documents)
 
             let result = await COLLECTION.insertMany(documents, MToptions);
             return resolve(result);
@@ -58,19 +64,30 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
     }),
 
 
-    insertOne: (req={}, MToptions = {}) => new Promise(async (resolve, reject) => {
+    insertOne: (req = {}, MToptions = {}) => new Promise(async (resolve, reject) => {
         try {
-            const {document} = req;
+            /** 根据前端数据 获取 [插入一个] 方法 所需要的document*/
+            const { document } = req;
             if (!isObject(document)) return reject({ errMsg: "insertOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document });
 
             /** 调整 req 中的 document*/
-            let errMsg = reqRegulate(req, { CLdoc, payload: MToptions.payload, regulates: ["document"] });
+            MToptions.CLdoc = CLdoc;
+            MToptions.regulates = ["document"]
+            let errMsg = regulateReq(req, MToptions);
             if (errMsg) return reject(errMsg);
 
-            /** 是否能够添加 如果没有就通过 有就不通过 */
-            await Exist(req, {CLdoc, COLLECTION, payload: MToptions.payload, pass_exist: false})
+            /** 加密: 如果模型配置中有此相 则进行加密 */
+            if (CLoptions.needEncryption) await Encryption(document, CLoptions.needEncryption);
 
-            let result = await COLLECTION.insertOne(document, MToptions);
+            /** 是否能够添加 如果没有就通过 有就不通过 */
+            MToptions.COLLECTION = COLLECTION;  // 加入 原生方法调用 以便在下游方法中调用
+            MToptions.pass_exist = false;       // 如果没有找到相同数据 才通过 不然会报错
+            await Exist(req, MToptions)
+
+            // if(CLoptions)
+            /** 原生数据库的 数据库操作 */
+            const options = {};
+            let result = await COLLECTION.insertOne(document, options);
 
             return resolve(result);
         } catch (e) {
@@ -80,19 +97,25 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
 
 
 
-    updateMany: (req = {}, documents, MToptions = {}) => new Promise(async (resolve, reject) => {
+    updateMany: (req = {}, MToptions = {}) => new Promise(async (resolve, reject) => {
         try {
-            const {filter = {}, update={}} = req;
-            if (!isObject(update)) return reject("CLmodel updateOne set 参数必须是对象 ");
+            /** 调整 req 中的 filter, update*/
+            MToptions.CLdoc = CLdoc;
+            MToptions.regulates = ["filter", "update"]
+            let errMsg = regulateReq(req, MToptions);
+            if (errMsg) return reject(errMsg);
 
-            /** 筛选过滤 */
-            let errMsg = reqRegulate(req, {CLdoc, payload: MToptions.payload, regulates: ["filter"] });
-            if(errMsg) return reject(errMsg);
+            /** 如果 update 中存在 $set 如果update中没有$.. update方法 前面的 regulate 默改装成 $set方法*/
+            if (req.update["$set"]) {
+                /** 加密: 如果模型配置中有此相 则进行加密 */
+                if (CLoptions.needEncryption) await Encryption(req.update["$set"], CLoptions.needEncryption);
 
-            /** 查看是否能 批量更新 还没有做 */
-            // if (!able_update) return reject()
+                /** 查看是否能 批量更新 还没有做 */
+                // if (!able_update) return reject()
+            }
 
-            let result = await COLLECTION.updateMany(req.match, update, MToptions);
+
+            let result = await COLLECTION.updateMany(req.match, req.update, MToptions);
             return resolve(result);
         } catch (e) {
             return reject(e);
@@ -103,18 +126,28 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
 
     updateOne: (req = {}, MToptions = {}) => new Promise(async (resolve, reject) => {
         try {
-            const {filter = {}, update={}} = req;
+            const { filter = {} } = req;
             if (!isObjectIdAbs(filter._id)) return reject("CLmodel updateOne filter _id 必须为 ObjectId");
-            if (!isObject(update)) return reject("CLmodel updateOne set 参数必须是对象 ");
 
-            /** 筛选过滤 */
-            let errMsg = reqRegulate(req, {CLdoc, payload: MToptions.payload, regulates: ["filter", "update"] });
-            if(errMsg) return reject(errMsg);
+            /** 调整 req 中的 filter, update 如果update中没有$.. update方法 则默改装成 $set方法 */
+            MToptions.CLdoc = CLdoc;
+            MToptions.regulates = ["filter", "update"]
+            let errMsg = regulateReq(req, MToptions);
+            if (errMsg) return reject(errMsg);
 
-            /** 更新字段 */
-            if(update["$set"]) await Exist(req, {CLdoc, COLLECTION, payload: MToptions.payload, pass_exist: false});
+            /** 如果 update 中存在 $set 如果update中没有$.. update方法 前面的 regulate 默改装成 $set方法*/
+            if (req.update["$set"]) {
+                /** 加密: 如果模型配置中有此相 则进行加密 */
+                if (CLoptions.needEncryption) await Encryption(req.update["$set"], CLoptions.needEncryption);
 
-            let result = await COLLECTION.updateOne(req.match, update, MToptions);
+                /** 是否能更新 这些字段 */
+                MToptions.COLLECTION = COLLECTION;
+                MToptions.pass_exist = false;
+                await Exist(req, MToptions);
+            }
+
+            const options = {};
+            let result = await COLLECTION.updateOne(req.match, req.update, options);
             return resolve(result);
         } catch (e) {
             return reject(e);

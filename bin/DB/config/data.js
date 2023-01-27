@@ -11,10 +11,11 @@
  * 
  * IS_fixed [Boolean] 字段是否可以修改, 如果为 true  update的时候 前端不需要给数据
  * 
- * AUTO_payload [String] insert时 自动载入paylaod信息 比如 _id, Firm 不需要前端给数据 后端自动设定数据。 
+ * AUTO_payload [String] 自动载入paylaod信息 比如 _id, Firm 不需要前端给数据 后端自动设定数据。 
  * 					比如 Order.User_crt = payload._id  Order.Firm = payload.Firm
  * AUTO_Date [Boolean] 是否为自动更新时间， 如果为 true 不需要前端给数据 后端自动生成数据。 
  * 					比如 at_crt 即为 autoDate 又为fixed所以只有新建时自动添加
+ * AUTO_pwd [Boolean] 自动加密 
  * 
  * // writePre 中做的判定一下几个参数
  * TRIM [Number] (所属字段必须为 String 类型) 字段的固定长度  的正整数

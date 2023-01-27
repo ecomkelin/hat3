@@ -44,7 +44,7 @@ Holartec 系统
 
 数据模型的包装方法参数 是两个对象
     设计思路 第一个参数[命名为req]接受前端传递的参数 第二个参数[命名为MToption]传递后端给的参数
-    req:  {filter, project, skip, limit, sort, lookup, document, documents, update}
+    req:  {filter, projection, skip, limit, sort, lookup, document, documents, update}
         存储前端给的数据 并通过一些手段对这些数据进行筛选
 
         filter:  { _id, search, match = {}, includes = {}, excludes = {}, lte = {}, gte = {}, at_before = {}, at_after = {} }
@@ -56,6 +56,8 @@ Holartec 系统
                 最终表达的类型为 query: {"$or": [{code: {"$regex": "li", $options: 'i'}}, {name: {"$regex": "li", $options: 'i'}}]}
 
             match: { }      // 精确匹配非ObjectId类型的 字段        如 ： "code": "002", 
+                可以使用 {"addrs.via": "orsiera"}
+                也可以使用 {"addrs": {"$elemMatch": {via: "orsiera}}}
                 最终表达的类型为 query: {"code": "002"}
 
             includes: {}    // 精确匹配 ObjectId 类型的 字段    
@@ -82,6 +84,14 @@ Holartec 系统
             at_after: {}    //
 
         project: {}     // 中不能同时存在 0 和 非0 的两种状态  如 code: 1, name: "姓名"  字段的映射
+            // 可以使用 {"addrs.city": 1}
+
+        update: {}
+            可以有 {"$set": {}, "$mul": {}, "$inc": {}, /* "$unset": {}, "$rename": {} */ }
+            如果直接就是 doc 对象 则相当于默认为 $set
+
+
+
 
 
     find:                   {filter, project={}, skip, limit, sort, lookup} = req

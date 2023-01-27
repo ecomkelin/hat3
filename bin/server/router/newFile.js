@@ -4,7 +4,7 @@ const restfulMethods = ['get', 'post', 'put', 'delete'];
 
 /** 每个扫描到一个符合要求的文件 执行此函数
  * @param {*} fileType 除去.js 后的 自定义文件类型
- * @param {*} reqFile   require此文件 把对象（函数）付给 reqFile 变量
+ * @param {*} reqFile   require此文件 把对象（函数）付给 reqFile 变量 相当于 reqFile = require("xxx/xxx.js")
  * @param {*} fileName  文件的名称
  * @param {*} paths     相对扫描文件的根目录 本文件的绝对路径上的 所有文件夹名称
  * @param {*} n         所在相对 扫描文件的根目录 文件在第几层 （因为递归问题 需要用此数来解决 paths 不能清除n后面的记录问题)

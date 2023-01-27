@@ -1,4 +1,4 @@
-const reqRegulate = require("../../config/reqRegulate");
+const regulateReq = require("../../config/regulateReq");
 
 module.exports = (COLLECTION, CLdoc, CLoptions) => ({
     countDocuments: (req, MToptions = {}) => new Promise(async (resolve, reject) => {
@@ -6,7 +6,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
             if (!isObject(req)) return reject("CLmodel countDocuments req 要为 对象");
 
             /** 调整 req */
-            let errMsg = reqRegulate(req, { CLdoc, payload: MToptions.payload, regulates: ["filter"] });
+            let errMsg = regulateReq(req, { CLdoc, payload: MToptions.payload, regulates: ["filter"] });
             if (errMsg) return reject(errMsg);
 
             let count = await COLLECTION.countDocuments(req.match, MToptions);
@@ -23,7 +23,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
             if (!isObject(req)) return reject("CLmodel find req 要为 对象");
 
             /** 调整 req */
-            let errMsg = reqRegulate(req, { CLdoc, payload: MToptions.payload, regulates: ["filter", "projection", "find"] });
+            let errMsg = regulateReq(req, { CLdoc, payload: MToptions.payload, regulates: ["filter", "projection", "find"] });
             if (errMsg) return reject(errMsg);
             // req.lookup
 
@@ -50,7 +50,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
             if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
 
             /** 调整 req */
-            let errMsg = reqRegulate(req, { CLdoc, payload: MToptions.payload, regulates: ["filter", "projection"] });
+            let errMsg = regulateReq(req, { CLdoc, payload: MToptions.payload, regulates: ["filter", "projection"] });
             if (errMsg) return reject(errMsg);
 
             MToptions.projection = req.projection;

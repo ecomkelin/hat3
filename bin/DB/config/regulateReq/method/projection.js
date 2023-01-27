@@ -1,4 +1,4 @@
-const getCLfield = require("./method/getCLfield");
+const getCLfield = require("../func/getCLfield");
 
 module.exports = (req, MToptions) => {
     const {projection = {}} = req;

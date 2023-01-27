@@ -1,10 +1,10 @@
-const getCLfield = require("./method/getCLfield");
+const getCLfield = require("../func/getCLfield");
 
 module.exports = (req, MToptions) => {
     /** sort */
     const {sort={}} = req;
     const {CLdoc} = MToptions;
-    if(!isObject(sort)) return "reqRegulate find sort 必须为对象"
+    if(!isObject(sort)) return "regulateReq find sort 必须为对象"
     let hasSort = 0;
     for(key in sort) {
         let docField = getCLfield(CLdoc, key);

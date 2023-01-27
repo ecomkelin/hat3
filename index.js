@@ -1,4 +1,6 @@
-require("./bin/env")
+require("./bin/env")        // 给系统一些环境
+
+if(IS_DEV) require("./test"); // 开发时 测试用的文件
 
 const koaServer = require("./bin/server/koaServer");
 

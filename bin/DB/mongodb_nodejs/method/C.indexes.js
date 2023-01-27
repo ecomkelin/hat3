@@ -4,10 +4,16 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
         try {
             Object.keys(req).forEach(key => delete req[key]);   // 用不到上游/前台 传递的数据
 
-            const {createIndex, options = {}, commitQuorum} = MToptions;
+            const {options = {}, commitQuorum} = MToptions;
 
-            let result = await COLLECTION.createIndex(createIndex, options);
-            return resolve(result);
+            const createObj = CLoptions.indexesObj;
+            if(createObj) {
+                let result = await COLLECTION.createIndex(createObj, options);
+                return resolve(result);
+            } else {
+                return reject("此集合 不可创建 索引")
+            }
+
         } catch (e) {
             return reject(e);
         }
@@ -19,9 +25,13 @@ module.exports = (COLLECTION, CLdoc, CLoptions) => ({
         try {
             Object.keys(req).forEach(key => delete req[key]);   // 用不到上游/前台 传递的数据
 
-            const {dropIndex} = MToptions;
-            let result = await COLLECTION.dropIndex(dropIndex);
-            return resolve(result);
+            const dropObj = CLoptions.indexesObj;
+            if(dropObj) {
+                let result = await COLLECTION.dropIndex(dropObj);
+                return resolve(result);
+            } else {
+                return reject("此集合 不可删除 索引")
+            }
         } catch (e) {
             return reject(e);
         }

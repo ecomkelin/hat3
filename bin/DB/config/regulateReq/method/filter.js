@@ -1,4 +1,4 @@
-const getCLfield = require("./method/getCLfield");
+const getCLfield = require("../func/getCLfield");
 
 
 module.exports = (req, MToptions) => {
@@ -9,7 +9,7 @@ module.exports = (req, MToptions) => {
 
     const { CLdoc, payload } = MToptions;
 
-    /** 分销模式 */
+    /** 分销模式 区分 Firm 用的 */
     let Firm = null;
     if (payload.Firm) Firm = payload.Firm._id || payload.Firm;
     if (Firm) req.match.Firm = Firm;

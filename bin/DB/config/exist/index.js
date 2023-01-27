@@ -16,7 +16,7 @@
 		if(is_upd) {
 			if(!isObject(update)) return reject("exist 请传递 update 或 document 对象")
 			docObj = update["$set"];
-			/** filter 在reqRegulate中被删除了 _id 被放到了 match里面 */
+			/** filter 在regulateReq中被删除了 _id 被放到了 match里面 */
 			if(!req.match || !isObjectIdAbs(req.match._id) ) return reject("exist 请传递  ObjectId 类型的 match._id")
 			match = {_id: {"$ne": req.match._id}};
 		} else {
