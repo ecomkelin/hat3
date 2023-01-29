@@ -2,7 +2,7 @@ const CLmodel_User = require("../../Models/auth/User.Model");
 
 exports.get_find = async ctx => {
     try {
-        const payload = ctx.payload;
+        const payload = ctx.Koptions.payload;
         let data = await CLmodel_User.find(ctx.reqBody, {payload});
 
         return ctx.success = {data};
@@ -13,7 +13,7 @@ exports.get_find = async ctx => {
 
 exports.post_find = async ctx => {
     try {
-        const payload = ctx.payload;
+        const payload = ctx.Koptions.payload;
         let data = await CLmodel_User.find(ctx.reqBody, {payload});
 
         return ctx.success = {data};

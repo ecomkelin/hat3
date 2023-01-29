@@ -14,14 +14,12 @@ server.use(require("./middle/log"));
 const compress = require('koa-compress');
 server.use(compress({}));
 
-/** 身份中间件 */
-server.use(require("./middle/payload"));
-
-/** body 中间件 */
+/** body 中间件, 并初始化 挂载一些对象到 ctx上 比如 Koptions */
 const { koaBody } = require('koa-body');
 server.use(koaBody());
+
 /** 格式化 body 把所有的 字符串形式的 ObjectId 转为 真正的 ObjectId */
-server.use(require("./middle/reqFormat"))
+server.use(require("./middle/ctxOptions"))
 
 /** 配置静态文件夹 */
 const DIR_PUBLIC = path.resolve(process.cwd(), "public/");

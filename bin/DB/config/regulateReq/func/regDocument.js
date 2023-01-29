@@ -68,11 +68,11 @@ const fromDoc = (docObj, CLobj, is_upd) => {
 /**
  * 
  * @param {*} doc 
- * @param {*} MToptions 
+ * @param {*} Koptions 
  * @returns 如果没有错误 则没有返回值 有错误 则返回错误 字符串
  */
-module.exports = (doc, MToptions) => {
-    const {CLdoc, is_upd} = MToptions;
+module.exports = (doc, Koptions) => {
+    const {CLdoc, is_upd} = Koptions;
 
     let errMsg = fromDoc(doc, CLdoc, is_upd);
     if(errMsg) return errMsg;

@@ -16,7 +16,7 @@ const CLdoc = {
     },
     role: {
         type: Number,
-        required: true,
+        // required: true,
         CONF: {
             vals: [1, 2, 3],
             desp: {
@@ -71,7 +71,7 @@ const CLoptions = {
         updateOne: {},
 
         indexes: {},
-        createIndex:{},
+        // createIndex:{},
         // dropIndex: {},
     }
 }

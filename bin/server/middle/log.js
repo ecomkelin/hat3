@@ -9,7 +9,7 @@ module.exports = async(ctx, next) => {
 
         /** 可以是第一个中间件 因为 这些信息都是在 next 下面 */
         let person = '<';
-        let payload = ctx.payload;
+        let payload = ctx.Koptions.payload;
         if(payload) {
             let {Firm, code, name, role} = payload;
             if(Firm) person += `[${Firm}]Firm `;

@@ -30,11 +30,11 @@ const followCLobj = (CLobj, docObj, key, payload) => {
 /**
  * 
  * @param {*} docObj 
- * @param {*} MToptions 
+ * @param {*} Koptions 
  * @returns 如果没有错误 则没有返回值 有错误 则返回错误 字符串
  */
-module.exports = (docObj, MToptions) => {
-    let { CLdoc, payload, is_upd = false} = MToptions;
+module.exports = (docObj, Koptions) => {
+    let { CLdoc, payload, is_upd = false} = Koptions;
     now = new Date();
     for (key in CLdoc) {
         if (is_upd) {

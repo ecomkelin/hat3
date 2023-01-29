@@ -23,7 +23,7 @@ let replication = require("../config/replication") || {};
     /** 返回的 各种方法 find findOne insertMany .... 包含的参数
      * 这些参数是 执行的方法 method 传递过来的 
      * @param {*} query 
-     * @param {*} MToptions 
+     * @param {*} Koptions 
      *          payload: 身份参数
      *          replication： 如果有复制集参数 则覆盖 CLoptions
      *          session: trasaction 事务 这个还有点问题

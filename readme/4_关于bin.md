@@ -14,21 +14,24 @@
     server
         底层框架为 Koa
         中间件 
+            0 统一输出 next() 之上没有任何信息
+                之下 统一输出 ctx.body
+
             1 自定义中间件 系统打印日志
                 把每次前端的访问 打印出来
 
-            2 koa-compress: 为后端服务器 静态文件开启压缩
+            2 第三方 koa-compress: 为后端服务器 静态文件开启压缩
 
-            3 会把每次访问的 payload 加载到 ctx.payload 中
+            3 第三方 Koa-body 可以接受 body 参数
 
-            4 Koa-body 接收 ctx.request.body
-                手动优化1: 前端传递字符串 自动转为 JSON 对象格式
-                手动优化2: 深入body 把里面的 ObjectId(String)转化为 真正的 ObjectId
-                并 把其复制到 ctx.reqBody 
+            4 自定义中间件 ctx 参数格式化 以及 挂载一些对象
+                手动优化1: 前端传递 body 字符串的话 自动转为 JSON 对象格式
+                手动优化2: 深入ctx.request.body 把里面的 ObjectId(String)转化为 真正的 ObjectId 并赋值给 ctx.reqBody
+                手动优化3: 深入ctx.request.query 把里面的 ObjectId(String)转化为 真正的 ObjectId 并赋值给 ctx.reqQuery
+                4 挂载 Koptions 对象到 ctx 即 ctx.Koptions = {} 用来处理后端产生的数据
+                5 把 token 生成 payload 并赋给 ctx.Koptions
 
             5 koa-static 配置静态文件的位置
 
             6 router
                 路由 做了自动加载文件生成路由 详情见 1_关于路由规则.md
-
-            7 response

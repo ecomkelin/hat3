@@ -1,8 +1,8 @@
 const getCLfield = require("../func/getCLfield");
 
-module.exports = (req, MToptions) => {
+module.exports = (req, Koptions) => {
     const {projection = {}} = req;
-    const {CLdoc} = MToptions;
+    const {CLdoc} = Koptions;
     if(!isObject(projection)) return "projection 应该是 对象"
     /** 筛选前端给的合理性 */
     let hasProject = 0;

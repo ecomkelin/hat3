@@ -1,17 +1,18 @@
 const regulateReq = require("../../config/regulateReq");
 
 module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
-    countDocuments: (req, MToptions = {}) => new Promise(async (resolve, reject) => {
+    countDocuments: (ctxObj) => new Promise(async (resolve, reject) => {
         try {
-            if (!isObject(req)) return reject("CLmodel countDocuments req 要为 对象");
+            const {reqBody, Koptions} = ctxObj;
+            if (!isObject(reqBody)) return reject("CLmodel countDocuments reqBody 要为 对象");
 
-            /** 调整 req */
-            MToptions.CLdoc = CLdoc;
-            MToptions.regulates = ["filter"];
-            let errMsg = regulateReq(req, MToptions);
+            /** 调整 reqBody */
+            Koptions.CLdoc = CLdoc;
+            Koptions.regulates = ["filter"];
+            let errMsg = regulateReq(reqBody, Koptions);
             if (errMsg) return reject(errMsg);
 
-            let count = await COLLECTION.countDocuments(req.match, options);
+            let count = await COLLECTION.countDocuments(reqBody.match, options);
 
             return resolve(count);
         } catch (e) {
@@ -20,22 +21,23 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
     }),
 
 
-    find: (req, MToptions = {}) => new Promise(async (resolve, reject) => {
+    find: (ctxObj) => new Promise(async (resolve, reject) => {
         try {
-            if (!isObject(req)) return reject("CLmodel find req 要为 对象");
+            const {reqBody, Koptions} = ctxObj;
+            if (!isObject(reqBody)) return reject("CLmodel find reqBody 要为 对象");
 
-            /** 调整 req */
-            MToptions.CLdoc = CLdoc;
-            MToptions.regulates = ["filter", "projection", "find"];
-            let errMsg = regulateReq(req, MToptions);
+            /** 调整 reqBody */
+            Koptions.CLdoc = CLdoc;
+            Koptions.regulates = ["filter", "projection", "find"];
+            let errMsg = regulateReq(reqBody, Koptions);
             if (errMsg) return reject(errMsg);
-            // req.lookup
+            // reqBody.lookup
             let cursor = await COLLECTION
-                .find(req.match, options)
-                .project(req.projection)
-                .skip(req.skip)
-                .limit(req.limit)
-                .sort(req.sort)
+                .find(reqBody.match, options)
+                .project(reqBody.projection)
+                .skip(reqBody.skip)
+                .limit(reqBody.limit)
+                .sort(reqBody.sort)
 
             let docs = await cursor.toArray();
             await cursor.close();
@@ -47,20 +49,22 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
     }),
 
 
-    findOne: (req = {}, MToptions) => new Promise(async (resolve, reject) => {
+    findOne: (ctxObj) => new Promise(async (resolve, reject) => {
         try {
-            const { filter = {} } = req;
+            const {reqBody, Koptions} = ctxObj;
+
+            const { filter = {} } = reqBody;
             if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
 
-            /** 调整 req */
-            MToptions.CLdoc = CLdoc;
-            MToptions.regulates = ["filter", "projection"];
-            let errMsg = regulateReq(req, MToptions);
+            /** 调整 reqBody */
+            Koptions.CLdoc = CLdoc;
+            Koptions.regulates = ["filter", "projection"];
+            let errMsg = regulateReq(reqBody, Koptions);
             if (errMsg) return reject(errMsg);
 
-            options.projection = req.projection;
-            // req.lookup
-            let doc = await COLLECTION.findOne(req.match, options);
+            options.projection = reqBody.projection;
+            // reqBody.lookup
+            let doc = await COLLECTION.findOne(reqBody.match, options);
             return resolve(doc);
         } catch (e) {
             return reject(e);

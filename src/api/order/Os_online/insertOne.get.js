@@ -33,24 +33,24 @@ const trConf = {
 
 const insertOneSession = (OrderDoc) => new Promise(async (resolve, reject) => {
     try {
-        const MToptions = {};
+        const Koptions = {};
         let session = null;
         if (IS_REPLICA) {
             session = OrderCL.mongoClient.startSession();
             session.startTransaction(trConf);
-            MToptions.session = session;
+            Koptions.session = session;
         }
 
         const OrderResult = await OrderCL.insertOne(
             OrderDoc,
-            MToptions
+            Koptions
         );
 
         const UserResult = await UserCL.insertOne({
             code: "uu01",
             name: "user01",
             desp: "from order"
-        }, MToptions)
+        }, Koptions)
 
         // let itemSkus = OrderDoc.itemSkus;
         // for (let i = 0; i < itemSkus.length; i++) {
@@ -60,7 +60,7 @@ const insertOneSession = (OrderDoc) => new Promise(async (resolve, reject) => {
         //     // const SkuUpd = await SkuCL.updateOne(
         //     //     { _id: Sku_id, qty: { $gte: itemSku.qty } },
         //     //     { $inc: { 'qty': -itemSku.qty } },
-        //     //     MToptions
+        //     //     Koptions
         //     // );
         //     // const res_SkuUpd = await axios.post()
         //     if (SkuUpd.modifiedCount === 0) return reject("Sku 不符合条件");

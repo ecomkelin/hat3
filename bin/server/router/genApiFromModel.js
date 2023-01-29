@@ -24,20 +24,18 @@ module.exports = (CLmodel, fileName, newRoute) => {
             }
 
             /** 获取 payload 此payload 已经在服务中间件中 配置好了 这里只需要提取 */
-            const payload = ctx.payload;
+            const payload = ctx.Koptions.payload;
 
             /** 根据模型数据的操作配置 查看是否有权限 */
             if (GenRoute[routeMethod].path) {
-
+               console.info(payload);
             } else if (GenRoute[routeMethod].restrict) {
                return ctx.fail = {status: 401, errMsg: "您没有权限"};
             }
 
-            /** payload 加入到 options中 */
-            const MToptions = { payload };
 
             /** 根据 封装的数据库模型 下的路由方法 获取数据并返回 */
-            const data = await CLmodel[routeMethod](ctx.reqBody, MToptions);
+            const data = await CLmodel[routeMethod](ctx);
             ctx.success = {data};
          } catch (e) {
             ctx.fail = e;

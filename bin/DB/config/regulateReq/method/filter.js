@@ -1,17 +1,17 @@
 const getCLfield = require("../func/getCLfield");
 
 
-module.exports = (req, MToptions) => {
+module.exports = (req, Koptions) => {
     const {filter = {}} = req;
     delete req.filter;
 
     req.match = {};
 
-    const { CLdoc, payload } = MToptions;
+    const { CLdoc, payload } = Koptions;
 
     /** 分销模式 区分 Firm 用的 */
     let Firm = null;
-    if (payload.Firm) Firm = payload.Firm._id || payload.Firm;
+    if (payload.Firm) Firm = payload.Firm;
     if (Firm) req.match.Firm = Firm;
 
     let { _id, search, match = {}, includes = {}, excludes = {}, lte = {}, gte = {}, at_before = {}, at_after = {} } = filter;

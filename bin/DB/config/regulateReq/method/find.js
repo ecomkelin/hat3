@@ -1,9 +1,9 @@
 const getCLfield = require("../func/getCLfield");
 
-module.exports = (req, MToptions) => {
+module.exports = (req, Koptions) => {
     /** sort */
     const {sort={}} = req;
-    const {CLdoc} = MToptions;
+    const {CLdoc} = Koptions;
     if(!isObject(sort)) return "regulateReq find sort 必须为对象"
     let hasSort = 0;
     for(key in sort) {

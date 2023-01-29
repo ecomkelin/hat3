@@ -4,10 +4,10 @@
  * @param {Object} docObj 需要创建或更新的文档
  * @returns [Object] match
  */
- module.exports = (req, MToptions) => new Promise(async(resolve, reject) => {
+ module.exports = (req, Koptions) => new Promise(async(resolve, reject) => {
 	try {
 		const {document, update} = req;
-		const {CLdoc, COLLECTION, payload, pass_exist} = MToptions;
+		const {CLdoc, COLLECTION, payload, pass_exist} = Koptions;
 
 		let match = null;
 
