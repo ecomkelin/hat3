@@ -6,9 +6,10 @@ module.exports = async(ctx, next) => {
         // if(ctx && ctx.request) console.debug("req body: ", ctx.request.body);
         // if(ctx.request.headers) console.debug(ctx.request.headers.authorization)
         await next();
-    
+
+        /** 可以是第一个中间件 因为 这些信息都是在 next 下面 */
         let person = '<';
-        let payload = ctx.request.payload;
+        let payload = ctx.payload;
         if(payload) {
             let {Firm, code, name, role} = payload;
             if(Firm) person += `[${Firm}]Firm `;
@@ -19,7 +20,6 @@ module.exports = async(ctx, next) => {
             person += "noPayload"
         }
         person += '>';
-        // if(ctx) console.debug("res body", ctx.body);
         let end = Date.now();
         let ms = end - start;
         console.info(ctx.status, person, `用时: ${ms}ms \n`);

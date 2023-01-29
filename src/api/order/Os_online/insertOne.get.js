@@ -10,11 +10,11 @@ module.exports = async ctx => {
                 { Sku_id: "636a8e2b2477161a2ad41169", code: "005", name: "Sku_5", price: 5, qty: 5 },
             ]
         }
-        const result = await insertOneSession(OrderDoc);
+        const data = await insertOneSession(OrderDoc);
 
-        return resSUCCESS(ctx, { result });
+        return ctx.success = {data}
     } catch (e) {
-        return resERR(ctx, e)
+        return ctx.fail = e;
     }
 }
 

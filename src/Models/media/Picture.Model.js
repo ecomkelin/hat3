@@ -1,16 +1,16 @@
 const DB = require(path.join(process.cwd(), "bin/DB"));
 
-const CLname = "Ader";
+const CLname = "Picture";
 
 const CLdoc = {
-    code: {
-        type: String
-    },
-    pwd: {
-        type: String
-    }
-}
+    categary: { type: String, CONF: {vals: ['image']} },
+    name: { type: String },
+    ext: { type: String },
 
+    url: { type: String },
+    size: { type: String },
+    info: { type: String }
+}
 
 const CLoptions = {
     GenRoute: {
@@ -21,10 +21,12 @@ const CLoptions = {
             //     vips: [],    // vip
             // }
         },
+        findOne: {},
         deleteMany: {},
         deleteOne: {},
-        insertOne: {},
 
+        insertMany: {},
+        insertOne: {},
     }
 }
 

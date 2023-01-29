@@ -8,7 +8,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
 
     deleteMany: (req, MToptions) => new Promise(async (resolve, reject) => {
         try {
-            if (!isObject(req)) return reject("CLmodel find req 要为 对象");
+            if (!isObject(req)) return reject("CLmodel deleteMany req 要为 对象");
 
             /** 调整 req */
             MToptions.CLdoc = CLdoc;
@@ -27,7 +27,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
     deleteOne: (req = {}, MToptions) => new Promise(async (resolve, reject) => {
         try {
             let { filter = {} } = req;
-            if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
+            if (!isObjectIdAbs(filter._id)) return reject("CLmodel deleteOne 需要在filter中 _id的类型为 ObjectId");
 
             /** 调整 req */
             MToptions.CLdoc = CLdoc;
@@ -58,7 +58,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
             if (CLoptions.needEncryption) await Encryption(documents, CLoptions.needEncryption);
 
             /** 是否能够批量添加 未写*/
-            // console.log(documents)
 
             let result = await COLLECTION.insertMany(documents, options);
             return resolve(result);
@@ -92,6 +91,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
             /** 原生数据库的 数据库操作 */
             let result = await COLLECTION.insertOne(document, options);
 
+            if(result.acknowledged) {
+                result = await COLLECTION.findOne({_id: result.insertedId});
+                return resolve(result);
+            }
             return resolve(result);
         } catch (e) {
             return reject(e);
@@ -150,6 +153,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
             }
 
             let result = await COLLECTION.updateOne(req.match, req.update, options);
+            if(result.acknowledged && result.modifiedCount > 0) {
+                return resolve(req.update["$set"]);
+            }
             return resolve(result);
         } catch (e) {
             return reject(e);

@@ -19,12 +19,12 @@ const restfulMethods = ['get', 'post', 'put', 'delete'];
  */
 const newRoute = (restfulMethod, routePath, reqFunc) => {
    if (!restfulMethods.includes(restfulMethod)) {
-      console.log(`注意：${routePath} 此路径的 方法不对 没有加载到系统`)
+      console.error(`注意：${routePath} 此路径的 方法不对 没有加载到系统`)
       return;
    };
    let routeObj = restfulMethod + " - " + routePath.toLowerCase();
    if (routeObjs.includes(routeObj)) {
-      console.log("注意: 有相同路径的路由", routeObj);
+      console.error("注意: 有相同路径的路由", routeObj);
       return;
    }
    routeObjs.push(routeObj);
@@ -69,13 +69,13 @@ const recuRoutes = (dirPath, paths, n) => {
 const pathAbsolute = path.join(process.cwd(), "src/")
 recuRoutes(pathAbsolute, ['src'], 0);
 
-// const arrs = ['kelin', 'KELIN', "Like", "likelin", "feng"]
+
 router.get('/', ctx => {
    let { filter } = ctx.query;
    filter = filter ? filter.toLowerCase() : "";
    const routes = routeObjs.filter(item => item.toLowerCase().indexOf(filter) !== -1);
 
-   ctx.body = {
+   ctx.success = {
       desc: "显示了所有路由的列表",
       filter: "可以用query筛选查看。形式为 ?filter='xxx'",
       couter: routes.length + ' / ' + routeObjs.length,

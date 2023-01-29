@@ -49,8 +49,9 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
       return newRoute(restfulMethod, routePath, reqFunc);
    } else if (fileType === 'Model') {
       /** 生成 Model 模型 路由 方法 */
-
-      reqFunc = ctx => resSUCCESS(ctx, { model: reqFile.CLdoc });
+      reqFunc = ctx => {
+         ctx.success = { model: reqFile.CLdoc };
+      }
 
       newRoute(restfulMethod, routePath, reqFunc);
 

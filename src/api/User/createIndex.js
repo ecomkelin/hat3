@@ -2,9 +2,9 @@ const UserCL = require("../../Models/auth/User.Model");
 
 module.exports = async ctx => {
     try {
-        let data = await UserCL.createIndex(ctx.req, {createIndex: {"code": 1}});
-        return resSUCCESS(ctx, data);
+        let data = await UserCL.createIndex(ctx.reqBody, {createIndex: {"code": 1}});
+        return ctx.success = {data};
     } catch(e) {
-        return resERR(ctx, e)
+        return ctx.fail = e;
     }
 }

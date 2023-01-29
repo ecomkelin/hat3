@@ -8,5 +8,5 @@ module.exports = (req, MToptions) => {
         let errMsg = require("./method/"+key)(req, MToptions);
         if(errMsg) return errMsg;
     }
-    // console.log("Time: ", Date.now() - t) // 处理时间 1ms 所以不能用异步 因为异步有50ms的函数处理时间
+    // console.info("Time: ", Date.now() - t) // 处理时间 1ms 所以不能用异步 因为异步有50ms的函数处理时间
 }

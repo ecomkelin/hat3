@@ -8,6 +8,7 @@
  * 自动给数据库加入 数据 
  * 注意 比如 at_crt / crt_User / Firm 这样的字段 要加上 IS_fixed=ture 这样更新时就不会改变了
  */
+let now = new Date();
 const followCLobj = (CLobj, docObj, key, payload) => {
 
     /** auto 后台自动添加的数据 */
@@ -15,7 +16,7 @@ const followCLobj = (CLobj, docObj, key, payload) => {
     if (CLobj[key].AUTO_payload === "_id") docObj[key] = payload._id;
     /** 自动加入 payload Firm */
     else if (CLobj[key].AUTO_payload === "Firm") {
-        if (payload.Firm) docObj[key] = payload.Firm._id || payload.Firm;
+        if (payload.Firm) docObj[key] = payload.Firm;
     }
     /** 自动加入 当前时间 */
     else if (CLobj[key].AUTO_Date) docObj[key] = new Date();
@@ -34,6 +35,7 @@ const followCLobj = (CLobj, docObj, key, payload) => {
  */
 module.exports = (docObj, MToptions) => {
     let { CLdoc, payload, is_upd = false} = MToptions;
+    now = new Date();
     for (key in CLdoc) {
         if (is_upd) {
             // 在更新的情况下 如果不可更改 则跳过： 比如创建时间 后面的代码就不用执行了

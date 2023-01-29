@@ -2,9 +2,9 @@ const OrderCL = require("../../Models/Os_online.Model");
 
 module.exports = async ctx => {
     try {
-        let doc = await OrderCL.findOne({},{});
-        return resSUCCESS(ctx, {doc});
+        let data = await OrderCL.findOne({},{});
+        return ctx.success = {data}
     } catch(e) {
-        return resERR(ctx, e)
+        return ctx.fail = e;
     }
 }

@@ -1,20 +1,14 @@
-/* =============================================== 中间件 =============================================== */
 const jwtMD = require(path.join(process.cwd(), "core/encryption/jwt"));
-/**
- * 权限中间件
- * @param {Object} ctx 
- * @param {Function} next 
- * @returns [Function] next() | resNOACCESS(ctx)
- */
+
 module.exports = async(ctx, next) => {
 	try {
 		let payload = await jwtMD.obtainPayload_Pobj(ctx.request.headers['authorization']);
-		ctx.request.payload = payload;
 
-        return next();
-		
+		ctx.payload = payload;
+        await next();	// 如果用 await 那么 系统还会再回访 执行 next(); 下面的句子
+		// console.info("如果用 await, 那么执行完 下面的中间件 还会调用这句话")		
 	} catch(e) {
-		return resERR(ctx, e, next);
+		ctx.fail = e;
 	}
 }
 /* =============================================== 中间件 =============================================== */

@@ -1,22 +1,27 @@
 const CLmodel_User = require("../../Models/auth/User.Model");
+
 exports.get_find = async ctx => {
     try {
-        const payload = ctx.request.payload;
-        let data = await CLmodel_User.find(ctx.req, {payload});
+        const payload = ctx.payload;
+        let data = await CLmodel_User.find(ctx.reqBody, {payload});
 
-        return resSUCCESS(ctx, {data});
+        return ctx.success = {data};
     } catch(e) {
-        return resERR(ctx, e)
+        return ctx.fail = e;
     }
 }
 
 exports.post_find = async ctx => {
     try {
-        const payload = ctx.request.payload;
-        let data = await CLmodel_User.find(ctx.req, {payload});
+        const payload = ctx.payload;
+        let data = await CLmodel_User.find(ctx.reqBody, {payload});
 
-        return resSUCCESS(ctx, {data});
+        return ctx.success = {data};
     } catch(e) {
-        return resERR(ctx, e)
+        return ctx.fail = e;
     }
+}
+
+exports.get_deleteOne = async ctx => {
+
 }

@@ -26,15 +26,20 @@ const CLdoc = {
             }
         }
     },
-    name: {
-        type: String,
-        // IS_fixed: true,
-        // unique: true,
+    name: { type: String, },
+    Firm: {
+        type: ObjectId,
+        ref: "Firm"
     },
-    addrs: [{
-        city: { type: String },
-        via: { type: String }
-    }]
+    at_crt: {
+        type: Date,
+        AUTO_Date: true,
+        IS_fixed: true
+    },
+    at_upd: {
+        type: Date,
+        AUTO_Date: true
+    }
 }
 
 const CLoptions = {

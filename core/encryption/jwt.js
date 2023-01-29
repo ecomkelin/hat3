@@ -54,29 +54,8 @@ exports.generatePayload = (obj)=> {
 	let payload = {};
 	if(obj._id) payload._id = obj._id;
 	if(obj.code) payload.code = obj.code;
-	if(obj.nome) payload.nome = obj.nome;
-	if(obj.phone) payload.phone = obj.phone;
-	if(obj.email) payload.email = obj.email;
-	
+	if(obj.role) payload.role = obj.role;
 	if(obj.Firm) payload.Firm = obj.Firm;
-
-	if(obj.type_auth === 'User') {
-		payload.type_auth = obj.type_auth;
-		payload.rankNum = obj.rankNum;
-		payload.is_admin = obj.is_admin;
-		payload.auths = [];
-		for(let i=0; i<obj.auths.length; i++) {
-			let auth = obj.auths[i].toLowerCase();
-			if(!payload.auths.includes(auth)) payload.auths.push(auth);
-		}
-		for(let i=0; i<obj.Roles.length; i++) {
-			let Role = obj.Roles[i];
-			for(let j=0; j<Role.auths.length; j++) {
-				let auth = Role.auths[j].toLowerCase();
-				if(!payload.auths.includes(auth)) payload.auths.push(auth);
-			}
-		}
-	}
 
 	return payload;
 }

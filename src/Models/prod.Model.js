@@ -1,13 +1,20 @@
 const DB = require(path.join(process.cwd(), "bin/DB"));
 
-const CLname = "Ader";
+const CLname = "Prod";
 
 const CLdoc = {
     code: {
+        type: String,
+        unique: true,
+        MAX: 3
+    },
+    name: {
+        required: true,
         type: String
     },
-    pwd: {
-        type: String
+    at_crt: {
+        type: Date,
+        AUTO_Date: true
     }
 }
 
@@ -21,10 +28,7 @@ const CLoptions = {
             //     vips: [],    // vip
             // }
         },
-        deleteMany: {},
-        deleteOne: {},
-        insertOne: {},
-
+        insertOne: {}
     }
 }
 

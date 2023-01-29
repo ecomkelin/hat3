@@ -6,7 +6,6 @@
  * @returns [null | String] 如果不为空 则错误
  */
 const isErr_docVal = (CLobj, docVal, key) => {
-    console.log(1111, CLobj)
     if (CLobj.type === ObjectId) {
         if (!isObjectIdAbs(docVal)) return `regulateReq docRegulate [${key}] 字段的的类型为 ObjectId 您输入的信息有误`;
     } else if (CLobj.type === String) {
