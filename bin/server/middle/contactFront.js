@@ -1,28 +1,64 @@
+const moment = require('moment');
+
+const jwtMD = require(path.join(process.cwd(), "core/encryption/jwt"));
+
 module.exports = async (ctx, next) => {
 
     try {
-        await next();
+        /** 程序开始 第一次进入中间件 
+         * 本次执行程序的开始时间 并记录开始的时间
+        */
+        let start = Date.now();
+        console.info(moment(start).format("YYYY-MM-DD HH:mm:ss "), `[ ${ctx.method} ] ${ctx.url}`);
 
-        if(IS_DEV) request = getRequest(ctx);   // 开发环境 返回前端 请求数据
+        /** 挂载 Koptions 
+         * 并把 payload 挂载到 Koptions 上
+        */
+        ctx.Koptions = {};
+        const payload = await jwtMD.obtainPayload_Pobj(ctx.request.headers['authorization']);
+        ctx.Koptions.payload = payload;
 
+        /** 最后 打印日志 生成时间 */
+        let person = 'authorization: ';
+        if (payload) {
+            let { Firm, code, name, role } = payload;
+            if (Firm) person += `[Firm: ${Firm}] `;
+            if (code) person += `[code: ${code}] `;
+            if (name) person += `[name: ${name}] `;
+            if (role) person += `[role ${role}] `;
+        } else {
+            person += "noPayload"
+        }
+        console.info(person);
+
+        /** 开始等待执行下面的 中间件 及 路由 */
+        await next();   
+        /** 执行完毕中间件 路由执行函数 会给ctx 挂载返回值 */
+
+        /** 根据ctx挂载的返回值 生成 ctx.body */
+        if (IS_DEV) request = getRequest(ctx);   // 开发环境 返回前端 请求数据
         if (ctx.fail) fail(ctx);                // 如果不能得到数据
-        else if(ctx.success) success(ctx);      // 成功从后端获得数据
-
+        else if (ctx.success) success(ctx);      // 成功从后端获得数据
         else if (!ctx.body) {
             ctx.status = 600;
             ctx.body = {
                 status: 600,
-                steps: [`首先检查: 是否有此 [ ${ctx.url} ] 路由`,  "如果路由没有问题 那么 此路由没有写body 请联系管理员"]
+                steps: [`首先检查: 是否有此 [ ${ctx.url} ] 路由`, "如果路由没有问题 那么 此路由没有写body 请联系管理员"]
             }
         }
+
+        
+        let end = Date.now();
+        let ms = end - start;
+        console.info(ctx.status, `用时: ${ms}ms \n`);
     } catch (e) {
         ctx.fail = e;
         fail(ctx);
     }
 }
 
+/** 返回给前端 */
 let request;
-
 const fail = ctx => {
     let fail = ctx.fail;
     /** 服务器错误 */
@@ -41,7 +77,7 @@ const fail = ctx => {
 
         /** 如果自定义状态为 401 则为 无权限 */
         let noAuth;
-        if(status === 401) {
+        if (status === 401) {
             noAuth = "您没有权限"
         }
 
@@ -52,14 +88,12 @@ const fail = ctx => {
         ctx.body = { status: 400, fail };
     }
 }
+
 const success = ctx => {
     const success = ctx.success;
     ctx.status = 200;
     ctx.body = { status: 200, success, request };
 }
-
-
-
 
 const getRequest = (ctx) => {
     return {
@@ -83,7 +117,8 @@ const getRequest = (ctx) => {
         // query: ctx.request.query,           // 格式化后的 query 这个会在req里面写过滤后的 query
         // search: ctx.request.search,
         header: ctx.request.header,
-        body: ctx.reqBody
+        body: ctx.reqBody,
+        query: ctx.reqQuery,
         // headers: ctx.request.headers,
 
         // is2: ctx.is, // => 'html'

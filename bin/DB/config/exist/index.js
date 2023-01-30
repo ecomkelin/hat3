@@ -1,13 +1,12 @@
-/**
- * 根据数据模型 查看有哪些需要对比的数据
- * @param {Object} CLdoc 文档模型
- * @param {Object} docObj 需要创建或更新的文档
- * @returns [Object] match
+/** 
+ * 检查 数据库中是否存在此 数据
+ * 在 数据库方法 insert/update One/Many 中饰哟0那个了
  */
- module.exports = (req, Koptions) => new Promise(async(resolve, reject) => {
+ module.exports = (ctxObj, MToptions) => new Promise(async(resolve, reject) => {
 	try {
-		const {document, update} = req;
-		const {CLdoc, COLLECTION, payload, pass_exist} = Koptions;
+		const {reqBody = {}} = ctxObj
+		const {document, update} = reqBody;
+		const {CLdoc, COLLECTION, pass_exist} = MToptions;
 
 		let match = null;
 
@@ -17,8 +16,8 @@
 			if(!isObject(update)) return reject("exist 请传递 update 或 document 对象")
 			docObj = update["$set"];
 			/** filter 在regulateReq中被删除了 _id 被放到了 match里面 */
-			if(!req.match || !isObjectIdAbs(req.match._id) ) return reject("exist 请传递  ObjectId 类型的 match._id")
-			match = {_id: {"$ne": req.match._id}};
+			if(!reqBody.match || !isObjectIdAbs(reqBody.match._id) ) return reject("exist 请传递  ObjectId 类型的 match._id")
+			match = {_id: {"$ne": reqBody.match._id}};
 		} else {
 			if(!isObject(document)) return reject("exist document 必须为 对象");
 			docObj = document;

@@ -24,8 +24,14 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
 
             const dropObj = CLoptions.indexesObj;
             if(dropObj) {
-                let result = await COLLECTION.dropIndexes(dropObj, options);
-                return resolve(result);
+                if(dropObj instanceof Array) {
+                    for(i in dropObj) {
+                        await COLLECTION.dropIndexes(dropObj[i], options);
+                    }
+                } else {
+                    await COLLECTION.dropIndexes(dropObj, options);
+                }
+                return resolve("成功删除索引");
             } else {
                 return reject("此集合 不可删除 索引")
             }

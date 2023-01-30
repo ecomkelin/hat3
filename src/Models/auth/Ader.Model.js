@@ -13,7 +13,7 @@ const CLdoc = {
 
 
 const CLoptions = {
-    GenRoute: {
+    AutoRoute: {
         find: {
             // restrict: {
             //     types: [],   // payload 类型 如 Ader User Supplier Client

@@ -1,14 +1,15 @@
 const koa = require('koa');
 const server = new koa();
 
-/** 最后要执行的中间件 
- * 因为代码写在 await next() 后面 
- * 承接所有的结果
+/** 与前端的触点
+ * 1 打印开始日志
+ * 2 挂载 Koptions
+ * 3 挂载 payload
+ * 4 await next()
+ * 一 返回给前端 ctx.body
+ * 二 打印结束日志
  */
-server.use(require("./middle/response"));
-
-/** 日志打印中间件 */
-server.use(require("./middle/log"));
+server.use(require("./middle/contactFront"));
 
 /** 传输压缩 */
 const compress = require('koa-compress');
@@ -19,7 +20,7 @@ const { koaBody } = require('koa-body');
 server.use(koaBody());
 
 /** 格式化 body 把所有的 字符串形式的 ObjectId 转为 真正的 ObjectId */
-server.use(require("./middle/ctxOptions"))
+server.use(require("./middle/reqParse"))
 
 /** 配置静态文件夹 */
 const DIR_PUBLIC = path.resolve(process.cwd(), "public/");

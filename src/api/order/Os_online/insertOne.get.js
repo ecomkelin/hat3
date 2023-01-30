@@ -1,4 +1,4 @@
-const OrderCL = require("../../Models/Os_online.Model");
+const OrderCLmodel = require("../../Models/Os_online.Model");
 
 module.exports = async ctx => {
     try {
@@ -20,7 +20,7 @@ module.exports = async ctx => {
 
 
 
-const UserCL = require("../../../authorization/Models/User.Model");
+const UserCLmodel = require("../../../authorization/Models/User.Model");
 // const SkuCL = require("../../../production/Models/Sku.Model");
 
 
@@ -33,24 +33,24 @@ const trConf = {
 
 const insertOneSession = (OrderDoc) => new Promise(async (resolve, reject) => {
     try {
-        const Koptions = {};
+        const options = {};
         let session = null;
         if (IS_REPLICA) {
-            session = OrderCL.mongoClient.startSession();
+            session = OrderCLmodel.mongoClient.startSession();
             session.startTransaction(trConf);
-            Koptions.session = session;
+            options.session = session;
         }
 
-        const OrderResult = await OrderCL.insertOne(
+        const OrderResult = await OrderCLmodel.COLLECTION.insertOne(
             OrderDoc,
-            Koptions
+            options
         );
 
-        const UserResult = await UserCL.insertOne({
+        const UserResult = await UserCLmodel.COLLECTION.insertOne({
             code: "uu01",
             name: "user01",
             desp: "from order"
-        }, Koptions)
+        }, options)
 
         // let itemSkus = OrderDoc.itemSkus;
         // for (let i = 0; i < itemSkus.length; i++) {
@@ -60,7 +60,7 @@ const insertOneSession = (OrderDoc) => new Promise(async (resolve, reject) => {
         //     // const SkuUpd = await SkuCL.updateOne(
         //     //     { _id: Sku_id, qty: { $gte: itemSku.qty } },
         //     //     { $inc: { 'qty': -itemSku.qty } },
-        //     //     Koptions
+        //     //     options
         //     // );
         //     // const res_SkuUpd = await axios.post()
         //     if (SkuUpd.modifiedCount === 0) return reject("Sku 不符合条件");

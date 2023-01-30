@@ -1,10 +1,11 @@
 const getCLfield = require("../func/getCLfield");
 
-module.exports = (req, Koptions) => {
+module.exports = (ctxObj, MToptions) => {
     /** sort */
-    const {sort={}} = req;
-    const {CLdoc} = Koptions;
-    if(!isObject(sort)) return "regulateReq find sort 必须为对象"
+    const {reqBody = {} } = ctxObj;
+    const {sort={}} = reqBody;
+    const {CLdoc} = MToptions;
+    if(!isObject(sort)) return "find sort 必须为对象"
     let hasSort = 0;
     for(key in sort) {
         let docField = getCLfield(CLdoc, key);
@@ -12,16 +13,16 @@ module.exports = (req, Koptions) => {
         hasSort++;
         if(sort[key] !== -1 && sort[key] !== "-1")  sort[key] = 1;
     }
-    if(hasSort === 0) delete req.sort;
+    if(hasSort === 0) delete reqBody.sort;
 
     /** limit */
-    if(isNaN(req.limit)) req.limit = 60;
-    req.limit = parseInt(req.limit);
-    if(req.limit < 1) req.limit = 60;
+    if(isNaN(reqBody.limit)) reqBody.limit = 60;
+    reqBody.limit = parseInt(reqBody.limit);
+    if(reqBody.limit < 1) reqBody.limit = 60;
 
     /** skip */
-    if(isNaN(req.skip)) req.skip = 0;
-    req.skip = parseInt(req.skip);
-    if(req.skip < 0) req.skip = 0;
+    if(isNaN(reqBody.skip)) reqBody.skip = 0;
+    reqBody.skip = parseInt(reqBody.skip);
+    if(reqBody.skip < 0) reqBody.skip = 0;
 
 }

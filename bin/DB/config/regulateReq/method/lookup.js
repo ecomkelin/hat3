@@ -1,6 +1,7 @@
 const getCLfield = require("../func/getCLfield");
 
-module.exports = (req, Koptions) => {
-    const {lookup} = req;
-    const {CLdoc, payload} = Koptions;
+module.exports = (ctxObj, MToptions) => {
+    const {lookup} = ctxObj.reqBody;
+    const {payload} = ctxObj.Koptions;
+    const {CLdoc} = MToptions;
 }

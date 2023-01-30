@@ -1,24 +1,26 @@
+/**
+ * 过滤 reqBody.filter
+ */
 const getCLfield = require("../func/getCLfield");
 
+module.exports = (ctxObj, MToptions) => {
+    const {filter = {}} = ctxObj.reqBody;
+    const { payload } = ctxObj.Koptions;
 
-module.exports = (req, Koptions) => {
-    const {filter = {}} = req;
-    delete req.filter;
+    const matchObj = {};
 
-    req.match = {};
-
-    const { CLdoc, payload } = Koptions;
+    const { CLdoc } = MToptions;
 
     /** 分销模式 区分 Firm 用的 */
     let Firm = null;
     if (payload.Firm) Firm = payload.Firm;
-    if (Firm) req.match.Firm = Firm;
+    if (Firm) matchObj.Firm = Firm;
 
     let { _id, search, match = {}, includes = {}, excludes = {}, lte = {}, gte = {}, at_before = {}, at_after = {} } = filter;
 
     if (_id) {   // 一定是 ***One 方法
         if (!isObjectIdAbs(_id)) return { errMsg: "filter._id 必须为 ObjectId 类型" };
-        req.match._id = _id;
+        matchObj._id = _id;
     }
 
     if (search) {
@@ -43,7 +45,7 @@ module.exports = (req, Koptions) => {
                 matchOr.push({ [field]: { $regex: keywords, $options: 'i' } });
             }
         }
-        if (matchOr.length > 0) req.match["$or"] = matchOr;
+        if (matchOr.length > 0) matchObj["$or"] = matchOr;
     }
 
     for (key in match) {
@@ -57,7 +59,7 @@ module.exports = (req, Koptions) => {
                 continue;
             }
         }
-        req.match[key] = match[key];
+        matchObj[key] = match[key];
     }
 
     for (key in includes) {
@@ -77,14 +79,14 @@ module.exports = (req, Koptions) => {
                     else return `[filter.includes.${key}] 类型为 ObjectId`;
                 }
             }
-            req.match[key] = { "$in": val };
+            matchObj[key] = { "$in": val };
         } else {
             if (!isObjectIdAbs(val)) {
                 /** 如果不是 ObjectId 是对象的话 查找 则把对象中的 _id 提取出来 */
                 if (isObject(val) && isObjectIdAbs(val._id)) val = val._id;
                 else return `[filter.includes.${key}] 类型为 ObjectId`;
             }
-            req.match[key] = val;
+            matchObj[key] = val;
         }
     }
     // for (key in excludes) {
@@ -104,14 +106,14 @@ module.exports = (req, Koptions) => {
     //                 else return `[filter.excludes.${key}] 类型为 ObjectId`;
     //             }
     //         }
-    //         req.match[key] = { "$nin": val };
+    //         matchObj[key] = { "$nin": val };
     //     } else {
     //         if (!isObjectIdAbs(val)) {
     //             /** 如果不是 ObjectId 是对象的话 查找 则把对象中的 _id 提取出来 */
     //             if (isObject(val) && isObjectIdAbs(val._id)) val = val._id;
     //             else return `[filter.excludes.${key}] 类型为 ObjectId`;
     //         }
-    //         req.match[key] = { "$ne": val };
+    //         matchObj[key] = { "$ne": val };
     //     }
     // }
 
@@ -122,7 +124,7 @@ module.exports = (req, Koptions) => {
             else continue;
         }
         if (!docField.type) return `[filter.lte 的 key ${key}] 必须为基础类型`;
-        req.match[key] = { "$lte": lte[key] };
+        matchObj[key] = { "$lte": lte[key] };
     }
 
     for (key in gte) {
@@ -134,7 +136,7 @@ module.exports = (req, Koptions) => {
 
         if (!docField.type) return `[filter.gte 的 key ${key}] 必须为基础类型`;
 
-        req.match[key] = { "$gte": gte[key] };
+        matchObj[key] = { "$gte": gte[key] };
     }
     for (key in at_before) {
         let docField = getCLfield(CLdoc, key);
@@ -150,7 +152,7 @@ module.exports = (req, Koptions) => {
         if(!isNaN(at_before[key])) at_before[key] = parseInt(at_before[key]);   // 如果收到的是时间戳
 
         let before = (new Date(at_before[key]).setHours(23, 59, 59, 999));      // 按天算时间
-        req.match[key] = { "$lte": before };
+        matchObj[key] = { "$lte": before };
     }
     for (key in at_after) {
         let docField = getCLfield(CLdoc, key);
@@ -166,6 +168,8 @@ module.exports = (req, Koptions) => {
         if(!isNaN(at_after[key])) at_after[key] = parseInt(at_after[key]);   // 如果收到的是时间戳
 
         let after = (new Date(at_after[key]).setHours(0, 0, 0, 0));     // 按天算时间
-        req.match[key] = { "$gte": after };
+        matchObj[key] = { "$gte": after };
     }
+
+    ctxObj.reqBody.match = matchObj;
 }

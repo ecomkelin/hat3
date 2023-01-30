@@ -50,7 +50,7 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
    } else if (fileType === 'Model') {
       /** 生成 Model 模型 路由 方法 */
       reqFunc = ctx => {
-         ctx.success = { model: reqFile.CLdoc };
+         return ctx.success = { model: reqFile.CLdoc };
       }
 
       newRoute(restfulMethod, routePath, reqFunc);

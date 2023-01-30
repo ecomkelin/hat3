@@ -7,22 +7,22 @@
  */
 const isErr_docVal = (CLobj, docVal, key) => {
     if (CLobj.type === ObjectId) {
-        if (!isObjectIdAbs(docVal)) return `regulateReq docRegulate [${key}] 字段的的类型为 ObjectId 您输入的信息有误`;
+        if (!isObjectIdAbs(docVal)) return `docRegulate [${key}] 字段的的类型为 ObjectId 您输入的信息有误`;
     } else if (CLobj.type === String) {
-        if ((typeof docVal) !== 'string') return `regulateReq docRegulate [${key}] 必须为字符串`;
+        if ((typeof docVal) !== 'string') return `docRegulate [${key}] 必须为字符串`;
         // docVal = String(docVal);
-        if (CLobj.TRIM && CLobj.TRIM !== docVal.length) return `regulateReq docRegulate [${key}] 字段的字符串长度必须为 [${CLobj.TRIM}]`;
-        if (CLobj.MIN && CLobj.MIN > docVal.length) return `regulateReq docRegulate [${key}] 字段的字符串长度为： [${CLobj.MIN} ~ ${CLobj.MAX}]`;
-        if (CLobj.MAX && CLobj.MAX < docVal.length) return `regulateReq docRegulate [${key}] 字段的字符串长度为： [${CLobj.MIN} ~ ${CLobj.MAX}]`;
+        if (CLobj.TRIM && CLobj.TRIM !== docVal.length) return `docRegulate [${key}] 字段的字符串长度必须为 [${CLobj.TRIM}]`;
+        if (CLobj.MIN && CLobj.MIN > docVal.length) return `docRegulate [${key}] 字段的字符串长度为： [${CLobj.MIN} ~ ${CLobj.MAX}]`;
+        if (CLobj.MAX && CLobj.MAX < docVal.length) return `docRegulate [${key}] 字段的字符串长度为： [${CLobj.MIN} ~ ${CLobj.MAX}]`;
         if (CLobj.REGEXP) {
             let REGEXP = new RegExp(CLobj.REGEXP);
-            if (!REGEXP.test(docVal)) return `regulateReq docRegulate [${key}] 的规则： [${CLobj.regErrMsg}]`;
+            if (!REGEXP.test(docVal)) return `docRegulate [${key}] 的规则： [${CLobj.regErrMsg}]`;
         }
     } else if (CLobj.type === Number) {
-        if (isNaN(docVal)) return `regulateReq docRegulate [${key}] 字段为 数字`;;
+        if (isNaN(docVal)) return `docRegulate [${key}] 字段为 数字`;;
         docVal = parseInt(docVal);
-        if (CLobj.minNum && CLobj.minNum > docVal) return `regulateReq docRegulate [${key}] 字段的取值范围为： [${CLobj.minNum}, ${CLobj.maxNum}]`;
-        if (CLobj.maxNum && CLobj.maxNum < docVal) return `regulateReq docRegulate [${key}] 字段的取值范围为： [${CLobj.minNum}, ${CLobj.maxNum}]`;
+        if (CLobj.minNum && CLobj.minNum > docVal) return `docRegulate [${key}] 字段的取值范围为： [${CLobj.minNum}, ${CLobj.maxNum}]`;
+        if (CLobj.maxNum && CLobj.maxNum < docVal) return `docRegulate [${key}] 字段的取值范围为： [${CLobj.minNum}, ${CLobj.maxNum}]`;
     } else if (CLobj.type === Date) {
 
     } else {
@@ -31,23 +31,23 @@ const isErr_docVal = (CLobj, docVal, key) => {
 }
 const fromDocVal = (docVal, CLobj, is_upd) => {
     if(isObject(docVal)) {
-        if(!isObject(CLobj)) return "regulateReq docRegulate fromDocVal CLobj 不为对象 但是 docVal 为对象 所以错误"
+        if(!isObject(CLobj)) return "docRegulate fromDocVal CLobj 不为对象 但是 docVal 为对象 所以错误"
         let errMsg = fromDoc(docVal, CLobj, is_upd);
         if(errMsg) return errMsg;
     } else if(docVal instanceof Array) {
-        if(!(CLobj instanceof Array)) return "regulateReq docRegulate fromDocVal CLobj 不为数组 但是 docVal 为数组 所以错误"
+        if(!(CLobj instanceof Array)) return "docRegulate fromDocVal CLobj 不为数组 但是 docVal 为数组 所以错误"
         for(let i=0; i<docVal.length; i++) {
             let errMsg = fromDocVal(docVal[i], CLobj[0], is_upd);
             if(errMsg) return errMsg;
         }
     } else {
-        if(!CLobj.type) return "regulateReq docRegulate fromDocVal docVal 是基础值的情况下 CL_field无type"
+        if(!CLobj.type) return "docRegulate fromDocVal docVal 是基础值的情况下 CL_field无type"
 
         /** 修改数据时 不能修改模型中固定的值 */
-        if (is_upd && CLobj.IS_fixed) return `regulateReq docRegulate [${key}]为不可修改数据`;
+        if (is_upd && CLobj.IS_fixed) return `docRegulate [${key}]为不可修改数据`;
         /** 前端不可以传递 模型中自动生成的值 */
-        if (CLobj.AUTO_payload) return `regulateReq docRegulate [${key}]为自动生成的数据`;
-        if (CLobj.AUTO_Date) return `regulateReq docRegulate [${key}]为自动生成的数据`;
+        if (CLobj.AUTO_payload) return `docRegulate [${key}]为自动生成的数据`;
+        if (CLobj.AUTO_Date) return `docRegulate [${key}]为自动生成的数据`;
 
         let errMsg = isErr_docVal(CLobj, docVal, key);
         if (errMsg) return errMsg;
@@ -55,10 +55,10 @@ const fromDocVal = (docVal, CLobj, is_upd) => {
 }
 
 const fromDoc = (docObj, CLobj, is_upd) => {
-    if (!isObject(docObj)) return "regulateReq docRegulate fromDoc docObj 只能是 对象 或 数组";
+    if (!isObject(docObj)) return "docRegulate fromDoc docObj 只能是 对象 或 数组";
     
     for (key in docObj) {
-        if (!CLobj[key]) return `regulateReq docRegulate [${key}]数据模型中没有此值`;
+        if (!CLobj[key]) return `docRegulate [${key}]数据模型中没有此值`;
 
         let errMsg = fromDocVal(docObj[key], CLobj[key], is_upd);
         if(errMsg) return errMsg;
@@ -68,12 +68,12 @@ const fromDoc = (docObj, CLobj, is_upd) => {
 /**
  * 
  * @param {*} doc 
- * @param {*} Koptions 
+ * @param {*} MToptions 
  * @returns 如果没有错误 则没有返回值 有错误 则返回错误 字符串
  */
-module.exports = (doc, Koptions) => {
-    const {CLdoc, is_upd} = Koptions;
+module.exports = (docObj, MToptions) => {
+    const {CLdoc, is_upd} = MToptions;
 
-    let errMsg = fromDoc(doc, CLdoc, is_upd);
+    let errMsg = fromDoc(docObj, CLdoc, is_upd);
     if(errMsg) return errMsg;
 }

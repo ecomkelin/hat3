@@ -75,7 +75,7 @@ router.get('/', ctx => {
    filter = filter ? filter.toLowerCase() : "";
    const routes = routeObjs.filter(item => item.toLowerCase().indexOf(filter) !== -1);
 
-   ctx.success = {
+   return ctx.success = {
       desc: "显示了所有路由的列表",
       filter: "可以用query筛选查看。形式为 ?filter='xxx'",
       couter: routes.length + ' / ' + routeObjs.length,

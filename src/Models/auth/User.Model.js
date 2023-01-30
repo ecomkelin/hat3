@@ -55,7 +55,7 @@ const CLoptions = {
         "name": 1
     }],
 
-    GenRoute: {
+    AutoRoute: {
         countDocuments: {},
         find: {
             // restrict: { },
@@ -70,7 +70,7 @@ const CLoptions = {
         updateMany: {},
         updateOne: {},
 
-        indexes: {},
+        // indexes: {},
         // createIndex:{},
         // dropIndex: {},
     }

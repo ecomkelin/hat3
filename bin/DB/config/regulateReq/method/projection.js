@@ -1,8 +1,9 @@
 const getCLfield = require("../func/getCLfield");
 
-module.exports = (req, Koptions) => {
-    const {projection = {}} = req;
-    const {CLdoc} = Koptions;
+module.exports = (ctxObj, MToptions) => {
+    const {reqBody = {}} = ctxObj;
+    const {projection = {}} = reqBody;
+    const {CLdoc} = MToptions;
     if(!isObject(projection)) return "projection 应该是 对象"
     /** 筛选前端给的合理性 */
     let hasProject = 0;
@@ -31,5 +32,5 @@ module.exports = (req, Koptions) => {
     for(key in CLdoc) {   // 如果没有select 则需要自动去掉不可读的数据
         if(CLdoc[key].is_UnReadable) delete projection[key];
     }
-    if(hasProject === 0) delete req.projection;
+    if(hasProject === 0) delete reqBody.projection;
 }
