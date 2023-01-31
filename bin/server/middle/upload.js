@@ -59,7 +59,7 @@ const formParse = (ctx, form, rel_path) => new Promise(async (resolve, reject) =
                 return reject("upload 前端的 form-data fields中要有 body字段, 并且是JSON string类型");
             }
             let keys = Object.keys(files);
-            for (i in keys) {
+            for (let i in keys) {
                 let key = keys[i];
                 // console.info(files[key].newFilename)
                 // console.info(files[key].filepath)

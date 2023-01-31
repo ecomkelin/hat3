@@ -87,9 +87,9 @@ exports.sortArrayObj = (array, field, options = {}) => {
 		arr2 = sortArrayObj(arr2, field);
 	} else {
 		arr1.sort();
-		for (i in arr1) if (!isNaN(arr1[i])) arr1[i] = String(arr1[i]);
+		for (let i in arr1) if (!isNaN(arr1[i])) arr1[i] = String(arr1[i]);
 		arr2.sort();
-		for (i in arr2) if (!isNaN(arr2[i])) arr2[i] = String(arr2[i]);
+		for (let i in arr2) if (!isNaN(arr2[i])) arr2[i] = String(arr2[i]);
 	}
 
 	return JSON.stringify(arr1) === JSON.stringify(arr2);
@@ -179,7 +179,7 @@ const obtIds = (array, value, options = {}) => {
 
 	let ids;
 	if (isArray) {   // 如果 elems是数组
-		for (k in values) {
+		for (let k in values) {
 			value = values[k];// 为每一个要删除的元素遍历
 
 			ids = obtIds(array, value, options);
@@ -190,7 +190,7 @@ const obtIds = (array, value, options = {}) => {
 	}
 
 	// 开始删除元素
-	for (i in ids) array.splice(ids[i], 1);
+	for (let i in ids) array.splice(ids[i], 1);
 
 	return array;
 }

@@ -7,13 +7,13 @@ module.exports = (ctxObj, MToptions) => {
     const {CLdoc} = MToptions;
     if(!isObject(sort)) return "find sort 必须为对象"
     let hasSort = 0;
-    for(key in sort) {
+    for(let key in sort) {
         let docField = getCLfield(CLdoc, key);
-        if(docField.errMsg) if(errMsg) return param.errMsg = docField.errMsg;
+        if(docField.errMsg) return docField.errMsg;
         hasSort++;
         if(sort[key] !== -1 && sort[key] !== "-1")  sort[key] = 1;
     }
-    if(hasSort === 0) delete reqBody.sort;
+    // if(hasSort === 0) delete reqBody.sort;
 
     /** limit */
     if(isNaN(reqBody.limit)) reqBody.limit = 60;

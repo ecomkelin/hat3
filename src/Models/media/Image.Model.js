@@ -64,22 +64,9 @@ const CLoptions = {
         findOne: {},
 
         deleteMany: {
-            customizeCB: ctx => new Promise(async(resolve, reject) => {
-                try {
-                    return resolve();
-                } catch(e) {
-                    return reject(e);
-                }
-            })
+            // customizeCB: (ctx, CLmodel) => new Promise(async(resolve, reject) => { try { return resolve(); } catch(e) { return reject(e); } })
         },
         deleteOne: {
-            customizeCB: ctx => new Promise(async(resolve, reject) => {
-                try {
-                    return resolve();
-                } catch(e) {
-                    return reject(e);
-                }
-            })
         },
 
         insertMany: {},

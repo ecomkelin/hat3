@@ -25,7 +25,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
             const dropObj = CLoptions.indexesObj;
             if(dropObj) {
                 if(dropObj instanceof Array) {
-                    for(i in dropObj) {
+                    for(let i in dropObj) {
                         await COLLECTION.dropIndexes(dropObj[i], options);
                     }
                 } else {

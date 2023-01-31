@@ -21,27 +21,27 @@ const isErr_docVal = (CLobj, docVal, key) => {
     } else if (CLobj.type === Number) {
         if (isNaN(docVal)) return `docRegulate [${key}] 字段为 数字`;;
         docVal = parseInt(docVal);
-        if (CLobj.minNum && CLobj.minNum > docVal) return `docRegulate [${key}] 字段的取值范围为： [${CLobj.minNum}, ${CLobj.maxNum}]`;
-        if (CLobj.maxNum && CLobj.maxNum < docVal) return `docRegulate [${key}] 字段的取值范围为： [${CLobj.minNum}, ${CLobj.maxNum}]`;
+        if (CLobj.MIN && CLobj.MIN > docVal) return `docRegulate [${key}] 字段的取值范围为： [${CLobj.MIN}, ${CLobj.MAX}]`;
+        if (CLobj.MAX && CLobj.MAX < docVal) return `docRegulate [${key}] 字段的取值范围为： [${CLobj.MIN}, ${CLobj.MAX}]`;
     } else if (CLobj.type === Date) {
 
     } else {
         return "CLobj type 类型错误";
     }
 }
-const fromDocVal = (docVal, CLobj, is_upd) => {
+const docBasicParse = (docVal, CLobj, is_upd, key) => {
     if(isObject(docVal)) {
-        if(!isObject(CLobj)) return "docRegulate fromDocVal CLobj 不为对象 但是 docVal 为对象 所以错误"
-        let errMsg = fromDoc(docVal, CLobj, is_upd);
+        if(!isObject(CLobj)) return "docRegulate docBasicParse CLobj 不为对象 但是 docVal 为对象 所以错误"
+        let errMsg = docObjParse(docVal, CLobj, is_upd);
         if(errMsg) return errMsg;
     } else if(docVal instanceof Array) {
-        if(!(CLobj instanceof Array)) return "docRegulate fromDocVal CLobj 不为数组 但是 docVal 为数组 所以错误"
+        if(!(CLobj instanceof Array)) return "docRegulate docBasicParse CLobj 不为数组 但是 docVal 为数组 所以错误"
         for(let i=0; i<docVal.length; i++) {
-            let errMsg = fromDocVal(docVal[i], CLobj[0], is_upd);
+            let errMsg = docBasicParse(docVal[i], CLobj[0], is_upd);
             if(errMsg) return errMsg;
         }
     } else {
-        if(!CLobj.type) return "docRegulate fromDocVal docVal 是基础值的情况下 CL_field无type"
+        if(!CLobj.type) return "docRegulate docBasicParse docVal 是基础值的情况下 CL_field无type"
 
         /** 修改数据时 不能修改模型中固定的值 */
         if (is_upd && CLobj.IS_fixed) return `docRegulate [${key}]为不可修改数据`;
@@ -54,13 +54,13 @@ const fromDocVal = (docVal, CLobj, is_upd) => {
     }
 }
 
-const fromDoc = (docObj, CLobj, is_upd) => {
-    if (!isObject(docObj)) return "docRegulate fromDoc docObj 只能是 对象 或 数组";
+const docObjParse = (docObj, CLobj, is_upd) => {
+    if (!isObject(docObj)) return "docRegulate docObjParse docObj 只能是 对象 或 数组";
     
-    for (key in docObj) {
+    for (let key in docObj) {
         if (!CLobj[key]) return `docRegulate [${key}]数据模型中没有此值`;
 
-        let errMsg = fromDocVal(docObj[key], CLobj[key], is_upd);
+        let errMsg = docBasicParse(docObj[key], CLobj[key], is_upd, key);
         if(errMsg) return errMsg;
     }
 }
@@ -74,6 +74,6 @@ const fromDoc = (docObj, CLobj, is_upd) => {
 module.exports = (docObj, MToptions) => {
     const {CLdoc, is_upd} = MToptions;
 
-    let errMsg = fromDoc(docObj, CLdoc, is_upd);
+    let errMsg = docObjParse(docObj, CLdoc, is_upd);
     if(errMsg) return errMsg;
 }

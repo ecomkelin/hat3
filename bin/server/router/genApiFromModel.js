@@ -28,15 +28,14 @@ module.exports = (CLmodel, fileName, newRoute) => {
             const payload = ctx.Koptions.payload;
 
             /** 根据模型数据的操作配置 查看是否有权限 */
-            if (routeOption.path) {
+            if (routeOption.pass) {
                console.info(payload);
             } else if (routeOption.restrict) {
                return ctx.fail = {status: 401, errMsg: "您没有权限"};
             }
 
-            /** 第一个版本 用这种回调 有点不合理 改到了 数据库中 */
-            // if(routeOption.cb) {
-            //    await routeOption.cb(ctx, CLmodel)
+            // if(routeOption.customizeCB) {
+            //    await routeOption.customizeCB(ctx, CLmodel)
             // }
 
             /** 根据 封装的数据库模型 下的路由方法 获取数据并返回 */

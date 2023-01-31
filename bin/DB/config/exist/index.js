@@ -25,7 +25,7 @@
 
 
 		let matchOr = [];			// 初始化field唯一的参数
-		for(key in CLdoc) {		// 循环文档中的每个field
+		for(let key in CLdoc) {		// 循环文档中的每个field
 			if(is_upd && !docObj[key]) continue;	// 如果是更新文档 对于不更改的值 则可以忽略不判断;
 
 			let param = {};

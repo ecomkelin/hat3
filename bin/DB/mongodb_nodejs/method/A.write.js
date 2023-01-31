@@ -18,6 +18,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
+                /** 如果回调配置项中 含有 deletemany 回调 则执行 此回调方法 */
+                if (semiAutoCB.deletemany) await semiAutoCB.deletemany(ctxObj, { COLLECTION, options });
+
                 let deletedObj = await COLLECTION.deleteMany(reqBody.match, options);
                 return resolve(deletedObj);
             } catch (e) {
@@ -39,10 +42,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
-                /** 如果配置项中 含有 findOne 回调 则执行 此回调方法 */
-                if (semiAutoCB.deleteOne) {
-                    await semiAutoCB.deleteOne(ctxObj, { COLLECTION, options });
-                }
+                /** 如果回调配置项中 含有 deleteOne 回调 则执行 此回调方法 */
+                if (semiAutoCB.deleteOne) await semiAutoCB.deleteOne(ctxObj, { COLLECTION, options });
 
                 let deletedObj = await COLLECTION.deleteOne(reqBody.match, options);
                 if (deletedObj.deletedCount === 1) Koptions.delFiles = Koptions.will_delFiles;
@@ -61,7 +62,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!(documents instanceof Array)) return reject({ errMsg: "insertMany 错误: 第一个参数documents 必须是： Array 即 [] ", errParam: documents });
 
                 /** 调整 reqBody 中的 documents*/
-                MToptions.regulates = ["documents"]
+                MToptions.regulates = ["insert"]
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
@@ -86,7 +87,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!isObject(document)) return reject({ errMsg: "insertOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document });
 
                 /** 调整 reqBody 中的 document*/
-                MToptions.regulates = ["document"]
+                MToptions.regulates = ["insert"] // "insert" 调整 document
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
@@ -145,8 +146,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
         updateOne: (ctxObj = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {} } = ctxObj;
-                const { filter = {} } = reqBody;
+                const { filter = {}, update } = reqBody;
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel updateOne filter _id 必须为 ObjectId");
+                if(!isObject(update)) return reject("CLmodel updateOne 请传递 update 对象参数");
 
                 /** 调整 reqBody 中的 filter, update 如果update中没有$.. update方法 则默改装成 $set方法 */
                 MToptions.regulates = ["filter", "update"]

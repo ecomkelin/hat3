@@ -4,42 +4,18 @@ const CLname = "User";
 const CLdoc = {
     code: {
         type: String,
-        unique: true,
+        // unique: true,
         MIN: 2,
         MAX: 4
     },
-    pwd: {
-        required: true,
-        type: String,
-        MIN: 2,
-        MAX: 4
-    },
-    role: {
-        type: Number,
-        // required: true,
-        CONF: {
-            vals: [1, 2, 3],
-            desp: {
-                "1": "可以做什么",
-                "2": "可以做什么",
-                "3": "可以做什么"
-            }
-        }
-    },
-    name: { type: String, },
     Firm: {
         type: ObjectId,
-        ref: "Firm"
+        ref: 'Firm'  // 如果和 field 字段相同 可以省略不写
     },
-    at_crt: {
-        type: Date,
-        AUTO_Date: true,
-        IS_fixed: true
-    },
-    at_upd: {
-        type: Date,
-        AUTO_Date: true
-    }
+    Firms: [{
+        type: ObjectId,
+        ref: 'Firm'
+    }]
 }
 
 const CLoptions = {

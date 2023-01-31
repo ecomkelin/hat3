@@ -36,7 +36,7 @@ module.exports = (ctxObj, MToptions) => {
         } else {
             let keywords = new RegExp(search.keywords + '.*');
             search.fields = (search.fields instanceof Array) ? search.fields : [search.fields];
-            for (i in search.fields) {
+            for (let i in search.fields) {
                 let field = search.fields[i];
                 let docField = getCLfield(CLdoc, field);
                 if (docField.errMsg) return { errMsg: '[filter.search.fields]: ' + docField.errMsg };
@@ -48,7 +48,7 @@ module.exports = (ctxObj, MToptions) => {
         if (matchOr.length > 0) matchObj["$or"] = matchOr;
     }
 
-    for (key in match) {
+    for (let key in match) {
         /** match 为对象 对象的key为要匹配的字段 val为要精确匹配的数值 */
         let docField = getCLfield(CLdoc, key);
         if (docField.type === ObjectId) return "match 中不传递 ObjectId 的值 需要的话 请放到 includes中"
@@ -62,7 +62,7 @@ module.exports = (ctxObj, MToptions) => {
         matchObj[key] = match[key];
     }
 
-    for (key in includes) {
+    for (let key in includes) {
         /** includes: {key: vals} 
          * 获取 模型 字段
         */
@@ -89,7 +89,7 @@ module.exports = (ctxObj, MToptions) => {
             matchObj[key] = val;
         }
     }
-    // for (key in excludes) {
+    // for (let key in excludes) {
     //     /** excludes: {key: vals} 
     //      * 获取 模型 字段
     //     */
@@ -117,7 +117,7 @@ module.exports = (ctxObj, MToptions) => {
     //     }
     // }
 
-    for (key in lte) {
+    for (let key in lte) {
         let docField = getCLfield(CLdoc, key);
         if (docField.errMsg) {
             if (IS_STRICT) return docField.errMsg;
@@ -127,7 +127,7 @@ module.exports = (ctxObj, MToptions) => {
         matchObj[key] = { "$lte": lte[key] };
     }
 
-    for (key in gte) {
+    for (let key in gte) {
         let docField = getCLfield(CLdoc, key);
         if (docField.errMsg) {
             if (IS_STRICT) return docField.errMsg;
@@ -138,7 +138,7 @@ module.exports = (ctxObj, MToptions) => {
 
         matchObj[key] = { "$gte": gte[key] };
     }
-    for (key in at_before) {
+    for (let key in at_before) {
         let docField = getCLfield(CLdoc, key);
         if (docField.errMsg) {
             if (IS_STRICT) {
@@ -154,7 +154,7 @@ module.exports = (ctxObj, MToptions) => {
         let before = (new Date(at_before[key]).setHours(23, 59, 59, 999));      // 按天算时间
         matchObj[key] = { "$lte": before };
     }
-    for (key in at_after) {
+    for (let key in at_after) {
         let docField = getCLfield(CLdoc, key);
         if (docField.errMsg) {
             if (IS_STRICT) {
