@@ -5,12 +5,12 @@ const Exist = require("../../config/exist");
 
 
 module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
-    const {semiAutoCB = {}, needEncryption} = CLoptions;
-    const MToptions = { CLdoc }
+    const { needEncryption } = CLoptions;
+    const MToptions = { CLdoc, CLoptions}
     return {
-        deleteMany: (ctxObj = {}) => new Promise(async (resolve, reject) => {
+        deleteMany: (ctxObj = {}, _CLoptions={}) => new Promise(async (resolve, reject) => {
             try {
-                const { reqBody = {} } = ctxObj;
+                const { reqBody = {}, Koptions } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel deleteMany reqBody 要为 对象");
 
                 /** 调整 reqBody */
@@ -18,10 +18,31 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
-                /** 如果回调配置项中 含有 deletemany 回调 则执行 此回调方法 */
-                if (semiAutoCB.deletemany) await semiAutoCB.deletemany(ctxObj, { COLLECTION, options });
+                
+                /** 如果此集合中 有图片 则删除 */
+                if(CLoptions.optFiles) {
+                    const cursor = COLLECTION.find(reqBody.match, options);
+                    const objects = await cursor.toArray();
+                    // Koptions.objects = objects;
+                    objects.forEach(object => {
+                        /** 把图片放入待删除 */
+                        for(let key in CLoptions.optFiles) {
+                            if(CLoptions.optFiles[key] === 'string' && object[key]) {
+                                Koptions.will_handleFiles.push(object[key]);
+                            } else if(CLoptions.optFiles[key] === 'array' && object[key] instanceof Array) {
+                                object[key].forEach(url => Koptions.will_handleFiles.push(url))
+                            }
+                        }
+                    })
+                }
+
+                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
+                if (_CLoptions.semiCB) {
+                }
 
                 let deletedObj = await COLLECTION.deleteMany(reqBody.match, options);
+                if (deletedObj.deletedCount > 0) Koptions.handleFiles = Koptions.will_handleFiles;
+
                 return resolve(deletedObj);
             } catch (e) {
                 return reject(e);
@@ -29,7 +50,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
         }),
 
 
-        deleteOne: (ctxObj = {}) => new Promise(async (resolve, reject) => {
+        deleteOne: (ctxObj = {}, _CLoptions={}) => new Promise(async (resolve, reject) => {
             try {
 
                 const { reqBody = {}, Koptions = {} } = ctxObj;
@@ -42,11 +63,27 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
-                /** 如果回调配置项中 含有 deleteOne 回调 则执行 此回调方法 */
-                if (semiAutoCB.deleteOne) await semiAutoCB.deleteOne(ctxObj, { COLLECTION, options });
+                /** 如果此集合中 有图片 则删除 */
+                if(CLoptions.optFiles) {
+                    const object = await COLLECTION.findOne(ctxObj.reqBody.match, options);
+                    if (!object) return reject("DBmethod deleteOne 方法下 findOne:数据库中没有此 数据")
+                    // Koptions.object = object;
+
+                    /** 把图片放入待删除 */
+                    for(let key in CLoptions.optFiles) {
+                        if(CLoptions.optFiles[key] === 'string' && object[key]) {
+                            Koptions.will_handleFiles.push(object[key]);
+                        } else if(CLoptions.optFiles[key] === 'array' && object[key] instanceof Array) {
+                            object[key].forEach(url => Koptions.will_handleFiles.push(url))
+                        }
+                    }
+                }
+
+                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
+                if (_CLoptions.semiCB) { }
 
                 let deletedObj = await COLLECTION.deleteOne(reqBody.match, options);
-                if (deletedObj.deletedCount === 1) Koptions.delFiles = Koptions.will_delFiles;
+                if (deletedObj.deletedCount === 1) Koptions.handleFiles = Koptions.will_handleFiles;
 
                 return resolve(deletedObj);
             } catch (e) {
@@ -103,9 +140,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let result = await COLLECTION.insertOne(document, options);
 
                 if (result.acknowledged) {
+                    Koptions.handleFiles = [];
                     result = await COLLECTION.findOne({ _id: result.insertedId });
-                    /** 如果前台 */
-                    if (result) delete Koptions.delFiles;
                     return resolve(result);
                 }
                 return resolve(result);
@@ -116,7 +152,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
 
 
-        updateMany: (ctxObj = {}) => new Promise(async (resolve, reject) => {
+        updateMany: (ctxObj = {}, _CLoptions={}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {} } = ctxObj;
                 /** 调整 reqBody 中的 filter, update*/
@@ -134,6 +170,16 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 }
 
 
+                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
+                if (_CLoptions.semiCB) {
+                    const cursor = COLLECTION.find(reqBody.match, options);
+                    const objects = await cursor.toArray();
+                    Koptions.objects = objects;
+
+                    await _CLoptions.semiCB(Koptions);
+                }
+
+
                 let result = await COLLECTION.updateMany(reqBody.match, reqBody.update, options);
                 return resolve(result);
             } catch (e) {
@@ -143,32 +189,81 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
 
 
-        updateOne: (ctxObj = {}) => new Promise(async (resolve, reject) => {
+        updateOne: (ctxObj = {}, _CLoptions={}) => new Promise(async (resolve, reject) => {
             try {
-                const { reqBody = {} } = ctxObj;
-                const { filter = {}, update } = reqBody;
+                const { reqBody = {}, Koptions={} } = ctxObj;
+                const { filter = {}, update, rmArrFile} = reqBody;
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel updateOne filter _id 必须为 ObjectId");
-                if(!isObject(update)) return reject("CLmodel updateOne 请传递 update 对象参数");
+                if (!isObject(update)) return reject("CLmodel updateOne 请传递 update 对象参数");
 
                 /** 调整 reqBody 中的 filter, update 如果update中没有$.. update方法 则默改装成 $set方法 */
                 MToptions.regulates = ["filter", "update"]
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
-                /** 如果 update 中存在 $set 如果update中没有$.. update方法 前面的 regulate 默改装成 $set方法*/
-                if (reqBody.update["$set"]) {
-                    /** 加密: 如果模型配置中有此相 则进行加密 */
-                    if (needEncryption) await Encryption(reqBody.update["$set"], needEncryption);
+                /** 如果此集合中 有图片 则要做图片处理 */
+                const updateSet = reqBody.update["$set"];
+                if(!isObject(updateSet)) return reject("DBmethod updateOne 下的 update['$set'] 信息错误");
 
-                    /** 是否能更新 这些字段 */
-                    MToptions.COLLECTION = COLLECTION;
-                    MToptions.pass_exist = false;
-                    await Exist(ctxObj, MToptions);
+                /** 加密: 如果模型配置中有此相 则进行加密 */
+                if (needEncryption) await Encryption(updateSet, needEncryption);
+
+                /** 是否能更新 这些字段 */
+                MToptions.COLLECTION = COLLECTION;
+                MToptions.pass_exist = false;
+                await Exist(ctxObj, MToptions);
+
+                const object = await COLLECTION.findOne(ctxObj.reqBody.match, options);
+                if (!object) return reject("DBmethod updateOne 方法下 findOne:数据库中没有此 数据")
+                // Koptions.object = object;
+
+                const {reFields} = Koptions;
+                if(rmArrFile) {
+                    /** 删除原数据库中存储的图片 */
+                    for(let key in rmArrFile) {
+                        if(!(rmArrFile[key] instanceof Array)) return reject(`DBmethod updateOne 中 您要删除的 [${key}] 字段的值 为数组 请写成数组形式`)
+                        if(!(object[key] instanceof Array)) return reject(`DBmethod updateOne 中 [${key}] 字段不为数组`)
+
+                        let rmUrls = rmArrFile[key];  // 要删除的 字符串s
+                        let fieldVals = object[key]; // 集合文件的数组对象的值
+                        for(let i in rmUrls) {
+                            let id = fieldVals.indexOf(rmUrls[i]);
+                            if(id > -1) {
+                                Koptions.will_handleFiles.push(rmUrls[i]);
+                                fieldVals.splice(id, (id>-1) ? 1: 0);
+                            }
+                        }
+                        updateSet[key] = object[key];
+                    }
+                } else {
+
+                    /** 把要替换的 数据库图片放到 待处理图片缓存中 */
+                    if(reFields.length > 0){
+                        for(let i in reFields) {
+                            let field = reFields[i];
+                            if(object[field]) Koptions.will_handleFiles.push(object[field]);
+                        }
+    
+                        
+                    }
+                    const {optFiles} = CLoptions;
+                    for(let key in optFiles) {
+                        if(optFiles[key] === 'array') {
+                            if(updateSet[key]) {
+                                updateSet[key] = [...object[key], ...updateSet[key]]
+                            }
+                        }
+                    }
                 }
+                
+
+                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
+                if (_CLoptions.semiCB) { }
 
                 let result = await COLLECTION.updateOne(reqBody.match, reqBody.update, options);
                 if (result.acknowledged && result.modifiedCount > 0) {
-                    return resolve(reqBody.update["$set"]);
+                    Koptions.handleFiles = Koptions.will_handleFiles;
+                    return resolve(updateSet);
                 }
                 return resolve(result);
             } catch (e) {

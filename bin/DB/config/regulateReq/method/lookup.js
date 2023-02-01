@@ -6,6 +6,7 @@ module.exports = (ctxObj, MToptions) => {
     // const {payload} = ctxObj.Koptions;
     const {CLdoc} = MToptions;
 
+    if(!lookup) return;
     if(!(lookup instanceof Array)) lookup = [lookup];
     for(let i in lookup) {
         let lp = lookup[i];

@@ -4,7 +4,24 @@ const CLname = "Image";
 
 const CLdoc = {
     /** 之后可以做优化如果不是唯一的 那说明 另一张图片被覆盖了 */
-    relFile: { type: String },     // 相对路径+名称                         // 无对应
+    logo: {
+        type: String,
+        ALLOW_upload: true
+    },
+    relFile: { 
+        type: String,
+        ALLOW_upload: true
+    },     // 相对路径+名称                         // 无对应
+
+    imgs: [{
+        type: String,
+        ALLOW_upload: true
+    }],
+    pics: [{
+        type: String,
+        ALLOW_upload: true
+    }],
+
 
     filepath: { type: String },   // 本机的绝对位置 绝对路径
     name: { type: String },  // 图片名称 出去文件夹后的 名称                // 对应 formParse中的    newFilename
@@ -20,53 +37,65 @@ const CLdoc = {
 }
 
 const CLoptions = {
-    semiAutoCB: {
-        deleteOne: (ctxObj, MToptions) => new Promise(async (resolve, reject) => {
-            try {
-                const {COLLECTION, options} = MToptions;
-                const { Koptions = {} } = ctxObj;
-
-                const doc = await COLLECTION.findOne(ctxObj.reqBody.match, options);
-                if (!doc) return reject("数据库中没有此 数据")
-
-                /** 把图片放入待删除 */
-                if (!Koptions.will_delFiles) Koptions.will_delFiles = [];
-                if (doc.relFile) Koptions.will_delFiles.push(doc.relFile);
-                return resolve();
-            } catch (e) {
-                return reject(e);
-            }
-        }),
-        deleteMany: (ctxObj, CLmodel) => new Promise(async (resolve, reject) => {
-            try {
-                const { Koptions = {} } = ctxObj;
-                if (!Koptions.will_delFiles) Koptions.will_delFiles = [];
-                const docs = await CLmodel.find(ctxObj);
-                docs.forEach(doc => {
-                    if (doc.relFile) Koptions.will_delFiles.push(doc.relFile);
-                });
-
-                return resolve();
-            } catch (e) {
-                return reject(e);
-            }
-        })
-    },
-    AutoRoute: {
+    Routes: {
         find: {
-            // restrict: {
-            //     types: [],   // payload 类型 如 Ader User Supplier Client
-            //     roles: [],   // payload 角色 如 
-            //     vips: [],    // vip
-            // }
+            permissionsCB: (Koptions) => new Promise((resolve, reject) => {
+                try {
+                    /** 获取 payload 此payload 已经在服务中间件中 配置好了 这里只需要提取 */
+                    const payload = Koptions.payload;
+                    /** 权限管理 */
+                    if (!payload) {
 
+                        return reject({ status: 401, errMsg: "您没有权限" });
+                    }
+                    return resolve();
+                } catch(e) {
+                    return reject(e);
+                }
+            })
         },
         findOne: {},
 
         deleteMany: {
             // customizeCB: (ctx, CLmodel) => new Promise(async(resolve, reject) => { try { return resolve(); } catch(e) { return reject(e); } })
+            semiCB: (Koptions) => new Promise(async (resolve, reject) => {
+                try {
+                    const { objects } = Koptions;
+
+                    objects.forEach(object => {
+                        if (object.relFile) Koptions.will_handleFiles.push(object.relFile);
+                        if(object.imgs) {
+                            object.imgs.forEach(img => {
+                                Koptions.will_handleFiles.push(img);
+                            })
+                        }
+                    });
+
+                    return resolve();
+                } catch (e) {
+                    return reject(e);
+                }
+            }),
         },
         deleteOne: {
+            semiCB: (Koptions) => new Promise(async (resolve, reject) => {
+                try {
+                    const { object } = Koptions;
+                    if (!object) return reject("semiCB 数据库中没有此 数据")
+
+                    /** 把图片放入待删除 */
+
+                    if (object.relFile) Koptions.will_handleFiles.push(object.relFile);
+                    if(object.imgs) {
+                        object.imgs.forEach(img => {
+                            Koptions.will_handleFiles.push(img);
+                        })
+                    }
+                    return resolve();
+                } catch (e) {
+                    return reject(e);
+                }
+            }),
         },
 
         insertMany: {},

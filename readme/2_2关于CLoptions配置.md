@@ -10,7 +10,7 @@
     indexesObj:{} / [{}]                // 一般用于 createIndex / dropIndex
 
     3 自动生成路由
-    AutoRoute: {
+    Routes: {
         countDocuments: {},
         find: {
             restrict: { },      // 可以在此处 做限制

@@ -28,6 +28,25 @@ module.exports = (CLname, CLdoc, CLoptions = {}) => {
         DBnames.push(CLoptions.DBname);
     }
 
+    /** 根据 CLdoc 生成CLoptions配置项 */
+    for(let key in CLdoc) {
+        let CLfield = CLdoc[key];
+        if(CLfield.ENcryption) {
+            if(!CLoptions.needEncryption) CLoptions.needEncryption = {method: "md5", fields: []};
+            CLoptions.needEncryption.fields.push(key)
+        }
+
+        let isArray= 'string';
+        if(CLfield instanceof Array) {
+            CLfield = CLfield[0];
+            isArray = 'array';
+        }
+        if(CLfield.ALLOW_upload) {
+            if(!CLoptions.optFiles) CLoptions.optFiles = {};
+            CLoptions.optFiles[key] = isArray
+        }
+    }
+    // console.log(CLname, CLoptions.optFiles);
     /** 创建 集合模型对象 */
     const COLLECTION = DB.collection(CLname);
 

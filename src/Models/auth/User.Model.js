@@ -8,22 +8,22 @@ const CLdoc = {
         MIN: 2,
         MAX: 4
     },
-    Firm: {
-        type: ObjectId,
-        ref: 'Firm'  // 如果和 field 字段相同 可以省略不写
+    pwd: {
+        type: String,
+        ENcryption: "md5", // 加密方式
     },
-    Firms: [{
-        type: ObjectId,
-        ref: 'Firm'
-    }]
+    at_crt: {
+        type: String,
+        AUTO_Date: true
+    }
 }
 
 const CLoptions = {
     /** 对哪个字段加密 */
-    needEncryption: {
-        method: "md5",
-        fields: "pwd"
-    },
+    // needEncryption: {
+    //     method: "md5",
+    //     fields: "pwd"
+    // },
     /** 创建索引 */
     indexesObj: [{
         "code": 1
@@ -31,11 +31,10 @@ const CLoptions = {
         "name": 1
     }],
 
-    AutoRoute: {
+    Routes: {
         countDocuments: {},
         find: {
             // restrict: { },
-            api: { }
         },
         findOne: {},
 

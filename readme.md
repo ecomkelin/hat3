@@ -5,5 +5,4 @@ Holartec 系统
 关于 cursor.close() 的问题 
 数据库 连接池问题
 
-updateOne 需要找出来 原图片
-关于修改数据时的 图片问题
+关于 updateOne 图片问题 还需要大量优化

@@ -42,7 +42,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let cursor = COLLECTION.aggregate(piplines)
                 let docs = await cursor.toArray();
                 let doc = docs[0]
-                console.log(doc);
                 // reqBody.lookup
                 // options.projection = reqBody.projection;
                 // let doc = await COLLECTION.findOne(reqBody.match, options);
@@ -114,7 +113,7 @@ const getPiplines = (reqBody, { is_Many = false }) => {
         }
     }
 
-    if (Object.keys(projection).length > 0) piplines.push({ "$project": projection })
+    if (projection && Object.keys(projection).length > 0) piplines.push({ "$project": projection })
 
     return piplines;
 }

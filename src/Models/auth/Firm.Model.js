@@ -11,7 +11,7 @@ const CLdoc = {
 }
 
 const CLoptions = {
-    AutoRoute: {
+    Routes: {
         find: { },
         deleteMany: {},
         deleteOne: {},
