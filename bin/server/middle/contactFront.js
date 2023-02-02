@@ -15,6 +15,10 @@ module.exports = async (ctx, next) => {
          * 并把 payload 挂载到 Koptions 上
         */
         ctx.Koptions = {};
+        /** 把将要被删除文件的路径 挂载到 Koptions 上去 */
+        ctx.Koptions.handleFiles = [];
+        ctx.Koptions.will_handleFiles = [];
+        /** 把payload挂载到 Koptions上去 */
         const payload = await jwtMD.obtainPayload_Pobj(ctx.request.headers['authorization']);
         ctx.Koptions.payload = payload;
 
@@ -33,7 +37,7 @@ module.exports = async (ctx, next) => {
 
 
         /** 开始等待执行下面的 中间件 及 路由 */
-        await next();   
+        await next();
         /** 执行完毕中间件 路由执行函数 会给ctx 挂载返回值 */
 
 
@@ -49,7 +53,7 @@ module.exports = async (ctx, next) => {
             }
         }
 
-        
+
         let end = Date.now();
         let ms = end - start;
         console.info(ctx.status, `用时: ${ms}ms \n`);

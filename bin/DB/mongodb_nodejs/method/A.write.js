@@ -231,7 +231,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { optFiles } = CLoptions;
                 /** 如果集合中 有文件字段 则需要进行下面图片的处理 */
                 if (optFiles) {
-                    const { flagStrs = [] } = Koptions;
                     /** 删除原数据库中存储的 数组图片
                      * 为了简化代码 如果做了删除图片 则不能进行其他修改操作
                     */

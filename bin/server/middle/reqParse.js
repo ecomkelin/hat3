@@ -54,13 +54,9 @@ module.exports = async (ctx, next) => {
         if(!ctx.reqBody.update["$set"])ctx.reqBody.update["$set"] = {};
     }
     
-
-
-    
     return next();// 如果用 await 那么 系统还会再回访 执行 next(); 下面的句子
     // console.info("如果用 await, 那么执行完 下面的中间件 还会调用这句话")		
 };   
-
 
 /** 深度循环 对象中的 ObjectId 
  * 形参必须为指针

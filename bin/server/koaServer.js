@@ -22,12 +22,11 @@ server.use(koaBody());
 
 
 /** 配置静态文件夹 */
-const DIR_PUBLIC = path.resolve(process.cwd(), "public/");
 const koaStatic = require('koa-static');
 server.use(koaStatic(DIR_PUBLIC));
 
 /** 文件中间件 文件传输系统 */
-server.use(require("./middle/upload"))
+server.use(require("./middle/handlefile"))
 
 /** 格式化 body 把所有的 字符串形式的 ObjectId 转为 真正的 ObjectId */
 server.use(require("./middle/reqParse"))

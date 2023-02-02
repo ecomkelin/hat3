@@ -68,7 +68,6 @@ module.exports = (CLname, CLdoc, CLoptions = {versionKey: false }) => {
 
         insertMany: (documents, options) => new Promise(async(resolve, reject) => {
             try {
-                // if(!isObject(documents)) return reject({errMsg: "insertOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document});
                 let result = await COLLECTION.insertMany(documents);
                 return resolve(result);
             } catch (e) {

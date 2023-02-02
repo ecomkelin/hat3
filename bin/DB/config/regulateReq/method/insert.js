@@ -4,7 +4,7 @@ const regCLoptions = require("../func/regCLoptions");
 
 module.exports = (ctxObj, MToptions) => {
     const {document, documents} = ctxObj.reqBody;
-    const {payload, flagArrs, flagStrs} = ctxObj.Koptions;
+    const {payload} = ctxObj.Koptions;
     const {CLdoc, CLoptions} = MToptions;
     let docs = [];
     if(document) docs.push(document);
