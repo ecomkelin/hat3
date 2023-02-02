@@ -22,7 +22,8 @@ module.exports = (ctxObj, MToptions) => {
 
     for (let i in updMethods) {
         const updMethod = updMethods[i];
-        if (!upd_keys.includes(updMethod)) return `update["$set", "$mul", "$inc"] 暂时只有这三个值 不能是 updMethod`;
+
+        if (!upd_keys.includes(updMethod)) return `update["$set", "$mul", "$inc"] 暂时只有这三个值 不能是 ${updMethod}`;
         let is_set = (updMethod === "$set") ? true : false;
 
         let doc = update[updMethod];

@@ -7,11 +7,16 @@ const DBnames = [process.env.DBname];
 /** 复制集配置 */
 let replication = require("../config/replication") || {};
 
-
 /** 加载连接的方法 */
 const Aread = require("./method/A.read");
 const Awrite = require("./method/A.write");
 const Cindexes = require("./method/C.indexes");
+
+/** 加载其他配置项 */
+const parseCLoptions = require("./func/parseCLoptions");
+
+let init = true;
+let RouteMethods;   // 在 生成路由的那块 会用到此配置
 
 module.exports = (CLname, CLdoc, CLoptions = {}) => {
     /** 如果 集合的复制集配置有特殊要求 则覆盖全局 */
@@ -28,32 +33,27 @@ module.exports = (CLname, CLdoc, CLoptions = {}) => {
         DBnames.push(CLoptions.DBname);
     }
 
-    /** 根据 CLdoc 生成CLoptions配置项 */
-    for(let key in CLdoc) {
-        let CLfield = CLdoc[key];
-        if(CLfield.ENcryption) {
-            if(!CLoptions.needEncryption) CLoptions.needEncryption = {method: "md5", fields: []};
-            CLoptions.needEncryption.fields.push(key)
-        }
-
-        let isArray= 'string';
-        if(CLfield instanceof Array) {
-            CLfield = CLfield[0];
-            isArray = 'array';
-        }
-        if(CLfield.ALLOW_upload) {
-            if(!CLoptions.optFiles) CLoptions.optFiles = {};
-            CLoptions.optFiles[key] = isArray
-        }
-    }
-    // console.log(CLname, CLoptions.optFiles);
     /** 创建 集合模型对象 */
     const COLLECTION = DB.collection(CLname);
+
+    /** 根据 CLdoc 为CLoptions 生成配置项 
+     *  1 ENcryption
+     *  2 optFiles
+    */
+    parseCLoptions(CLoptions, CLdoc);
 
     /** 一些数据库的 读方法 */
     const readMethod = Aread(COLLECTION, CLdoc, CLoptions, options);
     const writeMethod = Awrite(COLLECTION, CLdoc, CLoptions, options);
     const indexesMethod = Cindexes(COLLECTION, CLdoc, CLoptions, options);
+
+    /** 再此为 CLoptions 生成配置项 RouteMethods */
+    if(init) {
+        init = false;
+        RouteMethods = [...Object.keys(readMethod), ...Object.keys(writeMethod), ...Object.keys(indexesMethod)]
+    }
+    CLoptions.RouteMethods = RouteMethods;
+    
 
     /** 暴露数据模型 */
     return {

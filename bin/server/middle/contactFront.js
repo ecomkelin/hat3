@@ -31,18 +31,20 @@ module.exports = async (ctx, next) => {
         }
         console.info(person);
 
+
         /** 开始等待执行下面的 中间件 及 路由 */
         await next();   
         /** 执行完毕中间件 路由执行函数 会给ctx 挂载返回值 */
+
 
         /** 根据ctx挂载的返回值 生成 ctx.body */
         if (IS_DEV) request = getRequest(ctx);   // 开发环境 返回前端 请求数据
         if (ctx.fail) fail(ctx);                // 如果不能得到数据
         else if (ctx.success) success(ctx);      // 成功从后端获得数据
         else if (!ctx.body) {
-            ctx.status = 600;
+            ctx.status = 405;
             ctx.body = {
-                status: 600,
+                status: 405,
                 steps: [`首先检查: 是否有此 [ ${ctx.url} ] 路由`, "如果路由没有问题 那么 此路由没有写body 请联系管理员"]
             }
         }

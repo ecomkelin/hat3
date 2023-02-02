@@ -22,7 +22,7 @@ const CLdoc = {
         ALLOW_upload: true
     }],
 
-
+    name: {type: String},
     filepath: { type: String },   // 本机的绝对位置 绝对路径
     name: { type: String },  // 图片名称 出去文件夹后的 名称                // 对应 formParse中的    newFilename
     ext: { type: String },   // 后缀名 不重要                             // 无对应
@@ -37,17 +37,20 @@ const CLdoc = {
 }
 
 const CLoptions = {
+    api: {
+
+    },
+    customizeCB: {
+        getList: async(ctx, CLmodel) => {
+            const COLLECTION = CLmodel.COLLECTION;
+            const data = COLLECTION.findOne();
+            return ctx.success = "hello"
+        }
+    },
     Routes: {
         find: {
             permissionsCB: (Koptions) => new Promise((resolve, reject) => {
                 try {
-                    /** 获取 payload 此payload 已经在服务中间件中 配置好了 这里只需要提取 */
-                    const payload = Koptions.payload;
-                    /** 权限管理 */
-                    if (!payload) {
-
-                        return reject({ status: 401, errMsg: "您没有权限" });
-                    }
                     return resolve();
                 } catch(e) {
                     return reject(e);
@@ -62,15 +65,6 @@ const CLoptions = {
                 try {
                     const { objects } = Koptions;
 
-                    objects.forEach(object => {
-                        if (object.relFile) Koptions.will_handleFiles.push(object.relFile);
-                        if(object.imgs) {
-                            object.imgs.forEach(img => {
-                                Koptions.will_handleFiles.push(img);
-                            })
-                        }
-                    });
-
                     return resolve();
                 } catch (e) {
                     return reject(e);
@@ -83,14 +77,6 @@ const CLoptions = {
                     const { object } = Koptions;
                     if (!object) return reject("semiCB 数据库中没有此 数据")
 
-                    /** 把图片放入待删除 */
-
-                    if (object.relFile) Koptions.will_handleFiles.push(object.relFile);
-                    if(object.imgs) {
-                        object.imgs.forEach(img => {
-                            Koptions.will_handleFiles.push(img);
-                        })
-                    }
                     return resolve();
                 } catch (e) {
                     return reject(e);

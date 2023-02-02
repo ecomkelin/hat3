@@ -8,7 +8,7 @@ const passUpload = (ctx) => {
     /** 前端 的 路由路径 必须包含  insertOne 或者 updateOne 才有资格上传图片 */
     if(!ctx.url.toLowerCase().includes('insertone') && !ctx.url.toLowerCase().includes('updateone')) return false
     /** 前端 的 query 必须给 passUpload=1 才有机会通过 */
-    if(ctx.reqQuery.passUpload != 1) return false;
+    if(ctx.request.query.passUpload != 1) return false;
     return true;
 }
 
@@ -18,10 +18,7 @@ module.exports = async (ctx, next) => {
         /** 把将要被删除文件的路径 挂载到 Koptions 上去 */
         ctx.Koptions.handleFiles = [];
         ctx.Koptions.will_handleFiles = [];
-        ctx.Koptions.reFields = [];
-
         if(passUpload(ctx)) await uploadFiles(ctx);
-
         /** 等待系统处理 下面的中间件 */
     } catch (e) {
         ctx.fail = e;
@@ -34,11 +31,11 @@ module.exports = async (ctx, next) => {
         await next();
 
         /** 删除 待删除图片 */
-        // rmFile(ctx.Koptions.handleFiles);
+        rmFile(ctx.Koptions.handleFiles);
 
-        setTimeout(() => {
-            rmFile(ctx.Koptions.handleFiles);
-        }, 2000)
+        // setTimeout(() => {
+        //     rmFile(ctx.Koptions.handleFiles);
+        // }, 2000)
     }
 }
 
@@ -66,15 +63,13 @@ const formParse = (ctx, form, rel_path) => new Promise(async (resolve, reject) =
             let errMsg = null;
 
             try {
-                ctx.reqBody = JSON.parse(fields.body);
+                ctx.request.body = JSON.parse(fields.body);
             } catch (error) {
-                ctx.reqBody = {};
+                ctx.request.body = {};
                 errMsg = "upload 前端的 form-data fields中要有 body字段, 并且是JSON string类型";
             }
-            // console.log(111, files);
             /** 分辨是 insertOne 还是 updateOne */
-            const {document, update, flagArr=[], filter={}} = ctx.reqBody;
-            if(filter._id) filter._id = newObjectId(filter._id);
+            const {document, update, flagArrs=[]} = ctx.request.body;
 
             let obj = document;
             if(update) obj = update["$set"] || update;
@@ -85,7 +80,8 @@ const formParse = (ctx, form, rel_path) => new Promise(async (resolve, reject) =
                 obj = {};
             }
 
-            ctx.Koptions.flagArr = flagArr;
+            ctx.Koptions.flagArrs = flagArrs;
+            ctx.Koptions.flagStrs = [];
 
             /** 根据解析的 文件进行数据操作 */
             let keys = Object.keys(files);
@@ -102,12 +98,14 @@ const formParse = (ctx, form, rel_path) => new Promise(async (resolve, reject) =
                     // console.info(file.mimetype)
                     // console.info(file.size)
                     let rel_file = rel_path + file.newFilename;
-                    if(flagArr.includes(key)) {
+
+                    /** 根据前端描述 确定字段是数组还是字符串 */
+                    if(flagArrs.includes(key)) {
                         if(!obj[key]) obj[key] = [];
                         obj[key].push(rel_file);
                     } else {
                         obj[key] = rel_file;
-                        ctx.Koptions.reFields.push(key)
+                        ctx.Koptions.flagStrs.push(key)
                     }
                     /** 之前的笨办法 用下划线 _ 来标记数组 */
                     // let ks = key.split("_");
@@ -139,7 +137,7 @@ const uploadFiles = ctx => new Promise(async (resolve, reject) => {
         const { rel_path, uploadDir } = get_paths(ctx);
 
         /** 如果要手动命名文件名称 如果是多文件上传 最好不要手动命名 所以这就不用了 写在这 作为了解*/
-        // let filename = get_filename(ctx.reqQuery.filename);
+        // let filename = get_filename(ctx.request.query.filename);
 
         const form = formidable({
             multiples: true,            // 暂时先放着， 因为做了实验 数据跟此配置项没有任何关系
@@ -182,15 +180,15 @@ const get_paths = ctx => {
     /** 文件要上传的 相对位置 */
     let rel_path = '/upload/';                              // 系统文件会放入 upload中
     rel_path += ctx.Koptions.payload.Firm || '_Firm/';       // 首先以公司分文件夹 方便迁移
-    if(ctx.reqQuery.dirs) {                                 // 手动分文件夹
-        let dirs = ctx.reqQuery.dirs;
+    if(ctx.request.query.dirs) {                                 // 手动分文件夹
+        let dirs = ctx.request.query.dirs;
         if(dirs instanceof Array) {
             dirs.forEach(dir=> rel_path += dir+'/')
         } else if(typeof dirs === 'string') {
             rel_path += dirs+'/';         
         }
     }
-    if(ctx.reqQuery.dirDate == 1) {            // 如果 需要加入 日期文件夹
+    if(ctx.request.query.dirDate == 1) {            // 如果 需要加入 日期文件夹
         const date = new Date();
         const year = date.getFullYear();
         const month = date.getMonth() + 1;

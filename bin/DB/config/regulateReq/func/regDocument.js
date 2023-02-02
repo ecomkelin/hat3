@@ -31,17 +31,17 @@ const isErr_docVal = (CLobj, docVal, key) => {
 }
 const docBasicParse = (docVal, CLobj, is_upd, key) => {
     if(isObject(docVal)) {
-        if(!isObject(CLobj)) return "docRegulate docBasicParse CLobj 不为对象 但是 docVal 为对象 所以错误"
+        if(!isObject(CLobj)) return `docRegulate docBasicParse 模型中的${key}值为${CLobj} 不为对象, 收到了${docVal} 为对象`
         let errMsg = docObjParse(docVal, CLobj, is_upd);
         if(errMsg) return errMsg;
     } else if(docVal instanceof Array) {
-        if(!(CLobj instanceof Array)) return "docRegulate docBasicParse CLobj 不为数组 但是 docVal 为数组 所以错误"
+        if(!(CLobj instanceof Array)) return `docRegulate docBasicParse 模型中的${key}值为${CLobj} 不为数组, 收到了${docVal} 为数组`
         for(let i=0; i<docVal.length; i++) {
-            let errMsg = docBasicParse(docVal[i], CLobj[0], is_upd);
+            let errMsg = docBasicParse(docVal[i], CLobj[0], is_upd);    // 会自递归自己 判断下一层 （无论下一层是对象还是基础类型 
             if(errMsg) return errMsg;
         }
     } else {
-        if(!CLobj.type) return "docRegulate docBasicParse docVal 是基础值的情况下 CL_field无type"
+        if(!CLobj.type) return `docRegulate docBasicParse 模型中的${key}值为${CLobj} 不为最basic的类型 收到了${docVal}`
 
         /** 修改数据时 不能修改模型中固定的值 */
         if (is_upd && CLobj.IS_fixed) return `docRegulate [${key}]为不可修改数据`;
