@@ -11,6 +11,10 @@ const server = new koa();
  */
 server.use(require("./middle/contactFront"));
 
+/** */
+const cors = require('@koa/cors');
+server.use(cors());
+
 /** 传输压缩 */
 const compress = require('koa-compress');
 server.use(compress({}));
