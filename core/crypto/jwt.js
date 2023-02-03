@@ -18,7 +18,7 @@ exports.obtToken_fromHeaders = (headersToken) => {
  * @param {Boolean} is_refresh 是否为 refresh
  * @returns [Object] payload
  */
-exports.obtainPayload_Pobj = (headersToken, is_refresh)=> new Promise(async(resolve, reject) => {
+exports.obtPayload = (headersToken, is_refresh)=> new Promise(async(resolve, reject) => {
 	try {
 		let token = this.obtToken_fromHeaders(headersToken);
 		if(!token) return resolve({});	// 如果没有token 则返回空 payload, 不妨碍无权限的验证

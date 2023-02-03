@@ -29,39 +29,35 @@ const isErr_docVal = (CLobj, docVal, key) => {
         return "CLobj type 类型错误";
     }
 }
-const docBasicParse = (docVal, CLobj, is_upd, key) => {
-    if(isObject(docVal)) {
-        if(!isObject(CLobj)) return `docRegulate docBasicParse 模型中的${key}值为${CLobj} 不为对象, 收到了${docVal} 为对象`
-        let errMsg = docObjParse(docVal, CLobj, is_upd);
-        if(errMsg) return errMsg;
-    } else if(docVal instanceof Array) {
-        if(!(CLobj instanceof Array)) return `docRegulate docBasicParse 模型中的${key}值为${CLobj} 不为数组, 收到了${docVal} 为数组`
-        for(let i=0; i<docVal.length; i++) {
-            let errMsg = docBasicParse(docVal[i], CLobj[0], is_upd);    // 会自递归自己 判断下一层 （无论下一层是对象还是基础类型 
-            if(errMsg) return errMsg;
+
+const recu = (docObj, CLobj, field, is_upd) => {
+    if(field === '_id') return;
+    if(!CLobj) return "regDocumentError ${field} 数据与模型没有对应 1";
+    if (isObject(docObj)) {
+        if (!isObject(CLobj)) return `regDocumentError ${field} 数据与模型没有对应 2。 doc:为对象 CLobj: ${typeof CLobj}`
+
+        for(let key in docObj) {
+            let errMsg = recu(docObj[key], CLobj[key], key, is_upd);
+            if (errMsg) return errMsg;
+        }
+    } else if (docObj instanceof Array) {
+        if (!(CLobj instanceof Array)) return `regDocumentError ${field} 数据与模型没有对应 3 doc为数组 但模型不是`
+        for (let i = 0; i < docObj.length; i++) {
+            let errMsg = recu(docObj[i], CLobj[0], field, is_upd);    // 会自递归自己 判断下一层 （无论下一层是对象还是基础类型 
+            if (errMsg) return errMsg;
         }
     } else {
-        if(!CLobj.type) return `docRegulate docBasicParse 模型中的${key}值为${CLobj} 不为最basic的类型 收到了${docVal}`
+
+        if (!CLobj.type) return `regDocumentError ${field} 数据与模型没有对应 4 doc为基本类型 模型还不是`
 
         /** 修改数据时 不能修改模型中固定的值 */
-        if (is_upd && CLobj.IS_fixed) return `docRegulate [${key}]为不可修改数据`;
+        if (is_upd && CLobj.IS_fixed) return `regDocumentError ${field} 不能修改模型中固定的值`;
         /** 前端不可以传递 模型中自动生成的值 */
-        if (CLobj.AUTO_payload) return `docRegulate [${key}]为自动生成的数据`;
-        if (CLobj.AUTO_Date) return `docRegulate [${key}]为自动生成的数据`;
+        if (CLobj.AUTO_payload) return `regDocumentError ${field} 不能传递模型中自动生成的值`;
+        if (CLobj.AUTO_Date) return `regDocumentError ${field} 不能传递模型中自动生成的值`;
 
-        let errMsg = isErr_docVal(CLobj, docVal, key);
+        let errMsg = isErr_docVal(CLobj, docObj, field);
         if (errMsg) return errMsg;
-    }
-}
-
-const docObjParse = (docObj, CLobj, is_upd) => {
-    if (!isObject(docObj)) return "docRegulate docObjParse docObj 只能是 对象 或 数组";
-    
-    for (let key in docObj) {
-        if (!CLobj[key]) return `docRegulate [${key}]数据模型中没有此值`;
-
-        let errMsg = docBasicParse(docObj[key], CLobj[key], is_upd, key);
-        if(errMsg) return errMsg;
     }
 }
 
@@ -71,9 +67,10 @@ const docObjParse = (docObj, CLobj, is_upd) => {
  * @param {*} MToptions 
  * @returns 如果没有错误 则没有返回值 有错误 则返回错误 字符串
  */
-module.exports = (docObj, MToptions) => {
-    const {CLdoc, is_upd} = MToptions;
-
-    let errMsg = docObjParse(docObj, CLdoc, is_upd);
-    if(errMsg) return errMsg;
+module.exports = (doc, MToptions) => {
+    const { CLdoc, is_upd } = MToptions;
+    for(let key in doc) {
+        let errMsg = recu(doc[key], CLdoc[key], key, is_upd);
+        if (errMsg) return errMsg;
+    }
 }

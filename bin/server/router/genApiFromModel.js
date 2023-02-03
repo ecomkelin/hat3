@@ -36,10 +36,10 @@ module.exports = (CLmodel, fileName, newRoute) => {
    urlPre = "/Models/" + fileName + "/"
    Object.keys(Routes).forEach(key => {
       const if_noMethod = `${fileName} 模型文件 下的 CLoptions.Route 中的 ${key} 方法 不存在于 数据库包装方法`;
-      if (RouteMethods.indexOf(key) < 0) return console.log(if_noMethod);
-      // if (RouteMethods.indexOf(key) < 0) console.log(if_noMethod);
+      if (RouteMethods.indexOf(key) < 0) return console.error(if_noMethod);
+      // if (RouteMethods.indexOf(key) < 0) console.error(if_noMethod);
       const routeOption = Routes[key];
-      const { customizeCB, permissionsCB, permissionsConf, semiCB } = routeOption;
+      const { permissionsCB, permissionsConf, documentCB, semiCB } = routeOption;
       newRoute(restfulMethod, urlPre + key, async ctx => {
          try {
             if (RouteMethods.indexOf(key) < 0) return ctx.fail = { status: 500, errMsg: if_noMethod };
@@ -47,10 +47,6 @@ module.exports = (CLmodel, fileName, newRoute) => {
             if (ctx.request.query.showApi == 1) {
                return ctx.success = { api: api[key] || {} };
             }
-
-            /** 执行 完全自定义的 回调方法（如果有的话）*/
-            if (customizeCB) return customizeCB(ctx, CLmodel);
-            /** 如果没有则执行 下面的方法 */
 
             /** 如果没有 完全的自定义 路由方法 则执行以下方式 下面的方式为 mongodb_nodejs */
             if (permissionsCB) {
@@ -60,7 +56,7 @@ module.exports = (CLmodel, fileName, newRoute) => {
             }
 
             /** 根据 封装的数据库模型 下的路由方法 获取数据并返回 */
-            const _CLoptions = { semiCB };
+            const _CLoptions = { documentCB, semiCB };
             const data = await CLmodel[key](ctx, _CLoptions);
 
             return ctx.success = { data };

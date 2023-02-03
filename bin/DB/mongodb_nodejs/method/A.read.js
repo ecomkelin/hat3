@@ -52,7 +52,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
         }),
 
 
-        find: (ctxObj, _CLoptions) => new Promise(async (resolve, reject) => {
+        find: (ctxObj) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel find reqBody 要为 对象");

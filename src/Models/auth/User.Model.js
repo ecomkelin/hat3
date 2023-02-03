@@ -5,17 +5,30 @@ const CLdoc = {
     code: {
         type: String,
         // unique: true,
-        MIN: 2,
+        MIN: 1,
         MAX: 4
     },
     pwd: {
         type: String,
         ENcryption: "md5", // 加密方式
     },
-    name: {type: String},
+    categs: [{
+        type: String,
+        MIN: 2,
+        MAX: 4
+    }],
+    name: {
+        type: String,
+        MAX: 3
+    },
     at_upd: {
         type: String,
         AUTO_Date: true
+    },
+    at_crt: {
+        type: String,
+        AUTO_Date: true,
+        IS_fixed: true,
     }
 }
 
@@ -36,7 +49,18 @@ const CLoptions = {
         deleteMany: {},
         deleteOne: {},
         insertMany: {},
-        insertOne: {},
+        insertOne: {
+            documentCB: (document, Koptions) => {
+                // console.log("CB:", document)
+            },
+            semiCB: (Koptions) => new Promise(async (resolve, reject) => {
+                try {
+                    return resolve();
+                } catch (e) {
+                    return reject(e);
+                }
+            }),
+        },
         updateMany: {},
         updateOne: {},
 

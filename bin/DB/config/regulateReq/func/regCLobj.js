@@ -2,7 +2,7 @@
  * 自动给数据库加入 数据 
  * 注意 比如 at_crt / crt_User / Firm 这样的字段 要加上 IS_fixed=ture 这样更新时就不会改变了
  */
-module.exports = (CLobj, docObj, key, payload) => {
+const regCLobj = (CLobj, docObj, key, payload) => {
     /** auto 后台自动添加的数据 */
     /** 自动加入 payload _id */
     if (CLobj[key].AUTO_payload === "_id") docObj[key] = payload._id;
@@ -14,7 +14,47 @@ module.exports = (CLobj, docObj, key, payload) => {
     else if (CLobj[key].AUTO_Date) docObj[key] = new Date();
 
     /** 字段写入是否符合 CONF 配置 */
-    if(CLobj[key].CONF && docObj[key]) {
-        if(!CLobj[key].CONF.vals.includes(docObj[key])) return `regCLobj ${key} 字段值为 ${docObj[key]}, 不符合[${CLobj[key].CONF.vals}]文档的配置信息 `
+    if (CLobj[key].CONF && docObj[key]) {
+        if (!CLobj[key].CONF.vals.includes(docObj[key])) return `regCLobj ${key} 字段值为 ${docObj[key]}, 不符合[${CLobj[key].CONF.vals}]文档的配置信息 `
     }
+}
+const recu = (CLdoc, doc, MToptions) => {
+    const { payload = {}, is_upd = false } = MToptions;
+    for (let key in CLdoc) {
+        const CLobj = CLdoc[key];
+        if(CLobj.type) {
+            if (is_upd) {
+                if (CLobj.IS_fixed) {
+                    if (doc[key] !== undefined) return `update 修改时 不可修改 IS_fixed 为true 的字段 [${key}].`;
+                } else {
+                    let errMsg = regCLobj(CLdoc, doc, key, payload)
+                    if (errMsg) return errMsg;
+                }
+            } else {
+                if (CLobj.default || CLobj.default == 0) {
+                    if (!doc[key] && doc[key] !== 0) doc[key] = CLobj.default;
+                } if ((CLobj.required === true) && (doc[key] === null || doc[key] === undefined)) {
+                    return `docRegulate 创建时 必须添加 [doc.${key}] 字段`;
+                }
+                errMsg = regCLobj(CLdoc, doc, key, payload)
+                if (errMsg) return errMsg;
+            }
+        } else {
+            if(isObject(CLobj)) {
+                if(!isObject(doc[key])) doc[key] = {};
+                recu(CLobj, doc[key], MToptions);
+            } else if(CLobj instanceof Array) {
+                if(!(doc[key] instanceof Array)) doc[key] = [];
+                for(let i in CLobj) {
+                    recu(CLobj[i], doc[key][i], MToptions)
+                }
+            } else {
+                return "CLdoc 错误"
+            }
+        }
+    }
+}
+
+module.exports = (CLdoc, doc, MToptions) => {
+    return recu(CLdoc, doc, MToptions)
 }

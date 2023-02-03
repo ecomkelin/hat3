@@ -1,6 +1,6 @@
 const moment = require('moment');
 
-const jwtMD = require(path.join(process.cwd(), "core/encryption/jwt"));
+const {obtPayload} = require(path.join(process.cwd(), "core/crypto/jwt"));
 
 module.exports = async (ctx, next) => {
 
@@ -19,7 +19,7 @@ module.exports = async (ctx, next) => {
         ctx.Koptions.handleFiles = [];
         ctx.Koptions.will_handleFiles = [];
         /** 把payload挂载到 Koptions上去 */
-        const payload = await jwtMD.obtainPayload_Pobj(ctx.request.headers['authorization']);
+        const payload = await obtPayload(ctx.request.headers['authorization']);
         ctx.Koptions.payload = payload;
 
         /** 最后 打印日志 生成时间 */

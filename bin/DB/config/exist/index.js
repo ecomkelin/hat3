@@ -1,6 +1,7 @@
 /** 
+ * 新增 或 插入之前 先检查数据库 能否加入新的数据
  * 检查 数据库中是否存在此 数据
- * 在 数据库方法 insert/update One/Many 中饰哟0那个了
+ * 在 数据库方法 insert/update One/Many 
  */
  module.exports = (ctxObj, MToptions) => new Promise(async(resolve, reject) => {
 	try {

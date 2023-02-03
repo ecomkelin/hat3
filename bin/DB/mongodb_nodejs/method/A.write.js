@@ -5,8 +5,7 @@ const Exist = require("../../config/exist");
 
 
 module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
-    const { needEncryption } = CLoptions;
-
+    const { needEncryption} = CLoptions;
     const MToptions = { CLdoc, CLoptions }
     return {
         deleteMany: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
@@ -132,6 +131,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据前端数据 获取 [插入一个] 方法 所需要的document*/
                 const { document } = reqBody;
                 if (!isObject(document)) return reject({ errMsg: "insertOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document });
+                document._id = newObjectId();
+
+                /** documentCB */
+                if(_CLoptions.documentCB) _CLoptions.documentCB(document, Koptions);
 
                 /** 调整 reqBody 中的 document*/
                 MToptions.regulates = ["insert"] // "insert" 调整 document

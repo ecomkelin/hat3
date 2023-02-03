@@ -32,20 +32,15 @@ module.exports = (ctxObj, MToptions) => {
             /** 下面两个函数(1,2) 不能改变顺序 因为先判断前端给的数据是否符合要求 再自动生成 */
 
             /** 1  根据 doc数据 判断是否正确 */
-            errMsg = regDocument(doc, MToptions);
+            let errMsg = regDocument(doc, MToptions);
             if (errMsg) return errMsg;
 
             /** 2 根据数据模型 判断数据是否正确 
              * 在更新的情况下 如果不可更改 则跳过： 比如创建时间 后面的代码就不用执行了
             */
-            for (let key in CLdoc) {
-                if (CLdoc[key].IS_fixed) {
-                    if (doc[key] !== undefined) return `update 修改时 不可修改 IS_fixed 为true 的字段 [${key}].`;
-                } else {
-                    let errMsg = regCLobj(CLdoc, doc, key, payload)
-                    if (errMsg) return errMsg;
-                }
-            }
+            errMsg = regCLobj(CLdoc, doc, MToptions)
+            if (errMsg) return errMsg;
+
 
             /** 3 查看上传的这些文件 在模型中是否允许被上传 */
             errMsg = regCLoptions(ctxObj.Koptions, CLoptions)
