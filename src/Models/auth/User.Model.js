@@ -20,6 +20,7 @@ const CLdoc = {
     role: {
         type: Number
     },
+    name: {type: String},
     at_crt: {
         type: Date,
         AUTO_Date: true,

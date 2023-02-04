@@ -22,6 +22,7 @@ const regCLobj = (CLobj, docObj, key, payload) => {
 }
 const recu = (CLdoc, doc, MToptions) => {
     const { payload = {}, is_upd = false } = MToptions;
+    if(CLdoc.type) return;
     for (let key in CLdoc) {
         const CLobj = CLdoc[key];
         if (CLobj.type) {

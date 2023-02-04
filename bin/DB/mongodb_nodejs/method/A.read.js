@@ -61,6 +61,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 开始执行 */
                 let cursor = COLLECTION.aggregate(piplines)
                 let docs = await cursor.toArray();
+                if(docs.length < 1) return reject("没有找到数据")
                 let doc = docs[0]
                 // reqBody.lookup
                 // options.projection = reqBody.projection;

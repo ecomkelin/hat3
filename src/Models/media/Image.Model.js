@@ -48,41 +48,11 @@ const CLoptions = {
         }
     },
     Routes: {
-        find: {
-            permissionsCB: (Koptions) => new Promise((resolve, reject) => {
-                try {
-                    return resolve();
-                } catch(e) {
-                    return reject(e);
-                }
-            })
-        },
+        find: { },
         findOne: {},
 
-        deleteMany: {
-            // customizeCB: (ctx, CLmodel) => new Promise(async(resolve, reject) => { try { return resolve(); } catch(e) { return reject(e); } })
-            execCB: (Koptions) => new Promise(async (resolve, reject) => {
-                try {
-                    const { objects } = Koptions;
-
-                    return resolve();
-                } catch (e) {
-                    return reject(e);
-                }
-            }),
-        },
-        deleteOne: {
-            execCB: (Koptions) => new Promise(async (resolve, reject) => {
-                try {
-                    const { object } = Koptions;
-                    if (!object) return reject("execCB 数据库中没有此 数据")
-
-                    return resolve();
-                } catch (e) {
-                    return reject(e);
-                }
-            }),
-        },
+        deleteMany: { },
+        deleteOne: { },
 
         insertMany: {},
         insertOne: {},
