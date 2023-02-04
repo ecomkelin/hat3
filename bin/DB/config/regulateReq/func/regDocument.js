@@ -32,7 +32,7 @@ const isErr_docVal = (CLobj, docVal, key) => {
 
 const recu = (docObj, CLobj, field, is_upd) => {
     if(field === '_id') return;
-    if(!CLobj) return "regDocumentError ${field} 数据与模型没有对应 1";
+    if(!CLobj) return `regDocumentError ${field} 数据与模型没有对应 1`;
     if (isObject(docObj)) {
         if (!isObject(CLobj)) return `regDocumentError ${field} 数据与模型没有对应 2。 doc:为对象 CLobj: ${typeof CLobj}`
 

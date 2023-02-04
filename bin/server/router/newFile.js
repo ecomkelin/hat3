@@ -57,6 +57,8 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
 
       /** 如果 模型需要则自动生成一些 基础的 api路由 Model文件的 reqFile 就是其 CLmodel */
       genApiFromModel(reqFile, fileName, newRoute);
+
+      modelsMap[fileName] = reqFile;
       return;
    }
 }

@@ -1,11 +1,13 @@
 const regDocument = require("../func/regDocument");
-const regCLobj = require("../func/regCLobj");
+const regCLdoc = require("../func/regCLdoc");
 const regCLoptions = require("../func/regCLoptions");
 
 module.exports = (ctxObj, MToptions) => {
     const { document, documents } = ctxObj.reqBody;
     const { payload } = ctxObj.Koptions;
     const { CLdoc, CLoptions } = MToptions;
+    MToptions.payload = payload;
+
     let docs = [];
     if (document) docs.push(document);
     else if (documents) docs = documents;
@@ -20,7 +22,7 @@ module.exports = (ctxObj, MToptions) => {
 
         /** 2 根据数据模型 判断数据是否正确 */
         // 在新创建数据的情况下 判断每个必须的字段 如果前台没有给赋值 则报错
-        errMsg = regCLobj(CLdoc, doc, MToptions)
+        errMsg = regCLdoc(CLdoc, doc, MToptions)
         if (errMsg) return errMsg;
 
         /** 3 查看上传的这些文件 在模型中是否允许被上传 */

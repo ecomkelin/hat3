@@ -4,29 +4,15 @@
 const getCLfield = require("../func/getCLfield");
 
 module.exports = (ctxObj, MToptions) => {
-    const {reqBody, Koptions} = ctxObj;
-    const { payload } = Koptions;
+    const { reqBody } = ctxObj;
 
-
-    const match = {};
-    /** 分销模式 区分 Firm 用的 */
-    let Firm = null;
-    if (payload.Firm) Firm = payload.Firm;
-    if (Firm) match.Firm = Firm;
-
-    if(reqBody.match) {
-        reqBody.match = {...reqBody.match, ...match};
-    } else{
-        reqBody.match = match;
-        filterParse(reqBody.match, reqBody.filter, MToptions.CLdoc)
-    }
-
-    
-    
+    if (reqBody.match) return
+    reqBody.match = {};
+    filterParse(reqBody.match, reqBody.filter, MToptions.CLdoc)
 }
 
 
-const filterParse = (match, filter, CLdoc) => {
+const filterParse = (match, filter = {}, CLdoc) => {
     let { _id, search, exact = {}, includes = {}, excludes = {}, lte = {}, gte = {}, at_before = {}, at_after = {} } = filter;
     if (_id) {   // 一定是 ***One 方法
         if (!isObjectIdAbs(_id)) return { errMsg: "filter._id 必须为 ObjectId 类型" };
@@ -159,7 +145,7 @@ const filterParse = (match, filter, CLdoc) => {
         }
 
         if (docField.type !== Date) return `[filter.at_before 的 key ${key}] 必须为 Date 类型`;
-        if(!isNaN(at_before[key])) at_before[key] = parseInt(at_before[key]);   // 如果收到的是时间戳
+        if (!isNaN(at_before[key])) at_before[key] = parseInt(at_before[key]);   // 如果收到的是时间戳
 
         let before = (new Date(at_before[key]).setHours(23, 59, 59, 999));      // 按天算时间
         match[key] = { "$lte": before };
@@ -175,7 +161,7 @@ const filterParse = (match, filter, CLdoc) => {
         }
 
         if (docField.type !== Date) return `[filter.at_after 的 key ${key}] 必须为 Date 类型`;
-        if(!isNaN(at_after[key])) at_after[key] = parseInt(at_after[key]);   // 如果收到的是时间戳
+        if (!isNaN(at_after[key])) at_after[key] = parseInt(at_after[key]);   // 如果收到的是时间戳
 
         let after = (new Date(at_after[key]).setHours(0, 0, 0, 0));     // 按天算时间
         match[key] = { "$gte": after };

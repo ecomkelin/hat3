@@ -5,8 +5,10 @@
 const regCLobj = (CLobj, docObj, key, payload) => {
     /** auto 后台自动添加的数据 */
     /** 自动加入 payload _id */
-    if (CLobj[key].AUTO_payload === "_id") docObj[key] = payload._id;
-    /** 自动加入 payload Firm */
+    if (CLobj[key].AUTO_payload === "_id") {
+        if (payload._id) docObj[key] = payload._id;
+    }
+    /** 自动加入 payload Firm 999999 暂时不用 */
     else if (CLobj[key].AUTO_payload === "Firm") {
         if (payload.Firm) docObj[key] = payload.Firm;
     }
@@ -22,7 +24,7 @@ const recu = (CLdoc, doc, MToptions) => {
     const { payload = {}, is_upd = false } = MToptions;
     for (let key in CLdoc) {
         const CLobj = CLdoc[key];
-        if(CLobj.type) {
+        if (CLobj.type) {
             if (is_upd) {
                 if (CLobj.IS_fixed) {
                     if (doc[key] !== undefined) return `update 修改时 不可修改 IS_fixed 为true 的字段 [${key}].`;
@@ -40,12 +42,12 @@ const recu = (CLdoc, doc, MToptions) => {
                 if (errMsg) return errMsg;
             }
         } else {
-            if(isObject(CLobj)) {
-                if(!isObject(doc[key])) doc[key] = {};
+            if (isObject(CLobj)) {
+                if (!isObject(doc[key])) doc[key] = {};
                 recu(CLobj, doc[key], MToptions);
-            } else if(CLobj instanceof Array) {
-                if(!(doc[key] instanceof Array)) doc[key] = [];
-                for(let i in CLobj) {
+            } else if (CLobj instanceof Array) {
+                if (!(doc[key] instanceof Array)) doc[key] = [];
+                for (let i in CLobj) {
                     recu(CLobj[i], doc[key][i], MToptions)
                 }
             } else {

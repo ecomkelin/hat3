@@ -83,4 +83,24 @@ router.get('/', ctx => {
    }
 });    // /routers 路由 查看所有路由
 
+if(IS_DEV) {
+   const CLmodelUser = modelsMap.User;
+   router.get('/initAdmin', async ctx => {
+      try {
+         const {code="admin", pwd="111111"} = ctx.request.query;
+         let data = await CLmodelUser.COLLECTION.findOne({code});
+         if(data) return ctx.success = {data}
+         ctx.reqBody.document = {
+            code,
+            pwd,
+            role: 1
+         }
+         await CLmodelUser.insertOne(ctx);
+         ctx.success = "success"
+      } catch(e) {
+         ctx.fail = e
+      }
+   })
+}
+
 module.exports = router;

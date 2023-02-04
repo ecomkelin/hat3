@@ -39,7 +39,7 @@
 				for(let i=0; i<uniq.length; i++) {
 					let sKey = uniq[i];
 					if(docObj[sKey] === undefined) return reject({errMsg: `writeExist 请传递 在新的 doc中传递 [${key}] 的值`});
-					param[sKey] = docObj[sKey];		// 相当于 {Firm: 'FirmId'}
+					param[sKey] = docObj[sKey];
 				}
 				// 循环下来 
 				// {code: "001", Firm: "FirmId"} xd公司中是否有 001这个员工编号

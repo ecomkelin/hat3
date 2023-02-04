@@ -2,7 +2,7 @@
  * 过滤 reqBody 中的 update 对象
  */
 const regDocument = require("../func/regDocument");
-const regCLobj = require("../func/regCLobj");
+const regCLdoc = require("../func/regCLdoc");
 const regCLoptions = require("../func/regCLoptions");
 
 
@@ -17,6 +17,7 @@ module.exports = (ctxObj, MToptions) => {
     let errMsg = null;
 
     MToptions.is_upd = true;
+    MToptions.payload = payload;
 
     const updMethods = Object.keys(update);
 
@@ -38,7 +39,7 @@ module.exports = (ctxObj, MToptions) => {
             /** 2 根据数据模型 判断数据是否正确 
              * 在更新的情况下 如果不可更改 则跳过： 比如创建时间 后面的代码就不用执行了
             */
-            errMsg = regCLobj(CLdoc, doc, MToptions)
+            errMsg = regCLdoc(CLdoc, doc, MToptions)
             if (errMsg) return errMsg;
 
 

@@ -5,7 +5,7 @@ const Exist = require("../../config/exist");
 
 
 module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
-    const { needEncryption} = CLoptions;
+    const { needEncryption } = CLoptions;
     const MToptions = { CLdoc, CLoptions }
     return {
         deleteMany: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
@@ -13,13 +13,20 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {}, Koptions } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel deleteMany reqBody 要为 对象");
 
+                /** 数据调整之前 */
+                if (_CLoptions.regulateCB) _CLoptions.regulateCB(reqBody, Koptions);
+
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
+                /** 根据 payload 限制访问 */
+                if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
+
+
                 /** 是否要加载 find */
-                if (CLoptions.optFiles || _CLoptions.semiCB) {
+                if (CLoptions.optFiles || _CLoptions.execCB) {
                     const cursor = COLLECTION.find(reqBody.match, options);
                     const objects = await cursor.toArray();
                     Koptions.objects = objects;
@@ -39,8 +46,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                     })
                 }
 
-                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
-                if (_CLoptions.semiCB) _CLoptions.semiCB(Koptions);
+                /** 执行之前 */
+                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions);
 
                 let deletedObj = await COLLECTION.deleteMany(reqBody.match, options);
                 if (deletedObj.deletedCount > 0) Koptions.handleFiles = Koptions.will_handleFiles;
@@ -64,8 +71,12 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
-                /**  */
-                if (CLoptions.optFiles || _CLoptions.semiCB) {
+                /** 根据 payload 限制访问 */
+                if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
+
+
+                /**  是否要加载 findOne*/
+                if (CLoptions.optFiles || _CLoptions.execCB) {
                     const object = await COLLECTION.findOne(ctxObj.reqBody.match, options);
                     if (!object) return reject("DBmethod deleteOne 方法下 findOne:数据库中没有此 数据")
                     Koptions.object = object;
@@ -84,8 +95,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                     }
                 }
 
-                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
-                if (_CLoptions.semiCB) _CLoptions.semiCB(Koptions);
+                /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
+                if (_CLoptions.execCB) _CLoptions.execCB(Koptions);
 
 
                 let deletedObj = await COLLECTION.deleteOne(reqBody.match, options);
@@ -109,13 +120,13 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
-                /** 加密: 如果模型配置中有此相 则进行加密 */
-                if (needEncryption) await Encryption(documents, needEncryption);
 
                 /** 是否能够批量添加 未写*/
 
-                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
-                if (_CLoptions.semiCB) await _CLoptions.semiCB(Koptions)
+                /** 加密: 如果模型配置中有此相 则进行加密 */
+                if (needEncryption) await Encryption(documents, needEncryption);
+                /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
+                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions)
 
                 let result = await COLLECTION.insertMany(documents, options);
                 return resolve(result);
@@ -133,24 +144,25 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!isObject(document)) return reject({ errMsg: "insertOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document });
                 document._id = newObjectId();
 
-                /** documentCB */
-                if(_CLoptions.documentCB) _CLoptions.documentCB(document, Koptions);
+                /** 数据调整之前 */
+                if (_CLoptions.regulateCB) _CLoptions.regulateCB(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 document*/
                 MToptions.regulates = ["insert"] // "insert" 调整 document
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
-                /** 加密: 如果模型配置中有此相 则进行加密 */
-                if (needEncryption) await Encryption(document, needEncryption);
+
 
                 /** 是否能够添加 如果没有就通过 有就不通过 */
                 MToptions.COLLECTION = COLLECTION;  // 加入 原生方法调用 以便在下游方法中调用
                 MToptions.pass_exist = false;       // 如果没有找到相同数据 才通过 不然会报错
                 await Exist(ctxObj, MToptions)
 
-                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
-                if (_CLoptions.semiCB) await _CLoptions.semiCB(Koptions)
+                /** 加密: 如果模型配置中有此相 则进行加密 */
+                if (needEncryption) await Encryption(document, needEncryption);
+                /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
+                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions)
 
                 /** 原生数据库的 数据库操作 */
                 let result = await COLLECTION.insertOne(document, options);
@@ -186,13 +198,13 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                     // if (!able_update) return reject()
                 }
 
-                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
-                if (_CLoptions.semiCB) {
+                /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
+                if (_CLoptions.execCB) {
                     const cursor = COLLECTION.find(reqBody.match, options);
                     const objects = await cursor.toArray();
                     Koptions.objects = objects;
 
-                    await _CLoptions.semiCB(Koptions);
+                    await _CLoptions.execCB(Koptions);
                 }
 
                 let result = await COLLECTION.updateMany(reqBody.match, reqBody.update, options);
@@ -218,8 +230,14 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
-                /** 加密: 如果模型配置中有此相 则进行加密 */
-                if (needEncryption) await Encryption(updateSet, needEncryption);
+                /** 根据 payload 限制访问 */
+                if (_CLoptions.payloadCB) {
+                    _CLoptions.payloadCB(reqBody, Koptions);
+                } else {
+                    const { payload } = Koptions;
+                    const { match = {} } = reqBody;
+                    match.Firm = payload.Firm;
+                }
 
                 /** 是否能更新 这些字段 */
                 MToptions.COLLECTION = COLLECTION;
@@ -270,9 +288,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                     }
                 }
 
-
-                /** 如果(被简化过的)CLoptions选项中 含有 semiCB 回调 则执行 回调方法 */
-                if (_CLoptions.semiCB) await _CLoptions.semiCB(Koptions)
+                /** 加密: 如果模型配置中有此相 则进行加密 */
+                if (needEncryption) await Encryption(updateSet, needEncryption);
+                /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
+                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions)
 
                 let result = await COLLECTION.updateOne(reqBody.match, reqBody.update, options);
                 if (result.acknowledged && result.modifiedCount > 0) {

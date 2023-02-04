@@ -3,16 +3,27 @@ const regulateReq = require("../../config/regulateReq");
 module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
     const MToptions = { CLdoc };
     return {
-        countDocuments: (ctxObj) => new Promise(async (resolve, reject) => {
+        countDocuments: (ctxObj, _CLoption = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel countDocuments reqBody 要为 对象");
-
+                
+                /** 数据调整之前 */
+                if (_CLoption.regulateCB) _CLoption.regulateCB(reqBody, Koptions);
+                
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
+                /** 根据 payload 限制访问 */
+                if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
+                /* else match.Firm = payload.Firm  // 暂时不用这个功能 */
+
+                /** 执行之前 */
+                if (_CLoption.execCB) await _CLoption.execCB(reqBody, Koptions);
+
+                /** 开始执行 */
                 let count = await COLLECTION.countDocuments(reqBody.match, options);
 
                 return resolve(count);
@@ -25,20 +36,31 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
 
 
-        findOne: (ctxObj) => new Promise(async (resolve, reject) => {
+        findOne: (ctxObj, _CLoption = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody } = ctxObj;
-
+                if (!isObject(reqBody)) return reject("CLmodel findOne 请传递 reqBdoy 参数对象")
                 const { filter = {} } = reqBody;
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
 
+                /** 数据调整之前 */
+                if (_CLoption.regulateCB) _CLoption.regulateCB(reqBody, Koptions);
+
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "projection"];
-
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
-                const piplines = getPiplines(reqBody, {});
 
+                /** 根据 payload 限制访问 */
+                if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
+                
+
+                /** 执行之前 */
+                if (_CLoption.execCB) await _CLoption.execCB(reqBody, Koptions);
+
+                /** 转义为 aggregate */
+                const piplines = getPiplines(reqBody, {});
+                /** 开始执行 */
                 let cursor = COLLECTION.aggregate(piplines)
                 let docs = await cursor.toArray();
                 let doc = docs[0]
@@ -52,17 +74,27 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
         }),
 
 
-        find: (ctxObj) => new Promise(async (resolve, reject) => {
+        find: (ctxObj, _CLoption = {}) => new Promise(async (resolve, reject) => {
             try {
-                const { reqBody } = ctxObj;
+                const { reqBody = {}, Koptions = {} } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel find reqBody 要为 对象");
+
+                /** 数据调整之前 */
+                if (_CLoption.regulateCB) _CLoption.regulateCB(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "lookup", "projection", "find"];
-
                 let errMsg = regulateReq(ctxObj, MToptions);
                 if (errMsg) return reject(errMsg);
 
+                /** 根据 payload 限制访问 */
+                if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
+
+
+                /** 执行之前 */
+                if (_CLoption.execCB) await _CLoption.execCB(reqBody, Koptions);
+
+                /** 开始执行 */
                 let cursor;
                 const piplines = getPiplines(reqBody, { is_Many: true });
                 cursor = COLLECTION.aggregate(piplines);

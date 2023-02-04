@@ -35,3 +35,5 @@ ABBR = "/abbr"
 /** ObjectId */
 ObjectId = require("mongodb").ObjectId;
 
+
+modelsMap = {};

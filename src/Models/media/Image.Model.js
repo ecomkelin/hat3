@@ -61,7 +61,7 @@ const CLoptions = {
 
         deleteMany: {
             // customizeCB: (ctx, CLmodel) => new Promise(async(resolve, reject) => { try { return resolve(); } catch(e) { return reject(e); } })
-            semiCB: (Koptions) => new Promise(async (resolve, reject) => {
+            execCB: (Koptions) => new Promise(async (resolve, reject) => {
                 try {
                     const { objects } = Koptions;
 
@@ -72,10 +72,10 @@ const CLoptions = {
             }),
         },
         deleteOne: {
-            semiCB: (Koptions) => new Promise(async (resolve, reject) => {
+            execCB: (Koptions) => new Promise(async (resolve, reject) => {
                 try {
                     const { object } = Koptions;
-                    if (!object) return reject("semiCB 数据库中没有此 数据")
+                    if (!object) return reject("execCB 数据库中没有此 数据")
 
                     return resolve();
                 } catch (e) {

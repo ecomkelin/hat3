@@ -5,10 +5,10 @@ const jsonwebtoken = require('jsonwebtoken');
  * @param {String} headersToken bear空格token
  * @returns [String] token
  */
-exports.obtToken_fromHeaders = (headersToken) => {
+exports.tokenParse = (headersToken) => {
 	if(!headersToken) return null;
 	let hts = String(headersToken).split(" ");
-	if(hts.length === 1) return null;
+	if(hts.length === 1) return hts[0];
 	else if(hts.length > 1) return hts[1];
 }
 
@@ -18,9 +18,9 @@ exports.obtToken_fromHeaders = (headersToken) => {
  * @param {Boolean} is_refresh 是否为 refresh
  * @returns [Object] payload
  */
-exports.obtPayload = (headersToken, is_refresh)=> new Promise(async(resolve, reject) => {
+const tokenToPayload = (headersToken, is_refresh)=> new Promise(async(resolve, reject) => {
 	try {
-		let token = this.obtToken_fromHeaders(headersToken);
+		let token = this.tokenParse(headersToken);
 		if(!token) return resolve({});	// 如果没有token 则返回空 payload, 不妨碍无权限的验证
 		let token_secret = is_refresh ? REFRESH_TOKEN_SECRET : ACCESS_TOKEN_SECRET;
 		jsonwebtoken.verify(token, token_secret, (expired, payload) => {
@@ -31,6 +31,8 @@ exports.obtPayload = (headersToken, is_refresh)=> new Promise(async(resolve, rej
 		return reject(e);
 	}
 })
+exports.acTokenPayload = headersToken =>  tokenToPayload(headersToken, false);
+exports.reTokenPayload = headersToken => tokenToPayload(headersToken, true);
 
 
 /**
@@ -39,23 +41,26 @@ exports.obtPayload = (headersToken, is_refresh)=> new Promise(async(resolve, rej
  * @param {Boolean} is_refresh 是否为refresh
  * @returns [String] token
  */
-exports.generateToken = (payload, is_refresh=null)=> {
+const generateToken = (object, is_refresh=false) => {
+	const payload = this.parsePayload(object);
 	let token_secret = is_refresh ? REFRESH_TOKEN_SECRET : ACCESS_TOKEN_SECRET;
 	let token_ex = is_refresh ? REFRESH_TOKEN_EX : ACCESS_TOKEN_EX;
 	return jsonwebtoken.sign(payload, token_secret, {expiresIn: token_ex});
 }
+exports.genAcToken = (object)=> generateToken(object, false);
+exports.getReToken = (object)=> generateToken(object, true);
 
 /**
  * 根据 对象 obj 生成 payload
  * @param {Object} obj 根据obj生成 payload
  * @returns [Object] payload
  */
-exports.generatePayload = (obj)=> {
+exports.parsePayload = (obj)=> {
 	let payload = {};
 	if(obj._id) payload._id = obj._id;
 	if(obj.code) payload.code = obj.code;
 	if(obj.role) payload.role = obj.role;
-	if(obj.Firm) payload.Firm = obj.Firm;
+	// if(obj.Firm) payload.Firm = obj.Firm;
 
 	return payload;
 }

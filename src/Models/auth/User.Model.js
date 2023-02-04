@@ -4,31 +4,41 @@ const CLname = "User";
 const CLdoc = {
     code: {
         type: String,
-        // unique: true,
-        MIN: 1,
-        MAX: 4
+        unique: true,
+        required: true,
+        IS_fixed: true,
+        MIN: 4,
+        MAX: 10
     },
     pwd: {
         type: String,
+        required: true,
         ENcryption: "md5", // 加密方式
+        MIN: 6,
+        MAX: 15
     },
-    categs: [{
-        type: String,
-        MIN: 2,
-        MAX: 4
-    }],
-    name: {
-        type: String,
-        MAX: 3
-    },
-    at_upd: {
-        type: String,
-        AUTO_Date: true
+    role: {
+        type: Number
     },
     at_crt: {
-        type: String,
+        type: Date,
         AUTO_Date: true,
-        IS_fixed: true,
+        IS_fixed: true
+    },
+    at_upd: {
+        type: Date,
+        AUTO_Date: true
+    },
+    crt_User: {
+        type: ObjectId,
+        ref: 'User',
+        AUTO_payload: "_id",
+        IS_fixed: true
+    },
+    upd_User: {
+        type: ObjectId,
+        ref: 'User',
+        AUTO_payload: "_id",
     }
 }
 
@@ -38,36 +48,27 @@ const CLoptions = {
     }, {
         "name": 1
     }],
-
+    
     Routes: {
         countDocuments: {},
         find: {
-            // restrict: { },
+            payloadCB: (reqBody, Koptions) => {
+                const {match} = reqBody;
+                const {payload} = Koptions;
+                if(payload.role > 9) {
+                    match.Firm = payload.Firm;
+                }
+                match.role = {"gt": payload.role};
+            }
         },
         findOne: {},
-
-        deleteMany: {},
-        deleteOne: {},
-        insertMany: {},
-        insertOne: {
-            documentCB: (document, Koptions) => {
-                // console.log("CB:", document)
-            },
-            semiCB: (Koptions) => new Promise(async (resolve, reject) => {
-                try {
-                    return resolve();
-                } catch (e) {
-                    return reject(e);
-                }
-            }),
-        },
-        updateMany: {},
-        updateOne: {},
-
         // indexes: {},
         // createIndex:{},
         // dropIndex: {},
-    }
+    },
+    customizeCB: {
+        insertOne: async ctx => console.info("customizeCB 样本 暂时先不写 CLmodel 就是当前文件要暴露的对象"),
+    },
 }
 
-module.exports = DB(CLname, CLdoc, CLoptions);
+module.exports = DB(CLname, CLdoc, CLoptions);;
