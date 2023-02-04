@@ -87,13 +87,16 @@ if(IS_DEV) {
    const CLmodelUser = modelsMap.User;
    router.get('/initAdmin', async ctx => {
       try {
-         const {code="admin", pwd="111111"} = ctx.request.query;
+         const {code="admin", pwd="111111", role="10"} = ctx.request.query;
+         console.log(code)
+         console.log(pwd)
+         console.log(role)
          let data = await CLmodelUser.COLLECTION.findOne({code});
          if(data) return ctx.success = {data}
          ctx.reqBody.document = {
             code,
             pwd,
-            role: 1
+            role
          }
          await CLmodelUser.insertOne(ctx);
          ctx.success = "success"

@@ -1,7 +1,7 @@
 const moment = require('moment');
 
-const {acTokenPayload} = require(path.join(process.cwd(), "core/crypto/jwt"));
-
+const { acTokenPayload } = require(path.join(process.cwd(), "core/crypto/jwt"));
+let errStatus = [401, 500];
 module.exports = async (ctx, next) => {
 
     try {
@@ -41,9 +41,10 @@ module.exports = async (ctx, next) => {
 
 
         /** 根据ctx挂载的返回值 生成 ctx.body */
-        if (IS_DEV) request = getRequest(ctx);   // 开发环境 返回前端 请求数据
-        if (ctx.fail) fail(ctx);                // 如果不能得到数据
-        else if (ctx.success) success(ctx);      // 成功从后端获得数据
+        if (IS_DEV) request = getRequest(ctx);                  // 开发环境 返回前端 请求数据
+        if (ctx.fail) fail(ctx);                                // 收到错误信息
+        else if (errStatus.indexOf(ctx.status) > -1) fail(ctx); // 收到错误状态
+        else if (ctx.success) success(ctx);                     // 成功从后端获得数据
         else if (!ctx.body) {
             ctx.status = 405;
             ctx.body = {
@@ -51,7 +52,6 @@ module.exports = async (ctx, next) => {
                 steps: [`首先检查: 是否有此 [ ${ctx.url} ] 路由`, "如果路由没有问题 那么 此路由没有写body 请联系管理员"]
             }
         }
-
 
         let end = Date.now();
         let ms = end - start;
@@ -66,12 +66,20 @@ module.exports = async (ctx, next) => {
 let request;
 const fail = ctx => {
     let fail = ctx.fail;
-    /** 服务器错误 */
-    if (fail.stack) {
-        ctx.status = 500;
-        ctx.body = { status: 500, server_error: fail.stack }
-    }
 
+    if (ctx.status === 401) {
+        if (!fail) fail = "您没有权限"
+        ctx.body = { status: 401, fail, request };
+    }
+    else if (ctx.status === 500) {
+        if (!fail) fail = "服务器错误"
+        ctx.body = { status: 500, fail, request };
+    }
+    /** 服务器错误 */
+    else if (fail.stack) {
+        ctx.status = 500;
+        ctx.body = { status: 500, server_error: fail.stack, request }
+    }
     /** 前端的参数错误 */
     else if (isObject(fail)) {     // 错误信息给的是对象
         let status = 400;
@@ -80,17 +88,11 @@ const fail = ctx => {
             delete fail.status;
         }
 
-        /** 如果自定义状态为 401 则为 无权限 */
-        let noAuth;
-        if (status === 401) {
-            noAuth = "您没有权限"
-        }
-
         ctx.status = status;
-        ctx.body = { status, noAuth, fail };
+        ctx.body = { status, fail, request };
     } else {        // 错误信息给的是字符串
         ctx.status = 400;
-        ctx.body = { status: 400, fail };
+        ctx.body = { status: 400, fail, request };
     }
 }
 

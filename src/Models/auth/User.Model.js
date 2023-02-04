@@ -18,7 +18,18 @@ const CLdoc = {
         MAX: 15
     },
     role: {
-        type: Number
+        type: Number,
+        required: true,
+        CONF: {
+            vals: [10, 20, 30, 40, 100],
+            desc: {
+                10: "manager",
+                20: "sfer",
+                30: "pder",
+                40: "designer",
+                100: "Client"
+            }
+        }
     },
     name: {type: String},
     at_crt: {
@@ -53,23 +64,38 @@ const CLoptions = {
     Routes: {
         countDocuments: {},
         find: {
-            // payloadCB: (reqBody, Koptions) => {
-            //     const {match} = reqBody;
-            //     const {payload} = Koptions;
-            //     if(payload.role > 9) {
-            //         match.Firm = payload.Firm;
-            //     }
-            //     match.role = {"gt": payload.role};
-            // }
+            payloadReq: ({match}, payload) => {
+                match.role = {"$gte": payload.role};
+            }
         },
-        findOne: {},
+        findOne: {
+            payloadReq: ({match}, payload) => {
+                match.role = {"$gte": payload.role};
+            }
+        },
+        insertOne: {
+            permissionConf: { roles: [10] },
+            payloadReq: ({document}, payload) => {
+                if(document.role < payload.role) throw "您无权添加这个角色"
+            }
+        },
+        deleteOne: {
+            permissionConf: { roles: [10] },
+            payloadObject: (reqBdoy, {object, payload}) => {
+                if(object.role <= payload.role) throw "您无权删除这个角色"
+            }
+        },
+        updateOne: { 
+
+        },
 
         updateMany: { },
-        updateOne: { },
         insertMany: { },
-        insertOne: { },
-        deleteOne: {},
-        deleteMany: {},
+        deleteMany: {
+            payloadReq: ({}, payload) => {
+                if(document.role < payload.role) throw "您无权添加这个角色"
+            }
+        },
         // indexes: {},
         // createIndex:{},
         // dropIndex: {},
