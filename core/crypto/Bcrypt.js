@@ -24,9 +24,9 @@ exports.stringToHash = (str_bcrypt) => new Promise((resolve, reject) => {
  */
 exports.stringMatchHash = (str_bcrypt, hash_bcrypt) => new Promise(async(resolve, reject) => {
 	try {
-		if(!str_bcrypt) return reject({errMsg: "[密码错误]: 匹配时, 加密字符串不能为空" });
+		if(!str_bcrypt) return reject("[密码错误]: 匹配时, 加密字符串不能为空");
 		let isMatch = await bcrypt.compare(str_bcrypt, hash_bcrypt);
-		if(!isMatch) return reject({errMsg: "[密码错误]: 字符串加密与 hash_bcrypt 不符合" });
+		if(!isMatch) return reject("[密码错误]: 字符串加密与 hash_bcrypt 不符合");
 		return resolve(null);
 	} catch (e) {
 		return reject(e);

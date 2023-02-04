@@ -18,11 +18,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 */
-                if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
+                if (_CLoptions.payloadCB) _CLoptions.payloadCB(reqBody, Koptions);
 
 
                 /** 是否要加载 find */
@@ -64,15 +63,14 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 let { filter = {} } = reqBody;
 
-                if (!isObjectIdAbs(filter._id)) return reject("CLmodel deleteOne 需要在filter中 _id的类型为 ObjectId");
+                // if (!isObjectIdAbs(filter._id)) return reject("CLmodel deleteOne 需要在filter中 _id的类型为 ObjectId");
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter"];
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 */
-                if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
+                if (_CLoptions.payloadCB) _CLoptions.payloadCB(reqBody, Koptions);
 
 
                 /**  是否要加载 findOne*/
@@ -113,12 +111,11 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
             try {
                 const { reqBody = {} } = ctxObj;
                 const { documents } = reqBody;
-                if (!(documents instanceof Array)) return reject({ errMsg: "insertMany 错误: 第一个参数documents 必须是： Array 即 [] ", errParam: documents });
+                if (!(documents instanceof Array)) return reject("mgWrite: insertMany: ctx.reqBody.documents 必须是数组 [] ");
 
                 /** 调整 reqBody 中的 documents*/
                 MToptions.regulates = ["insert"]
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
 
                 /** 是否能够批量添加 未写*/
@@ -141,7 +138,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 /** 根据前端数据 获取 [插入一个] 方法 所需要的document*/
                 const { document } = reqBody;
-                if (!isObject(document)) return reject({ errMsg: "insertOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document });
+                if (!isObject(document)) return reject("mgWrite: insertOne: ctx.reqBody.document 必须是： object对象 即 {} ");
                 document._id = newObjectId();
 
                 /** 数据调整之前 */
@@ -149,8 +146,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
                 /** 调整 reqBody 中的 document*/
                 MToptions.regulates = ["insert"] // "insert" 调整 document
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
 
 
@@ -186,8 +182,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {} } = ctxObj;
                 /** 调整 reqBody 中的 filter, update*/
                 MToptions.regulates = ["filter", "update"]
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
                 /** 如果 update 中存在 $set 如果update中没有$.. update方法 前面的 regulate 默改装成 $set方法*/
                 if (reqBody.update["$set"]) {
@@ -227,8 +222,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
                 /** 调整 reqBody 中的 filter, update 如果update中没有$.. update方法 则默改装成 $set方法 */
                 MToptions.regulates = ["filter", "update"]
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 */
                 if (_CLoptions.payloadCB) {

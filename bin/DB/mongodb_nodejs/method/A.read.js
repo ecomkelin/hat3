@@ -13,8 +13,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 */
                 if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
@@ -48,8 +47,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "projection"];
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 */
                 if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
@@ -78,14 +76,12 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
             try {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel find reqBody 要为 对象");
-
                 /** 数据调整之前 */
                 if (_CLoption.regulateCB) _CLoption.regulateCB(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "lookup", "projection", "find"];
-                let errMsg = regulateReq(ctxObj, MToptions);
-                if (errMsg) return reject(errMsg);
+                regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 */
                 if (_CLoption.payloadCB) _CLoption.payloadCB(reqBody, Koptions);
@@ -93,7 +89,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
                 /** 执行之前 */
                 if (_CLoption.execCB) await _CLoption.execCB(reqBody, Koptions);
-
                 /** 开始执行 */
                 let cursor;
                 const piplines = getPiplines(reqBody, { is_Many: true });

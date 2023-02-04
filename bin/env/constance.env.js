@@ -24,9 +24,6 @@ REFRESH_TOKEN_EX = process.env.REFRESH_TOKEN_EX || "90d";
 SALT_WORK_FACTOR = parseInt(process.env.SALT_WORK_FACTOR) || 10;
 
 
-/** 是否为严格模式 */
-IS_STRICT = (process.env.IS_STRICT == 'true') ? true : false;
-
 /** 静态文件夹路径 */
 DIR_PUBLIC = path.resolve(process.cwd(), "public/");
 UPLOAD = "/upload"

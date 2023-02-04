@@ -76,7 +76,7 @@ module.exports = (CLname, CLdoc, CLoptions = {versionKey: false }) => {
         }),
         insertOne: (document, options={}) => new Promise(async(resolve, reject) => {
             try {
-                if(!isObject(document)) return reject({errMsg: "insertOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document});
+                if(!isObject(document)) return reject("insertOne 错误: 第一个参数document 必须是： object 即 {} ");
                 let result = await COLLECTION.create(document);
                 return resolve(result);
             } catch (e) {
@@ -85,9 +85,9 @@ module.exports = (CLname, CLdoc, CLoptions = {versionKey: false }) => {
         }),
         updateMany: (query={}, documents, options={}) => new Promise(async(resolve, reject) => {
             try {
-                if(!isObject(query)) return reject({errMsg: "updateOne 错误: 第一个参数query 必须是： object 即 {} ", errParam: query});
-                // if(!isObject(document)) return reject({errMsg: "updateOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document});
-                if(!isObject(options)) return reject({errMsg: "updateOne 错误: 第一个参数options 必须是： object 即 {} ", errParam: options});
+                if(!isObject(query)) return reject("updateOne 错误: 第一个参数query 必须是： object 即 {} ");
+                // if(!isObject(document)) return reject("updateOne 错误: 第一个参数document 必须是： object 即 {} ");
+                if(!isObject(options)) return reject("updateOne 错误: 第一个参数options 必须是： object 即 {} ");
     
                 let result = await COLLECTION.updateMany(query, documents, options);
                 return resolve(result);
@@ -97,9 +97,9 @@ module.exports = (CLname, CLdoc, CLoptions = {versionKey: false }) => {
         }),
         updateOne: (query={}, document, options={}) => new Promise(async(resolve, reject) => {
             try {
-                if(!isObject(query)) return reject({errMsg: "updateOne 错误: 第一个参数query 必须是： object 即 {} ", errParam: query});
-                if(!isObject(document)) return reject({errMsg: "updateOne 错误: 第一个参数document 必须是： object 即 {} ", errParam: document});
-                if(!isObject(options)) return reject({errMsg: "updateOne 错误: 第一个参数options 必须是： object 即 {} ", errParam: options});
+                if(!isObject(query)) return reject("updateOne 错误: 第一个参数query 必须是： object 即 {} ");
+                if(!isObject(document)) return reject("updateOne 错误: 第一个参数document 必须是： object 即 {} ");
+                if(!isObject(options)) return reject("updateOne 错误: 第一个参数options 必须是： object 即 {} ");
     
                 let result = await COLLECTION.updateOne(query, document, options);
                 return resolve(result);

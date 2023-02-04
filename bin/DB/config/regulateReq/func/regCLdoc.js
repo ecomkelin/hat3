@@ -17,7 +17,7 @@ const regCLobj = (CLobj, docObj, key, payload) => {
 
     /** 字段写入是否符合 CONF 配置 */
     if (CLobj[key].CONF && docObj[key]) {
-        if (!CLobj[key].CONF.vals.includes(docObj[key])) return `regCLobj ${key} 字段值为 ${docObj[key]}, 不符合[${CLobj[key].CONF.vals}]文档的配置信息 `
+        if (!CLobj[key].CONF.vals.includes(docObj[key])) throw `regCLobj ${key} 字段值为 ${docObj[key]}, 不符合[${CLobj[key].CONF.vals}]文档的配置信息 `
     }
 }
 const recu = (CLdoc, doc, MToptions) => {
@@ -27,19 +27,17 @@ const recu = (CLdoc, doc, MToptions) => {
         if (CLobj.type) {
             if (is_upd) {
                 if (CLobj.IS_fixed) {
-                    if (doc[key] !== undefined) return `update 修改时 不可修改 IS_fixed 为true 的字段 [${key}].`;
+                    if (doc[key] !== undefined) throw `update 修改时 不可修改 IS_fixed 为true 的字段 [${key}].`;
                 } else {
-                    let errMsg = regCLobj(CLdoc, doc, key, payload)
-                    if (errMsg) return errMsg;
+                    regCLobj(CLdoc, doc, key, payload)
                 }
             } else {
                 if (CLobj.default || CLobj.default == 0) {
                     if (!doc[key] && doc[key] !== 0) doc[key] = CLobj.default;
                 } if ((CLobj.required === true) && (doc[key] === null || doc[key] === undefined)) {
-                    return `docRegulate 创建时 必须添加 [doc.${key}] 字段`;
+                    throw `docRegulate 创建时 必须添加 [doc.${key}] 字段`;
                 }
-                errMsg = regCLobj(CLdoc, doc, key, payload)
-                if (errMsg) return errMsg;
+                regCLobj(CLdoc, doc, key, payload)
             }
         } else {
             if (isObject(CLobj)) {
@@ -51,12 +49,16 @@ const recu = (CLdoc, doc, MToptions) => {
                     recu(CLobj[i], doc[key][i], MToptions)
                 }
             } else {
-                return "CLdoc 错误"
+                throw "CLdoc 错误"
             }
         }
     }
 }
 
 module.exports = (CLdoc, doc, MToptions) => {
-    return recu(CLdoc, doc, MToptions)
+    try {
+        recu(CLdoc, doc, MToptions)
+    } catch(e) {
+        throw "[regCLdoc]- "+e
+    }
 }

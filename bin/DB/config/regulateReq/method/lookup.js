@@ -1,22 +1,24 @@
 const getCLfield = require("../func/getCLfield");
 
 module.exports = (ctxObj, MToptions) => {
-    const {reqBody} = ctxObj;
-    const {lookup} = reqBody;
-    // const {payload} = ctxObj.Koptions;
-    const {CLdoc} = MToptions;
-
-    if(!lookup) return;
-    if(!(lookup instanceof Array)) lookup = [lookup];
-    for(let i in lookup) {
-        let lp = lookup[i];
-        if(typeof lp === 'string') {
-            let errMsg = lookupParseString(reqBody, lp, CLdoc);
-            if(errMsg) return errMsg;
-        }else if(isObject(lp)) {
-            let errMsg = lookupParseObject(reqBody, lp, CLdoc);
-            if(errMsg) return errMsg;
+    try {
+        const {reqBody} = ctxObj;
+        const {lookup} = reqBody;
+        // const {payload} = ctxObj.Koptions;
+        const {CLdoc} = MToptions;
+    
+        if(!lookup) return;
+        if(!(lookup instanceof Array)) lookup = [lookup];
+        for(let i in lookup) {
+            let lp = lookup[i];
+            if(typeof lp === 'string') {
+                lookupParseString(reqBody, lp, CLdoc);
+            }else if(isObject(lp)) {
+                lookupParseObject(reqBody, lp, CLdoc);
+            }
         }
+    }catch(e) {
+        throw "[regulate/lookup]- " + e;
     }
 }
 
@@ -55,10 +57,9 @@ const lookupParse = (reqBody, docField, lookup) => {
 
 const lookupParseObject = (reqBody, lookup, CLdoc) => {
     let {localField} = lookup;
-    if(!localField) return "请在您的 lookup 对象中 配置 localField 告知服务器关联哪个集合"
+    if(!localField) throw "请在您的 lookup 对象中 配置 localField 告知服务器关联哪个集合"
 
-    let docField = getCLfield(CLdoc, localField);
-    if(docField.errMsg) return `[lookup 的 ${key}] 不是该数据的字段`+docField.errMsg;
+    getCLfield(CLdoc, localField);
 
     if(!lookup.foreignField) lookup.foreignField = "_id";
     if(!lookup.as) lookup.as = localField;
@@ -78,8 +79,7 @@ const lookupParseString = (reqBody, str, CLdoc) => {
 
     /** 第一组数据一定是 当前集合的字段 localField  */
     let localField = strs[0].replace(/^\s*/g,"");
-    let docField = getCLfield(CLdoc, localField);
-    if(docField.errMsg) return `[lookup 的 ${key}] 不是该数据的字段`+docField.errMsg;
+    getCLfield(CLdoc, localField);
 
 
     /** 000000 这可以优化 比如 相当于 mongoose 写的 select 可以把 lookup 中的 as 表现出来 */

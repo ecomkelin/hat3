@@ -52,16 +52,23 @@ const CLoptions = {
     Routes: {
         countDocuments: {},
         find: {
-            payloadCB: (reqBody, Koptions) => {
-                const {match} = reqBody;
-                const {payload} = Koptions;
-                if(payload.role > 9) {
-                    match.Firm = payload.Firm;
-                }
-                match.role = {"gt": payload.role};
-            }
+            // payloadCB: (reqBody, Koptions) => {
+            //     const {match} = reqBody;
+            //     const {payload} = Koptions;
+            //     if(payload.role > 9) {
+            //         match.Firm = payload.Firm;
+            //     }
+            //     match.role = {"gt": payload.role};
+            // }
         },
         findOne: {},
+
+        updateMany: { },
+        updateOne: { },
+        insertMany: { },
+        insertOne: { },
+        deleteOne: {},
+        deleteMany: {},
         // indexes: {},
         // createIndex:{},
         // dropIndex: {},

@@ -34,11 +34,11 @@
 				param[key] = docObj[key];
 			} else if(CLdoc[key].uniq) {
 				let uniq = CLdoc[key].uniq;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.uniq = ["Firm"]
-				if(!(uniq instanceof Array)) return reject({errMsg: `writeExist 数据库 CLdoc 的uniq值错误`});
+				if(!(uniq instanceof Array)) return reject(`writeExist 数据库 CLdoc 的uniq值错误`);
 				param[key] = docObj[key];			// 相当于 {code: '员工编号'}
 				for(let i=0; i<uniq.length; i++) {
 					let sKey = uniq[i];
-					if(docObj[sKey] === undefined) return reject({errMsg: `writeExist 请传递 在新的 doc中传递 [${key}] 的值`});
+					if(docObj[sKey] === undefined) return reject(`writeExist 请传递 在新的 doc中传递 [${key}] 的值`);
 					param[sKey] = docObj[sKey];
 				}
 				// 循环下来 
@@ -51,7 +51,7 @@
 				// 查看数据库模型中 field 的 true_uniq标识	
 				//比如 公司中员工账号唯一 is_default.true_uniq = ["Firm"] 整个公司只能有一个用户 的 is_default 为true
 				let true_uniq = CLdoc[key].true_uniq;	
-				if(!(true_uniq instanceof Array)) return reject({errMsg: `writeExist 数据库 CLdoc 的true_uniq值错误`});
+				if(!(true_uniq instanceof Array)) return reject(`writeExist 数据库 CLdoc 的true_uniq值错误`);
 				param[key] = docObj[key];			// 相当于 {is_default: '是否为默认数据'}
 				for(let i=0; i<true_uniq.length; i++) {
 					let sKey = true_uniq[i];

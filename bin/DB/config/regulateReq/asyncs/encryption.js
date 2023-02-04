@@ -9,7 +9,7 @@ module.exports = (doc, needEncryption) =>
         try {
             let { fields } = needEncryption;
             if ((typeof fields) === 'string') fields = [fields];
-            if (!(fields instanceof Array)) return reject({ errMsg: "DB regulate asyncs bcrypt: CLoptions needEncryption 对象错误" })
+            if (!(fields instanceof Array)) return reject("mgWrite asyncs bcrypt: CLoptions needEncryption 对象错误")
 
             /** 基本都是一个 pwd 加密 写成循环 只是防止有多个数据加密的 */
             for (let i = 0; i < fields.length; i++) {
