@@ -3,13 +3,13 @@ const regulateReq = require("../../config/regulateReq");
 module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
     const MToptions = { CLdoc };
     return {
-        countDocuments: (ctxObj = {}, _CLoption = {}) => new Promise(async (resolve, reject) => {
+        countDocuments: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel countDocuments reqBody 要为 对象");
 
                 // /** 数据调整之前 */
-                // if (_CLoption.reqBodyCB) _CLoption.reqBodyCB(reqBody, Koptions);
+                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
@@ -31,7 +31,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
 
 
-        findOne: (ctxObj = {}, _CLoption = {}) => new Promise(async (resolve, reject) => {
+        findOne: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {}, Koptions } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel findOne 请传递 reqBdoy 参数对象")
@@ -39,7 +39,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
 
                 // /** 数据调整之前 */
-                // if (_CLoption.reqBodyCB) _CLoption.reqBodyCB(reqBody, Koptions);
+                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "projection"];
@@ -54,23 +54,28 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let cursor = COLLECTION.aggregate(piplines)
                 let docs = await cursor.toArray();
                 if (docs.length < 1) return reject("没有找到数据")
-                let doc = docs[0]
+                let object = docs[0]
+                Koptions.object = object;
                 // reqBody.lookup
                 // options.projection = reqBody.projection;
                 // let doc = await COLLECTION.findOne(reqBody.match, options);
-                return resolve(doc);
+
+                /** 根据 payload 限制访问 */
+                if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
+
+                return resolve(object);
             } catch (e) {
                 return reject(e);
             }
         }),
 
 
-        find: (ctxObj, _CLoption = {}) => new Promise(async (resolve, reject) => {
+        find: (ctxObj, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel find reqBody 要为 对象");
                 // /** 数据调整之前 */
-                // if (_CLoption.reqBodyCB) _CLoption.reqBodyCB(reqBody, Koptions);
+                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "lookup", "projection", "find"];

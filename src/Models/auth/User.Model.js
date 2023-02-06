@@ -31,7 +31,7 @@ const CLdoc = {
             }
         }
     },
-    name: {type: String},
+    name: { type: String },
     at_crt: {
         type: Date,
         AUTO_Date: true,
@@ -54,46 +54,81 @@ const CLdoc = {
     }
 }
 
+const {stringMatchHash} = require(path.resolve(process.cwd(), 'core/crypto/Bcrypt'));
 const CLoptions = {
-    indexesObj: [{
-        "code": 1
-    }, {
-        "name": 1
-    }],
-    
+    indexesObj: { "code": 1 },
+
     Routes: {
         countDocuments: {},
         find: {
-            payloadReq: ({match}, payload) => {
-                match.role = {"$gte": payload.role};
+            roles: [10],
+            payloadReq: ({ match }, payload) => {
+                // match.role = { "$gt": payload.role };
             }
         },
         findOne: {
-            payloadReq: ({match}, payload) => {
-                match.role = {"$gte": payload.role};
+            roles: [10],
+            payloadReq: ({ match }, payload) => {
+                match.role = { "$gte": payload.role };
+            },
+            payloadObject: ({ object, payload }) => {
+                if ((object.role === payload.role) && (String(object._id) !== String(payload._id))) throw "您无权查看这个角色";
             }
         },
         insertOne: {
-            permissionConf: { roles: [10] },
-            payloadReq: ({document}, payload) => {
-                if(document.role < payload.role) throw "您无权添加这个角色"
+            roles: [10],
+            payloadReq: ({ document }, payload) => {
+                if (document.role <= payload.role) throw "您无权为用户添加 这个角色"
             }
         },
         deleteOne: {
-            permissionConf: { roles: [10] },
-            payloadObject: (reqBdoy, {object, payload}) => {
-                if(object.role <= payload.role) throw "您无权删除这个角色"
+            roles: [10],
+            payloadReq: ({ match }, payload) => {
+                match.role = { "$gt": payload.role };
             }
         },
-        updateOne: { 
-
+        updateOne: {
+            roles: [10],
+            payloadReq: ({ match, update }, payload) => {
+                if (update["$set"].role && (update["$set"].role <= payload.role)) throw "您无权为用户更新 这个角色";
+                match.role = { "$gte": payload.role };
+            },
+            payloadObject: ({ object, payload }) => {
+                if ((object.role === payload.role) && (String(object._id) !== String(payload._id))) throw "您无权修改这个角色";
+            },
+            execCB: async({password}, {object, payload}) => {
+                if(object.role === payload.role) {
+                    if(!password) throw "请传递您现在的密码 reqBody.password";
+                    await stringMatchHash(password, object.pwd);
+                }
+            }
         },
 
-        updateMany: { },
-        insertMany: { },
         deleteMany: {
-            payloadReq: ({}, payload) => {
-                if(document.role < payload.role) throw "您无权添加这个角色"
+            roles: [10],
+            payloadReq: ({ match }, payload) => {
+                match.role = { "$gt": payload.role };
+            }
+        },
+        updateMany: {
+            roles: [10],
+            payloadReq: ({ update }, payload) => {
+                if (update["$set"].role && (update["$set"].role <= payload.role)) throw "您无权为用户更新 这个角色"
+            },
+            payloadObject: ({ objects, payload }) => {
+                for (let i in objects) {
+                    let object = objects[i]
+                    if (object.role <= payload.role) throw "您无权修改这个角色"
+                }
+            }
+        },
+        insertMany: {
+            roles: [10],
+            payloadReq: ({ documents }, payload) => {
+                for (let i in documents) {
+                    let document = documents[i];
+                    if (document.role <= payload.role) throw "您无权为用户添加 这个角色"
+                }
             }
         },
         // indexes: {},
@@ -101,8 +136,10 @@ const CLoptions = {
         // dropIndex: {},
     },
     customizeCB: {
-        insertOne: async ctx => console.info("customizeCB 样本 暂时先不写 CLmodel 就是当前文件要暴露的对象"),
+        // insertOne: async ctx => console.info("customizeCB 样本 暂时先不写。 CLmodel 就是当前文件要暴露的对象"),
     },
 }
 
-module.exports = DB(CLname, CLdoc, CLoptions);;
+const CLmodel = DB(CLname, CLdoc, CLoptions);;
+module.exports = CLmodel;
+// module.exports = DB(CLname, CLdoc, CLoptions);;

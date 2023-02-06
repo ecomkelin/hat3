@@ -25,6 +25,8 @@ const tokenToPayload = (headersToken, is_refresh)=> new Promise(async(resolve, r
 		let token_secret = is_refresh ? REFRESH_TOKEN_SECRET : ACCESS_TOKEN_SECRET;
 		jsonwebtoken.verify(token, token_secret, (expired, payload) => {
 			if(expired) return reject({status: 401, errMsg: "token错误或过期", expired});
+			if(payload._id) payload._id = newObjectId(payload._id);
+			if(payload.Firm) payload.Firm = newObjectId(payload.Firm);
 			return resolve(payload);
 		})
 	} catch(e) {

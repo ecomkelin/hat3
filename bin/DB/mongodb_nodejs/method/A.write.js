@@ -48,8 +48,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 */
                 if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
                 /**  execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions)
-
+                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
+                console.log(111, reqBody.match)
                 let deletedObj = await COLLECTION.deleteMany(reqBody.match, options);
                 if (deletedObj.deletedCount > 0) Koptions.handleFiles = Koptions.will_handleFiles;
 
@@ -100,7 +100,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 */
                 if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
                 /**  execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
 
 
                 let deletedObj = await COLLECTION.deleteOne(reqBody.match, options);
@@ -115,12 +115,12 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
         insertMany: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
-                const { reqBody = {} } = ctxObj;
+                const { reqBody = {}, Koptions } = ctxObj;
                 const { documents } = reqBody;
                 if (!(documents instanceof Array)) return reject("mgWrite: insertMany: ctx.reqBody.documents 必须是数组 [] ");
 
-                // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                /** 数据调整之前 */
+                if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 documents*/
                 MToptions.regulates = ["insert"]
@@ -135,7 +135,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 加密: 如果模型配置中有此相 则进行加密 */
                 if (needEncryption) await Encryption(documents, needEncryption);
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
 
                 let result = await COLLECTION.insertMany(documents, options);
                 return resolve(result);
@@ -153,8 +153,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!isObject(document)) return reject("mgWrite: insertOne: ctx.reqBody.document 必须是： object对象 即 {} ");
                 document._id = newObjectId();
 
-                // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                /** 数据调整之前 */
+                if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 document*/
                 MToptions.regulates = ["insert"] // "insert" 调整 document
@@ -171,7 +171,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 加密: 如果模型配置中有此相 则进行加密 */
                 if (needEncryption) await Encryption(document, needEncryption);
                 /**  execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
 
                 /** 原生数据库的 数据库操作 */
                 let result = await COLLECTION.insertOne(document, options);
@@ -192,10 +192,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
         updateMany: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
-                const { reqBody = {} } = ctxObj;
+                const { reqBody = {}, Koptions } = ctxObj;
 
-                // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                /** 数据调整之前 */
+                if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 filter, update*/
                 MToptions.regulates = ["filter", "update"]
@@ -213,14 +213,16 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 / 文件限制 */
                 if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
 
-                /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) {
+                if(_CLoptions.payloadObject) {
                     const cursor = COLLECTION.find(reqBody.match, options);
                     const objects = await cursor.toArray();
                     Koptions.objects = objects;
-
-                    await _CLoptions.execCB(Koptions);
                 }
+
+                /** 根据 payload 控制访问 */
+                if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
+                /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
+                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
 
                 let result = await COLLECTION.updateMany(reqBody.match, reqBody.update, options);
                 return resolve(result);
@@ -240,8 +242,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const updateSet = reqBody.update["$set"];
                 if (!isObject(updateSet)) return reject("DBmethod updateOne 下的 update['$set'] 信息错误");
 
-                // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                /** 数据调整之前 */
+                if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 filter, update 如果update中没有$.. update方法 则默改装成 $set方法 */
                 MToptions.regulates = ["filter", "update"]
@@ -258,7 +260,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 应该做一个判断 再来找 object */
                 const object = await COLLECTION.findOne(ctxObj.reqBody.match, options);
                 if (!object) return reject("DBmethod 数据库中没有此 数据")
-                // Koptions.object = object;
+                Koptions.object = object;
 
                 const { optFiles } = CLoptions;
                 /** 如果集合中 有文件字段 则需要进行下面图片的处理 */
@@ -303,9 +305,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (needEncryption) await Encryption(updateSet, needEncryption);
 
                 /** 根据 payload 控制访问 */
-                if (_CLoptions.payloadObject) _CLoptions.payloadObject(reqBody, Koptions);
+                if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions);
 
                 let result = await COLLECTION.updateOne(reqBody.match, reqBody.update, options);
                 if (result.acknowledged && result.modifiedCount > 0) {

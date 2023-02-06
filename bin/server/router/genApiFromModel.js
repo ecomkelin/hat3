@@ -27,7 +27,7 @@ module.exports = (CLmodel, fileName, newRoute) => {
    Object.keys(Routes).forEach(key => {
       const if_noMethod = `${fileName} 模型文件 下的 CLoptions.Route 中的 ${key} 方法 不存在于 数据库包装方法`;
       const routeOption = Routes[key];
-      const { permissionCB, permissionConf } = routeOption;
+      const { permissionCB, roles } = routeOption;
 
       newRoute(restfulMethod, urlPre + key, async ctx => {
          try {
@@ -40,8 +40,7 @@ module.exports = (CLmodel, fileName, newRoute) => {
             /** 如果没有 完全的自定义 路由方法 则执行以下方式 下面的方式为 mongodb_nodejs */
             if (permissionCB) {
                permissionCB(ctx.Koptions);
-            } else if (permissionConf) {
-               const {roles} = permissionConf;
+            } else if (roles) {
                if(!(roles instanceof Array)) return ctx.fail = "权限配置错误"
                const {payload} = ctx.Koptions;
                if(!payload || !payload.role) return ctx.status = 401;
