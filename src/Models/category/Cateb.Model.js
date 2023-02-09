@@ -3,6 +3,10 @@ const DB = require(path.join(process.cwd(), "bin/DB"));
 const CLname = "Cateb";
 
 const CLdoc = {
+    far_Cateb: {
+        type: ObjectId, ref: "Cateb",
+        IS_fixed: true
+    },
     code: {
         type: String,
         required: true,
@@ -12,16 +16,22 @@ const CLdoc = {
     },
     level: {
         type: Number,
-        required: true,
-        default: 1,
+        AUTO: true,
         CONF: {
-            vals: [1, 2]
+            vals: [1, 2],
+            desc: {
+                1: "一级分类, find的时候 会默认为这个限制",
+                2: "二级分类, 通过一级分类展示二级分类列表"
+            }
         }
     },
+
     is_leaf: {
         type: Boolean,
-        default: true
+        default: false
     },
+
+    desc: { type: String },
 
     poster: {
         type: String,
@@ -32,8 +42,6 @@ const CLdoc = {
         ALLOW_upload: true
     },
 
-    desc: { type: String },
-
     ...docBasic
 }
 
@@ -42,9 +50,19 @@ const CLoptions = {
 
     Routes: {
         countDocuments: {},
-        find: {},
+        find: {
+            parseAfter: ({ match }) => {
+                if (!match.level) match.level = 1;
+            }
+        },
         findOne: {},
-        insertOne: { roles: role_pder },
+        insertOne: {
+            roles: role_pder,
+            execCB: ({ document = {} }, Koptions) => {
+                /** 如果 有父分类 则为二级分类， 否则为1级 */
+                document.level = document.far_Cateb ? 2 : 1;
+            }
+        },
         insertMany: { roles: role_pder },
         updateOne: { roles: role_pder },
         updateMany: { roles: role_pder },

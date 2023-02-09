@@ -1,6 +1,6 @@
 /** Attribute key Attk */
 const DB = require(path.join(process.cwd(), "bin/DB"));
-const CLname = "Brand";
+const CLname = "Pd";
 
 const CLdoc = {
     code: {
@@ -10,11 +10,14 @@ const CLdoc = {
         MIN: 1,
         MAX: 8
     },
+    name: {
+        type: String
+    },
     desc: { type: String },
-    icon: {
+    imgs: [{
         type: String,
         ALLOW_upload: true
-    },
+    }],
 
     ...docBasic
 }

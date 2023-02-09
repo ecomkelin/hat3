@@ -15,6 +15,8 @@ const regCLobj = (CLobj, docObj, key, payload) => {
     /** 自动加入 当前时间 */
     else if (CLobj[key].AUTO_Date) docObj[key] = new Date();
 
+    else if (CLobj[key].AUTO) delete docObj[key];
+
     /** 字段写入是否符合 CONF 配置 */
     if (CLobj[key].CONF && docObj[key]) {
         if (!CLobj[key].CONF.vals.includes(docObj[key])) throw `regCLobj ${key} 字段值为 ${docObj[key]}, 不符合[${CLobj[key].CONF.vals}]文档的配置信息 `

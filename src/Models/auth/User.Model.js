@@ -45,38 +45,38 @@ const CLoptions = {
         countDocuments: {},
         find: {
             roles: [10],
-            payloadReq: ({ match }, payload) => {
+            parseAfter: ({ match }, payload) => {
                 // match.role = { "$gt": payload.role };
             }
         },
         findOne: {
             roles: [10],
-            payloadReq: ({ match }, payload) => {
+            parseAfter: ({ match }, payload) => {
                 match.role = { "$gte": payload.role };
             },
-            payloadObject: ({ object, payload }) => {
+            findAfter: ({ object, payload }) => {
                 if ((object.role === payload.role) && (String(object._id) !== String(payload._id))) throw "您无权查看这个角色";
             }
         },
         insertOne: {
             roles: [10],
-            payloadReq: ({ document }, payload) => {
+            parseAfter: ({ document }, payload) => {
                 if (document.role <= payload.role) throw "您无权为用户添加 这个角色"
             }
         },
         deleteOne: {
             roles: [10],
-            payloadReq: ({ match }, payload) => {
+            parseAfter: ({ match }, payload) => {
                 match.role = { "$gt": payload.role };
             }
         },
         updateOne: {
             roles: [10],
-            payloadReq: ({ match, update }, payload) => {
+            parseAfter: ({ match, update }, payload) => {
                 if (update["$set"].role && (update["$set"].role <= payload.role)) throw "您无权为用户更新 这个角色";
                 match.role = { "$gte": payload.role };
             },
-            payloadObject: ({ object, payload }) => {
+            findAfter: ({ object, payload }) => {
                 if ((object.role === payload.role) && (String(object._id) !== String(payload._id))) throw "您无权修改这个角色";
             },
             execCB: async({password}, {object, payload}) => {
@@ -89,16 +89,16 @@ const CLoptions = {
 
         deleteMany: {
             roles: [10],
-            payloadReq: ({ match }, payload) => {
+            parseAfter: ({ match }, payload) => {
                 match.role = { "$gt": payload.role };
             }
         },
         updateMany: {
             roles: [10],
-            payloadReq: ({ update }, payload) => {
+            parseAfter: ({ update }, payload) => {
                 if (update["$set"].role && (update["$set"].role <= payload.role)) throw "您无权为用户更新 这个角色"
             },
-            payloadObject: ({ objects, payload }) => {
+            findAfter: ({ objects, payload }) => {
                 for (let i in objects) {
                     let object = objects[i]
                     if (object.role <= payload.role) throw "您无权修改这个角色"
@@ -107,7 +107,7 @@ const CLoptions = {
         },
         insertMany: {
             roles: [10],
-            payloadReq: ({ documents }, payload) => {
+            parseAfter: ({ documents }, payload) => {
                 for (let i in documents) {
                     let document = documents[i];
                     if (document.role <= payload.role) throw "您无权为用户添加 这个角色"

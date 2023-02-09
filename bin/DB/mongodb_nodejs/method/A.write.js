@@ -14,18 +14,18 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!isObject(reqBody)) return reject("CLmodel deleteMany reqBody 要为 对象");
 
                 // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
 
                 /** 是否要加载 find */
-                if (CLoptions.optFiles || _CLoptions.payloadObject || _CLoptions.execCB) {
+                if (CLoptions.optFiles || _CLoptions.findAfter || _CLoptions.execCB) {
                     const cursor = COLLECTION.find(reqBody.match, options);
                     const objects = await cursor.toArray();
                     Koptions.objects = objects;
@@ -46,10 +46,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 }
 
                 /** 根据 payload 限制访问 */
-                if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
+                if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /**  execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
-                console.log(111, reqBody.match)
                 let deletedObj = await COLLECTION.deleteMany(reqBody.match, options);
                 if (deletedObj.deletedCount > 0) Koptions.handleFiles = Koptions.will_handleFiles;
 
@@ -68,17 +67,17 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel deleteOne 需要在filter中 _id的类型为 ObjectId");
 
                 // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter"];
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
                 /**  是否要加载 findOne*/
-                if (CLoptions.optFiles || _CLoptions.payloadObject || _CLoptions.execCB) {
+                if (CLoptions.optFiles || _CLoptions.findAfter || _CLoptions.execCB) {
                     const object = await COLLECTION.findOne(ctxObj.reqBody.match, options);
                     if (!object) return reject("DBmethod deleteOne 方法下 findOne:数据库中没有此 数据")
                     Koptions.object = object;
@@ -98,7 +97,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 }
 
                 /** 根据 payload 限制访问 */
-                if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
+                if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /**  execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
 
@@ -120,14 +119,14 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!(documents instanceof Array)) return reject("mgWrite: insertMany: ctx.reqBody.documents 必须是数组 [] ");
 
                 /** 数据调整之前 */
-                if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 documents*/
                 MToptions.regulates = ["insert"]
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
 
                 /** 是否能够批量添加 未写*/
@@ -154,14 +153,14 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 document._id = newObjectId();
 
                 /** 数据调整之前 */
-                if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 document*/
                 MToptions.regulates = ["insert"] // "insert" 调整 document
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
                 /** 是否能够添加 如果没有就通过 有就不通过 */
                 MToptions.COLLECTION = COLLECTION;  // 加入 原生方法调用 以便在下游方法中调用
@@ -195,7 +194,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {}, Koptions } = ctxObj;
 
                 /** 数据调整之前 */
-                if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 filter, update*/
                 MToptions.regulates = ["filter", "update"]
@@ -211,16 +210,16 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 }
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
-                if (_CLoptions.payloadObject) {
+                if (_CLoptions.findAfter) {
                     const cursor = COLLECTION.find(reqBody.match, options);
                     const objects = await cursor.toArray();
                     Koptions.objects = objects;
                 }
 
                 /** 根据 payload 控制访问 */
-                if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
+                if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
 
@@ -242,16 +241,17 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!update["$set"]) update["$set"] = {};
                 const updateSet = update["$set"];
                 const updateRm = update["$remove"];
+                const updatePush = update["$push"];
 
                 /** 数据调整之前 */
-                if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 filter, update 如果update中没有$.. update方法 则默改装成 $set方法 */
                 MToptions.regulates = ["filter", "update"]
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
                 /** 是否能更新 这些字段 */
                 MToptions.COLLECTION = COLLECTION;
@@ -278,7 +278,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                         let fieldVals = object[key]; // 集合文件的数组对象的值
 
                         for (let i in rmKey) {
+                            /** 如果 集合中的数据为对象 那么就要按对象的方式处理 */
                             if (isObject(fieldVals[i])) {
+                                /** 如果 remove 的关键词数组的值为 ObjectId 则要与集合的_id 相比较  */
                                 if (isObjectId(rmKey[i])) {
                                     let index = 0;
                                     for (; index < fieldVals.length; index++) {
@@ -287,7 +289,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                                     if (index < fieldVals.length) {
                                         fieldVals.splice(index, (index > -1) ? 1 : 0);
                                     }
-                                } else if (isObject(rmKey[i])) {
+                                }
+                                /** 如果 remove 的关键词数组的值为 对象 则要与集合的_id 相比较  */
+                                else if (isObject(rmKey[i])) {
                                     let field = rmKey[i].key;
                                     let fieldVal = rmKey[i].val;
                                     let index = 0;
@@ -298,7 +302,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                                         fieldVals.splice(index, (index > -1) ? 1 : 0);
                                     }
                                 }
-                            } else if (fieldVals[i]) {
+                            }
+                            /** 如果 集合数据 为纯数组 */
+                            else if (fieldVals[i]) {
                                 let index = 0;
                                 for (; index < fieldVals.length; index++) {
                                     if (String(fieldVals[index]) === String(rmKey[i])) break;
@@ -313,21 +319,35 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                             }
                         }
 
+                        /** 通过 remove 重制 update["$set"] */
                         updateSet[key] = object[key];
                     }
                     delete update["$remove"]
                 } else {
                     /** 如果此集合有文件相关的字段 要检查是否被修改 被替换的 集合字段的文件路径 放到待处理文件缓存中 */
-                    if (optFiles) {
-                        for (let key in optFiles) {
-                            if (updateSet[key]) {
-                                if (optFiles[key] === 'array') {
-                                    updateSet[key] = [...object[key], ...updateSet[key]];
-                                } else if (optFiles[key] === 'string') {
-                                    if (object[key]) Koptions.will_handleFiles.push(object[key]);
+                    for (let key in updateSet) {
+                        if ((updateSet[key] instanceof Array) && updateSet[key].length > 0) {
+                            for (let i in updateSet[key]) {
+                                let j = 0;
+                                for (; j < object[key].length; j++) {
+                                    if(isObject(object[key][i])) {
+                                        if(String(updateSet[key][i]._id) === String(object[key][j]._id)) break;
+                                    } else {
+                                        if (String(updateSet[key][i]) === String(object[key][j])) break;
+                                    }
+                                }
+                                if (j === object[key].length) {
+                                    object[key].push(updateSet[key][i])
                                 }
                             }
+                            updateSet[key] = object[key];
+
+                        } else {
+                            if (optFiles && optFiles[key] === 'string') {
+                                if (object[key]) Koptions.will_handleFiles.push(object[key]);
+                            }
                         }
+
                     }
                 }
 
@@ -335,7 +355,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (needEncryption) await Encryption(updateSet, needEncryption);
 
                 /** 根据 payload 控制访问 */
-                if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
+                if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions);
 

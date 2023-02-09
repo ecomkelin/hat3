@@ -9,14 +9,14 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!isObject(reqBody)) return reject("CLmodel countDocuments reqBody 要为 对象");
 
                 // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
                 /** 开始执行 */
                 let count = await COLLECTION.countDocuments(reqBody.match, options);
@@ -37,14 +37,14 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
 
                 // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "projection"];
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
                 /** 转义为 aggregate */
                 const piplines = getPiplines(reqBody, {});
@@ -59,7 +59,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 // let doc = await COLLECTION.findOne(reqBody.match, options);
 
                 /** 根据 payload 限制访问 */
-                if (_CLoptions.payloadObject) _CLoptions.payloadObject(Koptions);
+                if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
 
                 return resolve(object);
             } catch (e) {
@@ -73,14 +73,14 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel find reqBody 要为 对象");
                 // /** 数据调整之前 */
-                // if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
+                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "lookup", "projection", "find"];
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
                 /** 开始执行 */
                 const piplines = getPiplines(reqBody, { is_Many: true });

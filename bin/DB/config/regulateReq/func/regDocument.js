@@ -63,8 +63,7 @@ const recu = (docObj, CLobj, field, is_upd, index) => {
     if (isObject(_docObj)) {
         if (!isObject(_CLobj)) throw ` ${field} 数据与模型没有对应 #2。 doc:为对象 _CLobj: ${typeof _CLobj}`
 
-        const _id = newObjectId();
-        _docObj._id = _id;
+        if(!_docObj._id) _docObj._id = newObjectId();
 
         for (let key in _docObj) {
             recu(_docObj, _CLobj, key, is_upd);
