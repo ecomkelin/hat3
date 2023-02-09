@@ -1,6 +1,6 @@
 
-const genApiFromModel = require("./genApiFromModel")
-const restfulMethods = ['get', 'post', 'put', 'delete'];
+const ModelRouter = require("./ModelRouter")
+const {restfulMethods} = require(path.resolve(process.cwd(), 'core/constant'));
 
 /** 每个扫描到一个符合要求的文件 执行此函数
  * @param {*} fileType 除去.js 后的 自定义文件类型
@@ -10,7 +10,7 @@ const restfulMethods = ['get', 'post', 'put', 'delete'];
  * @param {*} n         所在相对 扫描文件的根目录 文件在第几层 （因为递归问题 需要用此数来解决 paths 不能清除n后面的记录问题)
  * @returns 
  */
-module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
+module.exports = (fileType, reqFile, fileName, paths, n, addRoute) => {
    let dirStr = '';
    for (let level = 1; level <= n; level++) dirStr += '/' + paths[level];
 
@@ -20,7 +20,6 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
    let routePath = urlPre;
 
    let reqFunc = reqFile;                 // 路由的 执行函数 
-
 
    if (fileType === 'api') {
       /** 如果文件的中间名为 api 则说明 此文件为 exports.function 文件
@@ -38,7 +37,7 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
             restfulMethod = fns[0];
             routePath = urlPre + '/' + fns[1];
          }
-         newRoute(restfulMethod, routePath, reqFunc);
+         addRoute(restfulMethod, routePath, reqFunc);
       }
       return;
    } else if (restfulMethods.includes(fileType)) {
@@ -46,19 +45,18 @@ module.exports = (fileType, reqFile, fileName, paths, n, newRoute) => {
        * 路由的路径名称为 文件夹名称 + 文件名称
        */
       restfulMethod = fileType;
-      return newRoute(restfulMethod, routePath, reqFunc);
+      return addRoute(restfulMethod, routePath, reqFunc);
    } else if (fileType === 'Model') {
       /** 生成 Model 模型 路由 方法 */
       reqFunc = ctx => {
          return ctx.success = { model: reqFile.CLdoc };
       }
 
-      newRoute(restfulMethod, routePath, reqFunc);
+      addRoute(restfulMethod, routePath, reqFunc);
 
       /** 如果 模型需要则自动生成一些 基础的 api路由 Model文件的 reqFile 就是其 CLmodel */
-      genApiFromModel(reqFile, fileName, newRoute);
+      ModelRouter(reqFile, fileName, addRoute);
 
-      modelsMap[fileName] = reqFile;
       return;
    }
 }

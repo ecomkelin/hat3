@@ -17,6 +17,7 @@ const CLdoc = {
         type: String,
         ALLOW_upload: true
     }],
+
     pics: [{
         type: String,
         ALLOW_upload: true

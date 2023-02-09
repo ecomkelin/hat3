@@ -30,7 +30,7 @@ const CLdoc =  {
 
         unique: Boolean,        // 是否是唯一的, 如果为 true 则本字段中有且只有一个此值 (此字段为 mongoose 自带类型 本系统 在 docSame 中 也做了判定)
         true_unique: Boolean,   // 是否是唯一的, 如果为 true 则本字段中有且只有一个为真
-        uniq: ["其他字段"],       // 在docSame文件中做判定
+        unifd: ["其他字段"],       // 在docSame文件中做判定
         true_uniq: ["其他字段"],    //    在docSame文件中做判定 比如 true_uniq: ["Firm"] 一个公司中只有一个为真
     }
 
@@ -49,18 +49,18 @@ const CLdoc =  {
      */
 }
 
-    // uniq: ["其他字段"],    在docSame文件中做判定 比如 uniq: ["Firm"] 一个公司中只有一个此字段的值
+    // unifd: ["其他字段"],    在docSame文件中做判定 比如 unifd: ["Firm"] 一个公司中只有一个此字段的值
     	// 员工编号： {code: "001", Firm: "firmId"} xd公司中是否有 001这个员工编号
     // 想象以下场景:
 	// 产品名称： {nome: '002', Brand: 'brandId', Supplier: 'supplierId'} // 这个供应商的这个品牌下 产品的名称不能相同
-	// 折扣映射： Brand.uniq = ["Supplier"]; 添加折扣文档时 同一个供应商不能有相同的品牌
+	// 折扣映射： Brand.unifd = ["Supplier"]; 添加折扣文档时 同一个供应商不能有相同的品牌
 	// const field = {
 	//     // type: ...
-	//     // uniq: ['field1', 'field2']
+	//     // unifd: ['field1', 'field2']
 	// }
-	// field.uniq = ['field1', 'field2'];
+	// field.unifd = ['field1', 'field2'];
 	// 比如：
  	// code: {
 	// 	type: String,
-	// 	uniq: ['Firm']
+	// 	unifd: ['Firm']
 	// }

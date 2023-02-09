@@ -12,10 +12,10 @@ module.exports = (ctxObj, MToptions) => {
         /** 只要有0 则hasZero[0] 为1 只要有非0 则hasZero[1] 为1 */
         let hasZero = [0, 0];
         for (let key in projection) {
-            let docField = getCLfield(CLdoc, key);
+            let CLobj = getCLfield(CLdoc, key);
             /** 不在判断 projection 的配置项是否为 集合字段了， 因为lookup （而且深度查看也不好做程序） 不做也没有什么影响 */
             hasProject++;
-            if (docField.IS_unReadable) { // 如果 字段不可读
+            if (CLobj.IS_unReadable) { // 如果 字段不可读
                 delete projection[key];
             } else { // 字段 可读
                 if (!isNaN(projection[key])) projection[key] = parseInt(projection[key]);

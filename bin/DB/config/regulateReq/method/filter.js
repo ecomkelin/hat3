@@ -36,9 +36,9 @@ const filterParse = (match, filter = {}, CLdoc) => {
                 search.fields = (search.fields instanceof Array) ? search.fields : [search.fields];
                 for (let i in search.fields) {
                     let field = search.fields[i];
-                    let docField = getCLfield(CLdoc, field);
+                    let CLobj = getCLfield(CLdoc, field);
     
-                    if (docField.type !== String) throw `数据层readPre [filter.search.fields 的值 ${field}] 错误, 应该传递类型为<String>的<field>`;
+                    if (CLobj.type !== String) throw `数据层readPre [filter.search.fields 的值 ${field}] 错误, 应该传递类型为<String>的<field>`;
                     exactOr.push({ [field]: { $regex: keywords, $options: 'i' } });
                 }
             }
@@ -47,8 +47,8 @@ const filterParse = (match, filter = {}, CLdoc) => {
     
         for (let key in exact) {
             /** exact 为对象 对象的key为要匹配的字段 val为要精确匹配的数值 */
-            let docField = getCLfield(CLdoc, key);
-            if (docField.type === ObjectId) throw "exact 中不传递 ObjectId 的值 需要的话 请放到 includes中"
+            let CLobj = getCLfield(CLdoc, key);
+            if (CLobj.type === ObjectId) throw "exact 中不传递 ObjectId 的值 需要的话 请放到 includes中"
 
             match[key] = exact[key];
         }
@@ -57,8 +57,8 @@ const filterParse = (match, filter = {}, CLdoc) => {
             /** includes: {key: vals} 
              * 获取 模型 字段
             */
-            let docField = getCLfield(CLdoc, key);
-            if (docField.type !== ObjectId) throw `[filter.includes.${key}] 在模型中不为 ObjectId`;
+            let CLobj = getCLfield(CLdoc, key);
+            if (CLobj.type !== ObjectId) throw `[filter.includes.${key}] 在模型中不为 ObjectId`;
     
             let val = includes[key];
             if (val instanceof Array) {
@@ -83,8 +83,8 @@ const filterParse = (match, filter = {}, CLdoc) => {
         //     /** excludes: {key: vals} 
         //      * 获取 模型 字段
         //     */
-        //     let docField = getCLfield(CLdoc, key);
-        //     if (docField.type !== ObjectId) throw `[filter.excludes.${key}] 在模型中不为 ObjectId`;
+        //     let CLobj = getCLfield(CLdoc, key);
+        //     if (CLobj.type !== ObjectId) throw `[filter.excludes.${key}] 在模型中不为 ObjectId`;
     
         //     let val = excludes[key];
         //     if (val instanceof Array) {
@@ -107,30 +107,30 @@ const filterParse = (match, filter = {}, CLdoc) => {
         // }
     
         for (let key in lte) {
-            let docField = getCLfield(CLdoc, key);
-            if (!docField.type) throw `[filter.lte 的 key ${key}] 必须为基础类型`;
+            let CLobj = getCLfield(CLdoc, key);
+            if (!CLobj.type) throw `[filter.lte 的 key ${key}] 必须为基础类型`;
             match[key] = { "$lte": lte[key] };
         }
     
         for (let key in gte) {
-            let docField = getCLfield(CLdoc, key);    
-            if (!docField.type) throw `[filter.gte 的 key ${key}] 必须为基础类型`;
+            let CLobj = getCLfield(CLdoc, key);    
+            if (!CLobj.type) throw `[filter.gte 的 key ${key}] 必须为基础类型`;
     
             match[key] = { "$gte": gte[key] };
         }
         for (let key in at_before) {
-            let docField = getCLfield(CLdoc, key);
+            let CLobj = getCLfield(CLdoc, key);
     
-            if (docField.type !== Date) throw `[filter.at_before 的 key ${key}] 必须为 Date 类型`;
+            if (CLobj.type !== Date) throw `[filter.at_before 的 key ${key}] 必须为 Date 类型`;
             if (!isNaN(at_before[key])) at_before[key] = parseInt(at_before[key]);   // 如果收到的是时间戳
     
             let before = (new Date(at_before[key]).setHours(23, 59, 59, 999));      // 按天算时间
             match[key] = { "$lte": before };
         }
         for (let key in at_after) {
-            let docField = getCLfield(CLdoc, key);
+            let CLobj = getCLfield(CLdoc, key);
     
-            if (docField.type !== Date) throw `[filter.at_after 的 key ${key}] 必须为 Date 类型`;
+            if (CLobj.type !== Date) throw `[filter.at_after 的 key ${key}] 必须为 Date 类型`;
             if (!isNaN(at_after[key])) at_after[key] = parseInt(at_after[key]);   // 如果收到的是时间戳
     
             let after = (new Date(at_after[key]).setHours(0, 0, 0, 0));     // 按天算时间

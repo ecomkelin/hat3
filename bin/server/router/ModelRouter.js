@@ -1,9 +1,9 @@
 /**
  * @param {*} CLmodel 这就相当于 CLmodel = require("x/Model.js");
  * @param {*} fileName 为了路由名称传递过来的 名称变量
- * @param {*} newRoute 为了加入路由传递过来的 方法
+ * @param {*} addRoute 为了加入路由传递过来的 方法
  */
-module.exports = (CLmodel, fileName, newRoute) => {
+module.exports = (CLmodel, fileName, addRoute) => {
    let restfulMethod = "post"   // 统一做 post 处理
    /** 查看数据模型中的 一些操作配置 */
    const { RouteMethods, Routes = {}, customizeCB = {}, api = {} } = CLmodel.CLoptions;
@@ -15,8 +15,8 @@ module.exports = (CLmodel, fileName, newRoute) => {
       /** 获取 customizeCB 下面的方法对象 */
       const routeFunc = customizeCB[key];
       if ((typeof routeFunc) !== 'function') return;
-      // newRoute('get', urlPre + key, ctx => ctx.success = { api: api[key] || {} });
-      newRoute(restfulMethod, urlPre + key, routeFunc);
+      // addRoute('get', urlPre + key, ctx => ctx.success = { api: api[key] || {} });
+      addRoute(restfulMethod, urlPre + key, routeFunc);
    })
 
    /** 如果此操作配置中 有 find findOne delete 等操作信息 则进行路由配置 加入一个新的路由并 配置 路由执行函数 
@@ -29,7 +29,7 @@ module.exports = (CLmodel, fileName, newRoute) => {
       const routeOption = Routes[key];
       const { permissionCB, roles } = routeOption;
 
-      newRoute(restfulMethod, urlPre + key, async ctx => {
+      addRoute(restfulMethod, urlPre + key, async ctx => {
          try {
             if (RouteMethods.indexOf(key) < 0) return ctx.fail = { status: 500, errMsg: if_noMethod };
             /** 如果需要看 此路由的api 则可以给这个路由加入一个query: showApi=1 */
@@ -41,10 +41,10 @@ module.exports = (CLmodel, fileName, newRoute) => {
             if (permissionCB) {
                permissionCB(ctx.Koptions);
             } else if (roles) {
-               if(!(roles instanceof Array)) return ctx.fail = "权限配置错误"
-               const {payload} = ctx.Koptions;
-               if(!payload || !payload.role) return ctx.status = 401;
-               if(roles.indexOf(payload.role) === -1) return ctx.status = 401
+               if (!(roles instanceof Array)) return ctx.fail = "权限配置错误"
+               const { payload } = ctx.Koptions;
+               if (!payload || !payload.role) return ctx.status = 401;
+               if (roles.indexOf(payload.role) === -1) return ctx.status = 401
             }
 
             /** 根据 封装的数据库模型 下的路由方法 获取数据并返回 */

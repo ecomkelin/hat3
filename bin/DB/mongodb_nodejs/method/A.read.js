@@ -29,8 +29,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
 
 
 
-
-
         findOne: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {}, Koptions } = ctxObj;
@@ -85,9 +83,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
 
                 /** 开始执行 */
-                let cursor;
                 const piplines = getPiplines(reqBody, { is_Many: true });
-                cursor = COLLECTION.aggregate(piplines);
+                const cursor = COLLECTION.aggregate(piplines);
+                Koptions.objects = await cursor.toArray();
 
                 // // reqBody.lookup
                 // cursor = COLLECTION
@@ -97,9 +95,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 //     .limit(reqBody.limit)
                 //     .sort(reqBody.sort)
 
-                let docs = await cursor.toArray();
-                // await cursor.close();
-                return resolve(docs);
+                if (_CLoptions.execCB) await  _CLoptions.execCB(reqBody, Koptions);
+                await cursor.close();
+                return resolve(Koptions.objects);
             } catch (e) {
                 return reject(e);
             }

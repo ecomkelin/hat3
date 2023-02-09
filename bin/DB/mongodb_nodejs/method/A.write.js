@@ -213,7 +213,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 / 文件限制 */
                 if (_CLoptions.payloadReq) _CLoptions.payloadReq(reqBody, Koptions.payload);
 
-                if(_CLoptions.payloadObject) {
+                if (_CLoptions.payloadObject) {
                     const cursor = COLLECTION.find(reqBody.match, options);
                     const objects = await cursor.toArray();
                     Koptions.objects = objects;
@@ -236,11 +236,12 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
         updateOne: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
-                const { filter = {}, update, rmArrFile } = reqBody;
+                const { filter = {}, update } = reqBody;
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel updateOne filter _id 必须为 ObjectId");
                 if (!isObject(update)) return reject("CLmodel updateOne 请传递 update 对象参数");
-                const updateSet = reqBody.update["$set"];
-                if (!isObject(updateSet)) return reject("DBmethod updateOne 下的 update['$set'] 信息错误");
+                if (!update["$set"]) update["$set"] = {};
+                const updateSet = update["$set"];
+                const updateRm = update["$remove"];
 
                 /** 数据调整之前 */
                 if (_CLoptions.reqBodyCB) _CLoptions.reqBodyCB(reqBody, Koptions);
@@ -262,33 +263,62 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (!object) return reject("DBmethod 数据库中没有此 数据")
                 Koptions.object = object;
 
-                const { optFiles } = CLoptions;
-                /** 如果集合中 有文件字段 则需要进行下面图片的处理 */
-                if (optFiles) {
-                    /** 删除原数据库中存储的 数组图片
-                     * 为了简化代码 如果做了删除图片 则不能进行其他修改操作
-                    */
-                    if (rmArrFile) {
-                        for (let key in updateSet) { // 为了简化代码 如果做了删除图片 则不能进行其他修改操作
-                            delete updateSet[key]
-                        }
-                        for (let key in rmArrFile) {
-                            if (!(rmArrFile[key] instanceof Array)) return reject(`DBmethod updateOne 中 您要删除的 [${key}] 字段的值 为数组 请写成数组形式`)
-                            if (!(object[key] instanceof Array)) return reject(`DBmethod updateOne 中 [${key}] 字段不为数组`)
+                /** 删除原数据库中存储的 数组图片 */
+                const { optFiles = {} } = CLoptions;
 
-                            let rmUrls = rmArrFile[key];  // 要删除的 字符串s
-                            let fieldVals = object[key]; // 集合文件的数组对象的值
-                            for (let i in rmUrls) {
-                                let id = fieldVals.indexOf(rmUrls[i]);
-                                if (id > -1) {
-                                    Koptions.will_handleFiles.push(rmUrls[i]);
-                                    fieldVals.splice(id, (id > -1) ? 1 : 0);
+                /** 为了简化代码 如果做了数组删除 则不能进行其他修改操作 */
+                if (updateRm) {
+                    /** 清除 set 内容 */
+                    for (let key in updateSet) delete updateSet[key];
+
+                    for (let key in updateRm) {
+                        if (!(updateRm[key] instanceof Array)) updateRm[key] = [updateRm[key]];
+                        if (!(object[key] instanceof Array)) return reject(`DBmethod updateOne 中 remove [${key}] 字段不为数组`)
+                        let rmKey = updateRm[key];  // 要删除的 字符串s
+                        let fieldVals = object[key]; // 集合文件的数组对象的值
+
+                        for (let i in rmKey) {
+                            if (isObject(fieldVals[i])) {
+                                if (isObjectId(rmKey[i])) {
+                                    let index = 0;
+                                    for (; index < fieldVals.length; index++) {
+                                        if (String(fieldVals[index]._id) === String(rmKey[i])) break;
+                                    }
+                                    if (index < fieldVals.length) {
+                                        fieldVals.splice(index, (index > -1) ? 1 : 0);
+                                    }
+                                } else if (isObject(rmKey[i])) {
+                                    let field = rmKey[i].key;
+                                    let fieldVal = rmKey[i].val;
+                                    let index = 0;
+                                    for (; index < fieldVals.length; index++) {
+                                        if (String(fieldVals[index][field]) === String(fieldVal)) break;
+                                    }
+                                    if (index < fieldVals.length) {
+                                        fieldVals.splice(index, (index > -1) ? 1 : 0);
+                                    }
+                                }
+                            } else if (fieldVals[i]) {
+                                let index = 0;
+                                for (; index < fieldVals.length; index++) {
+                                    if (String(fieldVals[index]) === String(rmKey[i])) break;
+                                }
+                                if (index < fieldVals.length) {
+                                    /** 如果此字段为文件字段 则需要进行下面图片的处理 */
+                                    if (optFiles && optFiles[key]) {
+                                        Koptions.will_handleFiles.push(rmKey[i]);
+                                    }
+                                    fieldVals.splice(index, (index > -1) ? 1 : 0);
                                 }
                             }
-                            updateSet[key] = object[key];
                         }
-                    } else {
-                        /** 把要替换的 数据库图片放到 待处理图片缓存中 */
+
+                        updateSet[key] = object[key];
+                    }
+                    delete update["$remove"]
+                } else {
+                    /** 如果此集合有文件相关的字段 要检查是否被修改 被替换的 集合字段的文件路径 放到待处理文件缓存中 */
+                    if (optFiles) {
                         for (let key in optFiles) {
                             if (updateSet[key]) {
                                 if (optFiles[key] === 'array') {

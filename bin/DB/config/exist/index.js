@@ -24,7 +24,6 @@
 			docObj = document;
 		}
 
-
 		let matchOr = [];			// 初始化field唯一的参数
 		for(let key in CLdoc) {		// 循环文档中的每个field
 			if(is_upd && !docObj[key]) continue;	// 如果是更新文档 对于不更改的值 则可以忽略不判断;
@@ -32,12 +31,15 @@
 			let param = {};
 			if(CLdoc[key].unique) {									// 判断field是否为unique 如果是unique 则不需要判断其他的
 				param[key] = docObj[key];
-			} else if(CLdoc[key].uniq) {
-				let uniq = CLdoc[key].uniq;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.uniq = ["Firm"]
-				if(!(uniq instanceof Array)) return reject(`writeExist 数据库 CLdoc 的uniq值错误`);
+			} else if(CLdoc[key].unifd) {
+				let unifd = CLdoc[key].unifd;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.unifd = ["Firm"]
+				if((typeof unifd) === 'string') unifd = [unifd];
+				if(!(unifd instanceof Array)) return reject(`writeExist 数据库 CLdoc 的uniq值错误`);
 				param[key] = docObj[key];			// 相当于 {code: '员工编号'}
-				for(let i=0; i<uniq.length; i++) {
-					let sKey = uniq[i];
+				for(let i in unifd) {
+					let sKey = unifd[i];
+					if((typeof sKey) !== 'string') return reject(`writeExist 数据库 CLdoc 的uniq值错误`);
+
 					if(docObj[sKey] === undefined) return reject(`writeExist 请传递 在新的 doc中传递 [${key}] 的值`);
 					param[sKey] = docObj[sKey];
 				}

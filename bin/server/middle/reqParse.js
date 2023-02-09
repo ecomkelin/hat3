@@ -1,5 +1,5 @@
 
-const upd_keys = ["$set", "$mul", "$inc"]
+const {updateKeys} = require(path.resolve(process.cwd(), 'core/constant'));
 
 module.exports = async (ctx, next) => {
     /** 把所有 query 中的 ObjectId 字符串 转为 ObjectId对象 */
@@ -41,15 +41,15 @@ module.exports = async (ctx, next) => {
         let hasMethod = [0, 0]; // hasMethod[0] 为包含update方法  hasMthod[1] 不包含
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i];
-            if (key[0] === "$" && !upd_keys.includes(key)) return ctx.fail = `middle reqParse update 暂不支持此 ${key} 更新方式`
-            if (upd_keys.includes(key)) {
+            if (key[0] === "$" && !updateKeys.includes(key)) return ctx.fail = `middle reqParse update 暂不支持此 ${key} 更新方式`
+            if (updateKeys.includes(key)) {
                 hasMethod[0] = 1;   // 如果是 update 方法 则为1
             } else {
                 hasMethod[1] = 1;   // 如果不是update的方法 则为1
             }
             if (hasMethod[0] + hasMethod[1] === 2) return ctx.fail = "middle reqParse update 请写入正确的 update 的更新方式"
         }
-        /** 如果前端没有给update方法 upd_keys 则默认 update对象为 update的 set方法 */
+        /** 如果前端没有给update方法 updateKeys 则默认 update对象为 update的 set方法 */
         if (hasMethod[1] === 1) ctx.reqBody.update = {"$set": update};
         if(!ctx.reqBody.update["$set"])ctx.reqBody.update["$set"] = {};
     }

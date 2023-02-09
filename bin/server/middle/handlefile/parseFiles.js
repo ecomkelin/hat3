@@ -1,12 +1,16 @@
-const generateAbbrImg = require("./generateAbbrImg");
+const thumbnail = require("./thumbnail");
 
-const collation = (ctx, file, field, obj, rel_path) => new Promise(async (resolve, reject) => {
+/** 整理文件
+ * 1 压缩图片
+ * 2 把生成的文件路径 放入相应的 集合字段中
+ */
+const collationFile = (ctx, file, field, obj, rel_path) => new Promise(async (resolve, reject) => {
     try {
 
         let rel_file = rel_path + file.newFilename;
 
         /** 生成 缩略图 */
-        await generateAbbrImg(rel_file);
+        await thumbnail(rel_file);
 
         /** 根据前端描述 确定字段是数组还是字符串 */
         if (ctx.Koptions.flagArrs.includes(field)) {
@@ -75,7 +79,7 @@ module.exports = (ctx, form, rel_path) => new Promise(async (resolve, reject) =>
                     // console.info(file.originalFilename)
                     // console.info(file.mimetype)
                     // console.info(file.size)
-                    await collation(ctx, file, field, obj, rel_path);
+                    await collationFile(ctx, file, field, obj, rel_path);
                 }
             }
             if (errMsg) return reject(errMsg);

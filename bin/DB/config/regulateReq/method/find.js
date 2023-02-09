@@ -9,7 +9,6 @@ module.exports = (ctxObj, MToptions) => {
         if (!isObject(sort)) throw "find sort 必须为对象"
         let hasSort = 0;
         for (let key in sort) {
-            let docField = getCLfield(CLdoc, key);
             hasSort++;
             if (sort[key] !== -1 && sort[key] !== "-1") sort[key] = 1;
         }
@@ -27,5 +26,4 @@ module.exports = (ctxObj, MToptions) => {
     } catch (e) {
         throw "[regulate/find-]- " + e;
     }
-
 }

@@ -2,6 +2,7 @@ const DB = require(path.join(process.cwd(), "bin/DB"));
 const CLname = "User";
 
 const CLdoc = {
+
     code: {
         type: String,
         unique: true,
@@ -21,7 +22,7 @@ const CLdoc = {
         type: Number,
         required: true,
         CONF: {
-            vals: [10, 20, 30, 40, 100],
+            vals: role_all,
             desc: {
                 10: "manager",
                 20: "sfer",
@@ -32,26 +33,8 @@ const CLdoc = {
         }
     },
     name: { type: String },
-    at_crt: {
-        type: Date,
-        AUTO_Date: true,
-        IS_fixed: true
-    },
-    at_upd: {
-        type: Date,
-        AUTO_Date: true
-    },
-    crt_User: {
-        type: ObjectId,
-        ref: 'User',
-        AUTO_payload: "_id",
-        IS_fixed: true
-    },
-    upd_User: {
-        type: ObjectId,
-        ref: 'User',
-        AUTO_payload: "_id",
-    }
+
+    ...docBasic
 }
 
 const {stringMatchHash} = require(path.resolve(process.cwd(), 'core/crypto/Bcrypt'));
@@ -140,6 +123,7 @@ const CLoptions = {
     },
 }
 
-const CLmodel = DB(CLname, CLdoc, CLoptions);;
+const CLmodel = DB(CLname, CLdoc, CLoptions);
+UserCL = CLmodel;
 module.exports = CLmodel;
 // module.exports = DB(CLname, CLdoc, CLoptions);;

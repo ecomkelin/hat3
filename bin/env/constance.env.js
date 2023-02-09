@@ -33,4 +33,36 @@ ABBR = "/abbr"
 ObjectId = require("mongodb").ObjectId;
 
 
-modelsMap = {};
+/** 关于 角色的分类 */
+role_all = [10, 20, 30, 40, 100];
+role_pder = [10, 20, 30]
+
+
+
+/** 因为要在 初始值时用到 UserCL 如果引用 src文件夹下的文件的话 不好找 */
+UserCL=null;
+
+
+/** CLdoc 中大部分文档都需要的 */
+docBasic = {
+    at_crt: {
+        type: Date,
+        AUTO_Date: true,
+        IS_fixed: true
+    },
+    at_upd: {
+        type: Date,
+        AUTO_Date: true
+    },
+    crt_User: {
+        type: ObjectId,
+        ref: 'User',
+        AUTO_payload: "_id",
+        IS_fixed: true
+    },
+    upd_User: {
+        type: ObjectId,
+        ref: 'User',
+        AUTO_payload: "_id",
+    }
+}

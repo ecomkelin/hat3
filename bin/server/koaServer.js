@@ -3,15 +3,14 @@ const server = new koa();
 
 /** 与前端的触点
  * 1 打印开始日志
- * 2 挂载 Koptions
- * 3 挂载 payload
- * 4 await next()
+ * 2 挂载 Koptions 和 payload
+ * 3 await next()
  * 一 返回给前端 ctx.body
  * 二 打印结束日志
  */
 server.use(require("./middle/contactFront"));
 
-/** */
+/** 跨域问题 如果需要就打开 */
 // const cors = require('@koa/cors');
 // server.use(cors());
 
