@@ -95,7 +95,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 //     .limit(reqBody.limit)
                 //     .sort(reqBody.sort)
 
-                if (_CLoptions.execCB) await  _CLoptions.execCB(reqBody, Koptions);
+                if (_CLoptions.execCB) await  _CLoptions.execCB(ctxObj);
                 await cursor.close();
                 return resolve(Koptions.objects);
             } catch (e) {

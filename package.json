@@ -31,7 +31,8 @@
     "koa-static": "^5.0.0",
     "moment": "^2.29.4",
     "mongodb": "4.11",
-    "mongoose": "^6.8.4"
+    "mongoose": "^6.8.4",
+    "openai": "^3.1.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",

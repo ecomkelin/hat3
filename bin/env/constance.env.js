@@ -45,6 +45,9 @@ UserCL=null;
 
 /** CLdoc 中大部分文档都需要的 */
 docBasic = {
+    is_usable: {type: Boolean, default: true},
+
+    sort: {type: Number, default: 0},
     at_crt: {
         type: Date,
         AUTO_Date: true,

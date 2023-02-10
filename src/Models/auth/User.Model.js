@@ -79,7 +79,9 @@ const CLoptions = {
             findAfter: ({ object, payload }) => {
                 if ((object.role === payload.role) && (String(object._id) !== String(payload._id))) throw "您无权修改这个角色";
             },
-            execCB: async({password}, {object, payload}) => {
+            execCB: async({reqBody ={}, Koptions={}}) => {
+                const {password} = reqBody;
+                const  {object, payload} = Koptions;
                 if(object.role === payload.role) {
                     if(!password) throw "请传递您现在的密码 reqBody.password";
                     await stringMatchHash(password, object.pwd);

@@ -2,7 +2,6 @@ const getCLfield = require("../func/getCLfield");
 
 module.exports = (ctxObj, MToptions) => {
     try {
-
         const { reqBody = {} } = ctxObj;
         const { projection = {} } = reqBody;
         const { CLdoc } = MToptions;

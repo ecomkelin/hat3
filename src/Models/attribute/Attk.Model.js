@@ -19,7 +19,7 @@ const CLoptions = {
     Routes: {
         countDocuments: {},
         find: {
-            execCB: async (reqBody, Koptions) => {
+            execCB: async ({reqBody, Koptions}) => {
                 if (reqBody.find) {
                     const { objects } = Koptions;
                     for (let i in objects) {
@@ -39,14 +39,14 @@ const CLoptions = {
         updateMany: { roles: role_pder },
         deleteOne: {
             roles: role_pder,
-            execCB: async (reqBody, Koptions) => {
+            execCB: async (ctxObj) => {
 
             }
         },
 
         deleteMany: {
             roles: role_pder,
-            execCB: async (reqBody, Koptions) => {
+            execCB: async (ctxObj) => {
 
             }
         },

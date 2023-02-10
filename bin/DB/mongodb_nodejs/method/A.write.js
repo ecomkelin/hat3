@@ -48,7 +48,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 */
                 if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /**  execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
                 let deletedObj = await COLLECTION.deleteMany(reqBody.match, options);
                 if (deletedObj.deletedCount > 0) Koptions.handleFiles = Koptions.will_handleFiles;
 
@@ -99,7 +99,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 */
                 if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /**  execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
 
 
                 let deletedObj = await COLLECTION.deleteOne(reqBody.match, options);
@@ -134,7 +134,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 加密: 如果模型配置中有此相 则进行加密 */
                 if (needEncryption) await Encryption(documents, needEncryption);
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
 
                 let result = await COLLECTION.insertMany(documents, options);
                 return resolve(result);
@@ -170,7 +170,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 加密: 如果模型配置中有此相 则进行加密 */
                 if (needEncryption) await Encryption(document, needEncryption);
                 /**  execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
 
                 /** 原生数据库的 数据库操作 */
                 let result = await COLLECTION.insertOne(document, options);
@@ -221,7 +221,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 控制访问 */
                 if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions)
+                if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
 
                 let result = await COLLECTION.updateMany(reqBody.match, reqBody.update, options);
                 return resolve(result);
@@ -357,7 +357,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 控制访问 */
                 if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
-                if (_CLoptions.execCB) await _CLoptions.execCB(reqBody, Koptions);
+                if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj);
 
                 let result = await COLLECTION.updateOne(reqBody.match, reqBody.update, options);
                 if (result.acknowledged && result.modifiedCount > 0) {

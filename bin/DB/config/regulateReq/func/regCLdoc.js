@@ -22,8 +22,14 @@ const regCLobj = (CLobj, docObj, key, payload) => {
         if (!CLobj[key].CONF.vals.includes(docObj[key])) throw `regCLobj ${key} 字段值为 ${docObj[key]}, 不符合[${CLobj[key].CONF.vals}]文档的配置信息 `
     }
 }
-const recu = (CLdoc, doc, MToptions) => {
+const recu = (CLdoc, doc, MToptions, n) => {
     const { payload = {}, is_upd = false } = MToptions;
+    if(!doc) {
+        if(n === 0) throw `doc 错误`;
+        return;
+    }
+    n++;
+
     if(CLdoc.type) return;
     for (let key in CLdoc) {
         const CLobj = CLdoc[key];
@@ -45,11 +51,11 @@ const recu = (CLdoc, doc, MToptions) => {
         } else {
             if (isObject(CLobj)) {
                 if (!isObject(doc[key])) doc[key] = {};
-                recu(CLobj, doc[key], MToptions);
+                recu(CLobj, doc[key], MToptions, n);
             } else if (CLobj instanceof Array) {
                 if (!(doc[key] instanceof Array)) doc[key] = [];
                 for (let i in CLobj) {
-                    recu(CLobj[i], doc[key][i], MToptions)
+                    recu(CLobj[0], doc[key][i], MToptions, n)
                 }
             } else {
                 throw "CLdoc 错误"
@@ -60,8 +66,9 @@ const recu = (CLdoc, doc, MToptions) => {
 
 module.exports = (CLdoc, doc, MToptions) => {
     try {
-        recu(CLdoc, doc, MToptions)
+        recu(CLdoc, doc, MToptions, 0)
     } catch(e) {
+        console.log(111, e)
         throw "[regCLdoc]- "+e
     }
 }

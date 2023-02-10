@@ -58,7 +58,8 @@ const CLoptions = {
         findOne: {},
         insertOne: {
             roles: role_pder,
-            execCB: ({ document = {} }, Koptions) => {
+            execCB: async({ reqBody = {} }) => {
+                const { document = {} } = reqBody
                 /** 如果 有父分类 则为二级分类， 否则为1级 */
                 document.level = document.far_Cateb ? 2 : 1;
             }

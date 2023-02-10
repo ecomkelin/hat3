@@ -5,7 +5,7 @@ module.exports = (ctxObj, MToptions) => {
         /** sort */
         const { reqBody = {} } = ctxObj;
         const { sort = {} } = reqBody;
-        const { CLdoc } = MToptions;
+        // const { CLdoc } = MToptions;
         if (!isObject(sort)) throw "find sort 必须为对象"
         let hasSort = 0;
         for (let key in sort) {

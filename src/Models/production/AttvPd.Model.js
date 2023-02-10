@@ -1,25 +1,18 @@
 /** Attribute key Attk */
 const DB = require(path.join(process.cwd(), "bin/DB"));
-const CLname = "Pd";
+const CLname = "AttkPd";
 
 const CLdoc = {
+    // Pd: {type: ObjectId, ref: "Pd", required: true, IS_fixed: true},
+    AttrPd: {type: ObjectId, ref: "AttrPd", required: true, IS_fixed: true},
     code: {
         type: String,
         required: true,
-        unique: true,
-        MIN: 1,
-        MAX: 8
-    },
-    name: {
-        type: String
+        // unique: true,
+        MIN: 2, MAX: 20, REGEXP: '^[a-zA-Z0-9]*$'
     },
     desc: { type: String },
-    imgs: [{
-        type: String,
-        ALLOW_upload: true
-    }],
-
-    ...docBasic
+    img: { type: String, ALLOW_upload: true },
 }
 
 const CLoptions = {

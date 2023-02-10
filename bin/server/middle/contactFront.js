@@ -10,7 +10,6 @@ module.exports = async (ctx, next) => {
         */
         let start = Date.now();
         console.info(moment(start).format("YYYY-MM-DD HH:mm:ss "), `[ ${ctx.method} ] ${ctx.url}`);
-
         /** 挂载 Koptions 
          * 并把 payload 挂载到 Koptions 上
         */
@@ -41,7 +40,7 @@ module.exports = async (ctx, next) => {
 
 
         /** 根据ctx挂载的返回值 生成 ctx.body */
-        if (IS_DEV) request = getRequest(ctx);                  // 开发环境 返回前端 请求数据
+        request = (ctx.reqQuery.request === 1) ? getRequest(ctx) : undefined;                  // 开发环境 返回前端 请求数据
         if (ctx.fail) fail(ctx);                                // 收到错误信息
         else if (errStatus.indexOf(ctx.status) > -1) fail(ctx); // 收到错误状态
         else if (ctx.success) success(ctx);                     // 成功从后端获得数据
