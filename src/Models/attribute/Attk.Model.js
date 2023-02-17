@@ -13,26 +13,40 @@ const CLdoc = {
     desc: { type: String },
 }
 
-const AttvCL = require("./Attv.Model");
+let AttvCL = require("./Attv.Model");
 const CLoptions = {
     indexesObj: { "code": 1 },
     Routes: {
         countDocuments: {},
         find: {
             execCB: async ({reqBody, Koptions}) => {
+                if(Object.keys(AttvCL).length < 1) AttvCL = require("./Attv.Model");
                 if (reqBody.find) {
                     const { objects } = Koptions;
                     for (let i in objects) {
-                        let Attk = objects[i];
-                        const cursor = AttvCL.COLLECTION.find({ Attk: Attk._id });
+                        let object = objects[i];
+                        const cursor = AttvCL.COLLECTION.find({ Attk: object._id });
                         const Attvs = await cursor.toArray();
                         await cursor.close();
-                        Attk.Attvs = Attvs;
+                        object.Attvs = Attvs;
                     }
                 }
             }
         },
-        findOne: {},
+        findOne: {
+            execCB: async ({ reqBody, Koptions }) => {
+                if (Object.keys(AttvCL).length < 1) AttvCL = require("./Attv.Model");
+                if (reqBody.find) {
+                    const { object } = Koptions;
+
+                    const cursor = AttvCL.COLLECTION.find({ Attk: object._id });
+                    const Attvs = await cursor.toArray();
+                    await cursor.close();
+
+                    object.Attvs = Attvs;
+                }
+            }
+        },
         insertOne: { roles: role_pder },
         insertMany: { roles: role_pder },
         updateOne: { roles: role_pder },

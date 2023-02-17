@@ -9,9 +9,10 @@ const CLdoc = {
         IS_fixed: true
     },
     kv_attrs: [{
-        attr_key: { type: String },
-        attr_val: { type: String }
+        Attk: { type: ObjectId, ref: "Attk" },
+        Attvs: {type:ObjectId, ref: "Attv"}
     }],
+
     code: {
         type: String,
         required: true,

@@ -11,6 +11,7 @@ const isErr_docObj = (CLobj, docObj, field, index) => {
         _docObj = docObj[field];
         _CLobj = CLobj[field];
     } else {
+        console.log("Array")
         index = parseInt(index);
         _docObj = docObj[field][index];
         _CLobj = CLobj[field][0];
@@ -41,7 +42,9 @@ const isErr_docObj = (CLobj, docObj, field, index) => {
         if (_CLobj.MAX && _CLobj.MAX < _docObj) throw `docRegulate [${field}] 字段的取值范围为： [${_CLobj.MIN}, ${_CLobj.MAX}]`;
     } else if (_CLobj.type === Date) {
 
-    } else {
+    } else if (_CLobj.type === Boolean) {
+        
+    } else if(!_CLobj.type) {
         throw "CLobj[field] type 类型错误";
     }
 }

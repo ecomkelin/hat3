@@ -1,6 +1,6 @@
 const regulateReq = require("../../config/regulateReq");
 
-module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
+module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
     const MToptions = { CLdoc };
     return {
         countDocuments: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
@@ -8,8 +8,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel countDocuments reqBody 要为 对象");
 
-                // /** 数据调整之前 */
-                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
@@ -21,7 +19,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 开始执行 */
                 let count = await COLLECTION.countDocuments(reqBody.match, options);
 
-                return resolve(count);
+                return resolve({ count });
             } catch (e) {
                 return reject(e);
             }
@@ -36,11 +34,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { filter = {} } = reqBody;
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel findOne 需要在filter中 _id的类型为 ObjectId");
 
-                // /** 数据调整之前 */
-                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
-                MToptions.regulates = ["filter", "projection"];
+                MToptions.regulates = ["filter", "lookup", "projection"];
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
@@ -51,6 +47,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 开始执行 */
                 let cursor = COLLECTION.aggregate(piplines)
                 let docs = await cursor.toArray();
+                await cursor.close();
+
                 if (docs.length < 1) return reject("没有找到数据")
                 let object = docs[0]
                 Koptions.object = object;
@@ -58,10 +56,11 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 // options.projection = reqBody.projection;
                 // let doc = await COLLECTION.findOne(reqBody.match, options);
 
-                /** 根据 payload 限制访问 */
+                /** 根据 payload 限制访问 比如说 User 访问自己 */
                 if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
 
-                return resolve(object);
+                if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj);
+                return resolve({ object });
             } catch (e) {
                 return reject(e);
             }
@@ -72,8 +71,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
             try {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel find reqBody 要为 对象");
-                // /** 数据调整之前 */
-                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "lookup", "projection", "find"];
@@ -82,10 +79,15 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 / 文件限制 */
                 if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
+                // console.log(111, reqBody);
                 /** 开始执行 */
                 const piplines = getPiplines(reqBody, { is_Many: true });
                 const cursor = COLLECTION.aggregate(piplines);
-                Koptions.objects = await cursor.toArray();
+                const objects = await cursor.toArray();
+                await cursor.close();
+
+                Koptions.objects = objects;
+                // console.log(222, objects)
 
                 // // reqBody.lookup
                 // cursor = COLLECTION
@@ -95,9 +97,11 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 //     .limit(reqBody.limit)
                 //     .sort(reqBody.sort)
 
-                if (_CLoptions.execCB) await  _CLoptions.execCB(ctxObj);
-                await cursor.close();
-                return resolve(Koptions.objects);
+                /** 根据 payload 限制访问 比如说 User 访问自己 */
+                if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
+
+                if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj);
+                return resolve({ objects });
             } catch (e) {
                 return reject(e);
             }
@@ -127,6 +131,7 @@ const getPiplines = (reqBody, { is_Many = false }) => {
         }
     }
 
+    /** 把数组编程对象 */
     if (unwinds instanceof Array) {
         for (let i in unwinds) {
             piplines.push({ "$unwind": unwinds[i] });

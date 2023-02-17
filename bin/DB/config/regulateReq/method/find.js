@@ -10,9 +10,10 @@ module.exports = (ctxObj, MToptions) => {
         let hasSort = 0;
         for (let key in sort) {
             hasSort++;
+            if(key.length < 1) throw "sort 属性有一个是空 是错误的"
             if (sort[key] !== -1 && sort[key] !== "-1") sort[key] = 1;
         }
-        // if(hasSort === 0) delete reqBody.sort;
+        if(hasSort === 0) delete reqBody.sort;
 
         /** limit */
         if (isNaN(reqBody.limit)) reqBody.limit = 60;

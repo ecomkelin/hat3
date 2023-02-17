@@ -43,9 +43,9 @@ module.exports = (CLname, CLdoc, CLoptions = {}) => {
     parseCLoptions(CLoptions, CLdoc);
 
     /** 一些数据库的 读方法 */
-    const readMethod = Aread(COLLECTION, CLdoc, CLoptions, options);
-    const writeMethod = Awrite(COLLECTION, CLdoc, CLoptions, options);
-    const indexesMethod = Cindexes(COLLECTION, CLdoc, CLoptions, options);
+    const readMethod = Aread(COLLECTION, CLdoc, CLoptions, CLname, options);
+    const writeMethod = Awrite(COLLECTION, CLdoc, CLoptions, CLname, options);
+    const indexesMethod = Cindexes(COLLECTION, CLdoc, CLoptions, CLname, options);
 
     /** 再此为 CLoptions 生成配置项 RouteMethods */
     if(init) {

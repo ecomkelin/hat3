@@ -11,15 +11,19 @@ const CLdoc = {
     },
     name: { type: String },
     desc: { type: String },
+    note: { type: String }, // 备注 后台人看的
     imgs: [{ type: String, ALLOW_upload: true }],
 
     Cateb: { type: ObjectId, ref: "Cateb" },
 
-    AttrPds: [{ type: ObjectId, ref: "AttrPd" }],
+    kvs_attrs: [{
+        Attk: { type: ObjectId, ref: "Attk" },
+        Attvs: [{type:ObjectId, ref: "Attv"}]
+    }],
 
     Brand: { type: ObjectId, ref: "Brand" },
 
-    Supplier: { type: ObjectId, ref: "Supplier" },
+    // Supplier: { type: ObjectId, ref: "Supplier" },
 
     ...docBasic
 }

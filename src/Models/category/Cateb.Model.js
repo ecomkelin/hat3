@@ -3,7 +3,7 @@ const DB = require(path.join(process.cwd(), "bin/DB"));
 const CLname = "Cateb";
 
 const CLdoc = {
-    far_Cateb: {
+    Cateb_parent: {
         type: ObjectId, ref: "Cateb",
         IS_fixed: true
     },
@@ -51,26 +51,61 @@ const CLoptions = {
     Routes: {
         countDocuments: {},
         find: {
-            parseAfter: ({ match }) => {
-                if (!match.level) match.level = 1;
+            // parseAfter: ({ match }) => {
+            //     if (!match.Cateb_parent) match.level = 1;
+            // }
+            execCB: async ({reqBody, Koptions}) => {
+                if (reqBody.find) {
+                    const { objects } = Koptions;
+                    for (let i in objects) {
+                        let object = objects[i];
+                        const cursor = CatebCL.COLLECTION.find({ Cateb_parent: object._id });
+                        const Cateb_sons = await cursor.toArray();
+                        await cursor.close();
+                        object.Cateb_sons = Cateb_sons;
+                    }
+                }
             }
         },
-        findOne: {},
+        findOne: {
+            execCB: async ({ reqBody, Koptions }) => {
+                if (reqBody.find) {
+                    const { object } = Koptions;
+
+                    const cursor = CatebCL.COLLECTION.find({ Cateb_parent: object._id });
+                    const Cateb_sons = await cursor.toArray();
+                    await cursor.close();
+
+                    object.Cateb_sons = Cateb_sons;
+                }
+            }
+        },
         insertOne: {
             roles: role_pder,
-            execCB: async({ reqBody = {} }) => {
+            parseCB: async({ reqBody = {} }) => {
                 const { document = {} } = reqBody
                 /** 如果 有父分类 则为二级分类， 否则为1级 */
-                document.level = document.far_Cateb ? 2 : 1;
+                if(document.Cateb_parent) {
+                    if(!isObjectIdAbs(document.Cateb_parent)) throw "Cateb Model insertOne execCB: Cateb_parent 必须是 ObjectId 类型";
+                    const parentObj = await CatebCL.COLLECTION.findOne({_id: document.Cateb_parent});
+                    if(!parentObj) throw "Cateb Model insertOne execCB: 数据库中没有父分类";
+
+                    document.level = 2;
+                    document.is_leaf = true;
+                } else {
+                    document.level = 1;
+                    document.is_leaf = false;
+                }
             }
         },
-        insertMany: { roles: role_pder },
+        // insertMany: { roles: role_pder },
         updateOne: { roles: role_pder },
-        updateMany: { roles: role_pder },
+        // updateMany: { roles: role_pder },
         deleteOne: { roles: role_pder },
 
         deleteMany: { roles: role_pder },
     }
 }
 
-module.exports = DB(CLname, CLdoc, CLoptions);;
+const CatebCL = DB(CLname, CLdoc, CLoptions);;
+module.exports = CatebCL;

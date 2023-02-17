@@ -21,7 +21,7 @@ const filterParse = (match, filter = {}, CLdoc) => {
             match._id = _id;
         }
     
-        if (search) {
+        if (search && search.fields) {
             let exactOr = [];
             /** 参数 fields 需要模糊查询的字段（可以是 数组）
              * keywords 需要查询的 字符串

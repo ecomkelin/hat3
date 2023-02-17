@@ -4,7 +4,7 @@ const Encryption = require("../../config/regulateReq/asyncs/encryption");
 const Exist = require("../../config/exist");
 
 
-module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
+module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
     const { needEncryption } = CLoptions;
     const MToptions = { CLdoc, CLoptions }
     return {
@@ -13,9 +13,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {}, Koptions } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel deleteMany reqBody 要为 对象");
 
-                // /** 数据调整之前 */
-                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
-
                 /** 调整 reqBody */
                 MToptions.regulates = ['filter'];
                 regulateReq(ctxObj, MToptions);
@@ -23,11 +20,12 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 / 文件限制 */
                 if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
-
                 /** 是否要加载 find */
                 if (CLoptions.optFiles || _CLoptions.findAfter || _CLoptions.execCB) {
                     const cursor = COLLECTION.find(reqBody.match, options);
                     const objects = await cursor.toArray();
+                    await cursor.close();
+
                     Koptions.objects = objects;
                 }
 
@@ -49,10 +47,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /**  execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
-                let deletedObj = await COLLECTION.deleteMany(reqBody.match, options);
-                if (deletedObj.deletedCount > 0) Koptions.handleFiles = Koptions.will_handleFiles;
+                let deletedResult = await COLLECTION.deleteMany(reqBody.match, options);
+                if (deletedResult.deletedCount > 0) Koptions.handleFiles = Koptions.will_handleFiles;
 
-                return resolve(deletedObj);
+                return resolve({ deletedResult });
             } catch (e) {
                 return reject(e);
             }
@@ -65,9 +63,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 let { filter = {} } = reqBody;
 
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel deleteOne 需要在filter中 _id的类型为 ObjectId");
-
-                // /** 数据调整之前 */
-                // if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter"];
@@ -102,10 +97,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
 
 
-                let deletedObj = await COLLECTION.deleteOne(reqBody.match, options);
-                if (deletedObj.deletedCount === 1) Koptions.handleFiles = Koptions.will_handleFiles;
+                let deletedResult = await COLLECTION.deleteOne(reqBody.match, options);
+                if (deletedResult.deletedCount === 1) Koptions.handleFiles = Koptions.will_handleFiles;
 
-                return resolve(deletedObj);
+                return resolve({ deletedResult });
             } catch (e) {
                 return reject(e);
             }
@@ -117,9 +112,9 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const { reqBody = {}, Koptions } = ctxObj;
                 const { documents } = reqBody;
                 if (!(documents instanceof Array)) return reject("mgWrite: insertMany: ctx.reqBody.documents 必须是数组 [] ");
-
-                /** 数据调整之前 */
-                if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
+                for (let i in documents) {
+                    documents[i]._id = newObjectId();
+                }
 
                 /** 调整 reqBody 中的 documents*/
                 MToptions.regulates = ["insert"]
@@ -128,16 +123,18 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据 payload 限制访问 / 文件限制 */
                 if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
 
+                /** 是否能够批量添加 000000
+                 * 比如是否 有相同的 code 判断
+                 * 未写*/
 
-                /** 是否能够批量添加 未写*/
 
                 /** 加密: 如果模型配置中有此相 则进行加密 */
                 if (needEncryption) await Encryption(documents, needEncryption);
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
 
-                let result = await COLLECTION.insertMany(documents, options);
-                return resolve(result);
+                let insertResult = await COLLECTION.insertMany(documents, options);
+                return resolve({ insertResult });
             } catch (e) {
                 return reject(e);
             }
@@ -150,10 +147,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 根据前端数据 获取 [插入一个] 方法 所需要的document*/
                 const { document } = reqBody;
                 if (!isObject(document)) return reject("mgWrite: insertOne: ctx.reqBody.document 必须是： object对象 即 {} ");
+                /** 在这加入 _id 是因为 可能在数据调整的时候 要用的 _id
+                 * 比如 添加 Pd 时 自动加入 Sku 要吧 Pd的_id 传给 Sku
+                 */
                 document._id = newObjectId();
-
-                /** 数据调整之前 */
-                if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 document*/
                 MToptions.regulates = ["insert"] // "insert" 调整 document
@@ -173,15 +170,15 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
 
                 /** 原生数据库的 数据库操作 */
-                let result = await COLLECTION.insertOne(document, options);
+                let insertResult = await COLLECTION.insertOne(document, options);
 
-                if (result.acknowledged) {
+                if (insertResult.acknowledged) {
                     Koptions.handleFiles = [];
 
-                    document._id = result.insertedId;
-                    return resolve(document);
+                    document._id = insertResult.insertedId;
+                    return resolve({ document });
                 }
-                return resolve(result);
+                return resolve({ insertResult });
             } catch (e) {
                 return reject(e);
             }
@@ -192,9 +189,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
         updateMany: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {}, Koptions } = ctxObj;
-
-                /** 数据调整之前 */
-                if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 filter, update*/
                 MToptions.regulates = ["filter", "update"]
@@ -215,6 +209,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 if (_CLoptions.findAfter) {
                     const cursor = COLLECTION.find(reqBody.match, options);
                     const objects = await cursor.toArray();
+                    await cursor.close();
+
                     Koptions.objects = objects;
                 }
 
@@ -223,8 +219,27 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
 
-                let result = await COLLECTION.updateMany(reqBody.match, reqBody.update, options);
-                return resolve(result);
+                // if(ctxObj.reqQuery.onlyUpdate) {
+                if (true) {
+                    let updateResult = await COLLECTION.updateMany(reqBody.match, reqBody.update, options);
+                    return resolve({ updateResult });
+                } else {
+                    // let cursor = await COLLECTION.aggregate([
+                    //     { "$match": {} },
+                    //     { ...reqBody.update },
+                    //     // { $lookup: {
+                    //     //     from: CLname,
+                    //     //     localField: "_id",
+                    //     //     foreignField: "_id",
+                    //     //     as: "updated_doc"
+                    //     // } },
+                    //     { $out: CLname }
+                    // ])
+                    // const objects = await cursor.toArray();
+                    // await cursor.close();
+                    // console.log(objects)
+                    // return resolve(objects);
+                }
             } catch (e) {
                 return reject(e);
             }
@@ -242,9 +257,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 const updateSet = update["$set"];
                 const updateRm = update["$remove"];
                 const updatePush = update["$push"];
-
-                /** 数据调整之前 */
-                if (_CLoptions.parsePre) _CLoptions.parsePre(reqBody, Koptions);
 
                 /** 调整 reqBody 中的 filter, update 如果update中没有$.. update方法 则默改装成 $set方法 */
                 MToptions.regulates = ["filter", "update"]
@@ -330,8 +342,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                             for (let i in updateSet[key]) {
                                 let j = 0;
                                 for (; j < object[key].length; j++) {
-                                    if(isObject(object[key][i])) {
-                                        if(String(updateSet[key][i]._id) === String(object[key][j]._id)) break;
+                                    if (isObject(object[key][i])) {
+                                        if (String(updateSet[key][i]._id) === String(object[key][j]._id)) break;
                                     } else {
                                         if (String(updateSet[key][i]) === String(object[key][j])) break;
                                     }
@@ -359,12 +371,26 @@ module.exports = (COLLECTION, CLdoc, CLoptions, options) => {
                 /** 如果(被简化过的)CLoptions选项中 含有 execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj);
 
-                let result = await COLLECTION.updateOne(reqBody.match, reqBody.update, options);
-                if (result.acknowledged && result.modifiedCount > 0) {
-                    Koptions.handleFiles = Koptions.will_handleFiles;
-                    return resolve(updateSet);
+                let updateResult;
+                /** 获取更新后的文档 */
+                if (ctxObj.reqQuery.onlyUpdate) {
+                    updateResult = await COLLECTION.updateOne(reqBody.match, reqBody.update, options);
+                } else {
+                    options.returnDocument = "after";
+                    options.returnNewDocument = true;
+                    updateResult = await COLLECTION.findOneAndUpdate(reqBody.match, reqBody.update, options);
                 }
-                return resolve(result);
+                /** findOneAndUpdate 成功后的结果 */
+                if (updateResult.ok) {
+                    Koptions.handleFiles = Koptions.will_handleFiles;
+                    return resolve({ object: updateResult.value });
+                }
+                /** updateOne 成功后的结果 */
+                else if (updateResult.acknowledged && updateResult.modifiedCount > 0) {
+                    Koptions.handleFiles = Koptions.will_handleFiles;
+                    return resolve({ updateSet });
+                }
+                return resolve(updateResult);
             } catch (e) {
                 return reject(e);
             }

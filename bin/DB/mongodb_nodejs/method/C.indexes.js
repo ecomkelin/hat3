@@ -1,4 +1,4 @@
-module.exports = (COLLECTION, CLdoc, CLoptions, options) => ({
+module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => ({
 
     createIndex: () => new Promise(async (resolve, reject) => {
         try {

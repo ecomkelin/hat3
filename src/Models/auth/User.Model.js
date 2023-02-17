@@ -7,9 +7,8 @@ const CLdoc = {
         type: String,
         unique: true,
         required: true,
-        IS_fixed: true,
-        MIN: 4,
-        MAX: 10
+        // IS_fixed: true,
+        REGEXP: '^[a-z0-9]*$', MIN: 4, MAX: 10
     },
     pwd: {
         type: String,
@@ -100,12 +99,12 @@ const CLoptions = {
             parseAfter: ({ update }, payload) => {
                 if (update["$set"].role && (update["$set"].role <= payload.role)) throw "您无权为用户更新 这个角色"
             },
-            findAfter: ({ objects, payload }) => {
-                for (let i in objects) {
-                    let object = objects[i]
-                    if (object.role <= payload.role) throw "您无权修改这个角色"
-                }
-            }
+            // findAfter: ({ objects, payload }) => {
+            //     for (let i in objects) {
+            //         let object = objects[i]
+            //         if (object.role <= payload.role) throw "您无权修改这个角色"
+            //     }
+            // }
         },
         insertMany: {
             roles: [10],
@@ -125,7 +124,6 @@ const CLoptions = {
     },
 }
 
-const CLmodel = DB(CLname, CLdoc, CLoptions);
-UserCL = CLmodel;
-module.exports = CLmodel;
+const UserCL = DB(CLname, CLdoc, CLoptions);
+module.exports = UserCL;
 // module.exports = DB(CLname, CLdoc, CLoptions);;

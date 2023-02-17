@@ -4,7 +4,10 @@
 const { ObjectId } = require("mongodb");    
 
 
-isObjectId = id => ObjectId.isValid(id);
+isObjectId = id => {
+    if(id.length === 12) return false;
+    return ObjectId.isValid(id);
+}
 isObjectIdAbs = id => ObjectId.isValid(id) ? (typeof id) !== 'string' : false;
 
 newObjectId = id => ((!isObjectIdAbs(id) && isObjectId(id)) || !id) ? new ObjectId(id) : id;

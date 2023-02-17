@@ -21,7 +21,7 @@ exports.tokenParse = (headersToken) => {
 const tokenToPayload = (headersToken, is_refresh)=> new Promise(async(resolve, reject) => {
 	try {
 		let token = this.tokenParse(headersToken);
-		if(!token) return resolve({});	// 如果没有token 则返回空 payload, 不妨碍无权限的验证
+		if(!token || token.length < 10) return resolve({});	// 如果没有token 则返回空 payload, 不妨碍无权限的验证
 		let token_secret = is_refresh ? REFRESH_TOKEN_SECRET : ACCESS_TOKEN_SECRET;
 		jsonwebtoken.verify(token, token_secret, (expired, payload) => {
 			if(expired) return reject({status: 401, errMsg: "token错误或过期", expired});
@@ -50,7 +50,7 @@ const generateToken = (object, is_refresh=false) => {
 	return jsonwebtoken.sign(payload, token_secret, {expiresIn: token_ex});
 }
 exports.genAcToken = (object)=> generateToken(object, false);
-exports.getReToken = (object)=> generateToken(object, true);
+exports.genReToken = (object)=> generateToken(object, true);
 
 /**
  * 根据 对象 obj 生成 payload

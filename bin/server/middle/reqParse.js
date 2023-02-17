@@ -20,6 +20,7 @@ module.exports = async (ctx, next) => {
     } else {
         ctx.reqBody = {};
     }
+
     /** 把所有body中的 ObjectId 字符串 转为 ObjectId对象 */
     if (ctx.reqBody instanceof Array) {
         deepArrayId(ctx.reqBody);
@@ -60,12 +61,17 @@ module.exports = async (ctx, next) => {
  * 形参必须为指针
 */
 const deepObjectId = (obj) => {
+
     Object.keys(obj).forEach(key => {
-        if (isObject(obj[key])) deepObjectId(obj[key]);
+        if (isObject(obj[key])) {
+            deepObjectId(obj[key]);
+        }
         else if (obj[key] instanceof Array) {
             deepArrayId(obj[key]);
         }
-        if (isObjectId(obj[key])) obj[key] = newObjectId(obj[key]);
+        if (isObjectId(obj[key])) {
+            obj[key] = newObjectId(obj[key]);
+        }
     })
 }
 const deepArrayId = (arrs) => {

@@ -1,14 +1,13 @@
 const moment = require('moment');
 
-const { acTokenPayload } = require(path.join(process.cwd(), "core/crypto/jwt"));
-let errStatus = [401, 500];
-module.exports = async (ctx, next) => {
+const { tokenParse, acTokenPayload } = require(path.join(process.cwd(), "core/crypto/jwt"));
 
+module.exports = async (ctx, next) => {
+    let start = Date.now();
     try {
         /** 程序开始 第一次进入中间件 
          * 本次执行程序的开始时间 并记录开始的时间
         */
-        let start = Date.now();
         console.info(moment(start).format("YYYY-MM-DD HH:mm:ss "), `[ ${ctx.method} ] ${ctx.url}`);
         /** 挂载 Koptions 
          * 并把 payload 挂载到 Koptions 上
@@ -18,7 +17,11 @@ module.exports = async (ctx, next) => {
         ctx.Koptions.handleFiles = [];
         ctx.Koptions.will_handleFiles = [];
         /** 把payload挂载到 Koptions上去 */
-        const payload = await acTokenPayload(ctx.request.headers['authorization']);
+
+        let payload;
+        /** 包含有 login 的url 不用检查 token 因为肯定没有带 */
+        if(ctx.url.includes("/login")) payload = {};
+        else payload = await acTokenPayload(ctx.request.headers['authorization']);
         ctx.Koptions.payload = payload;
 
         /** 最后 打印日志 生成时间 */
@@ -38,12 +41,11 @@ module.exports = async (ctx, next) => {
         await next();
         /** 执行完毕中间件 路由执行函数 会给ctx 挂载返回值 */
 
-
         /** 根据ctx挂载的返回值 生成 ctx.body */
-        request = (ctx.reqQuery.request === 1) ? getRequest(ctx) : undefined;                  // 开发环境 返回前端 请求数据
-        if (ctx.fail) fail(ctx);                                // 收到错误信息
-        else if (errStatus.indexOf(ctx.status) > -1) fail(ctx); // 收到错误状态
-        else if (ctx.success) success(ctx);                     // 成功从后端获得数据
+        request = (ctx.reqQuery.request == 1) ? getRequest(ctx) : undefined;                  // 开发环境 返回前端 请求数据
+
+        if (ctx.fail) failHandle(ctx);                                // 收到错误信息
+        else if (ctx.success) successHandle(ctx);                     // 成功从后端获得数据
         else if (!ctx.body) {
             ctx.status = 405;
             ctx.body = {
@@ -52,32 +54,33 @@ module.exports = async (ctx, next) => {
             }
         }
 
+
+    } catch (e) {
+        ctx.fail = e;
+        failHandle(ctx);
+    } finally {
         let end = Date.now();
         let ms = end - start;
         console.info(ctx.status, `用时: ${ms}ms \n`);
-    } catch (e) {
-        ctx.fail = e;
-        fail(ctx);
     }
 }
 
+
 /** 返回给前端 */
 let request;
-const fail = ctx => {
+const failHandle = ctx => {
     let fail = ctx.fail;
-
-    if (ctx.status === 401) {
-        if (!fail) fail = "您没有权限"
-        ctx.body = { status: 401, fail, request };
-    }
-    else if (ctx.status === 500) {
-        if (!fail) fail = "服务器错误"
-        ctx.body = { status: 500, fail, request };
-    }
+    console.error("contactFront: ", fail)
     /** 服务器错误 */
-    else if (fail.stack) {
+    if (fail.stack) {
         ctx.status = 500;
         ctx.body = { status: 500, server_error: fail.stack, request }
+    }
+
+    else if(fail.status === 401) {
+        // ctx.status = 401;
+        ctx.status = 200; // 为了前端验证方便
+        ctx.body = { ...fail, request };
     }
     /** 前端的参数错误 */
     else if (isObject(fail)) {     // 错误信息给的是对象
@@ -87,7 +90,7 @@ const fail = ctx => {
             delete fail.status;
         }
 
-        ctx.status = status;
+        // ctx.status = status;
         ctx.body = { status, fail, request };
     } else {        // 错误信息给的是字符串
         ctx.status = 400;
@@ -95,9 +98,11 @@ const fail = ctx => {
     }
 }
 
-const success = ctx => {
+const successHandle = (ctx) => {
     const success = ctx.success;
+    const trustToken = ctx.headers['trust-token']
     ctx.status = 200;
+    ctx.response.set('Trust-Token', trustToken);
     ctx.body = { status: 200, success, request };
 }
 
@@ -125,6 +130,7 @@ const getRequest = (ctx) => {
         header: ctx.request.header,
         body: ctx.reqBody,
         query: ctx.reqQuery,
+        payload: ctx.Koptions.payload,
         // headers: ctx.request.headers,
 
         // is2: ctx.is, // => 'html'
