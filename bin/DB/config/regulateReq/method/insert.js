@@ -8,6 +8,7 @@ module.exports = (ctxObj, MToptions) => {
         const { payload } = ctxObj.Koptions;
         const { CLdoc, CLoptions } = MToptions;
         MToptions.payload = payload;
+        MToptions.is_upd = false;
 
         let docs = [];
         if (document) docs.push(document);

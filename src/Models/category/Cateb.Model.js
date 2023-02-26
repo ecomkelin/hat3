@@ -10,7 +10,7 @@ const CLdoc = {
     code: {
         type: String,
         required: true,
-        unique: true,
+        // unique: true,
         MIN: 1,
         MAX: 8
     },
@@ -26,9 +26,9 @@ const CLdoc = {
         }
     },
 
-    is_leaf: {
+    is_branch: {
         type: Boolean,
-        default: false
+        default: true
     },
 
     desc: { type: String },
@@ -51,9 +51,10 @@ const CLoptions = {
     Routes: {
         countDocuments: {},
         find: {
-            // parseAfter: ({ match }) => {
-            //     if (!match.Cateb_parent) match.level = 1;
-            // }
+            parseAfter: async ({reqBody: {match = {}}}) => {
+                if(!match.Cateb_parent) match.level = 1;
+                if (!match.Cateb_parent) match.level = 1;
+            },
             execCB: async ({reqBody, Koptions}) => {
                 if (reqBody.find) {
                     const { objects } = Koptions;
@@ -82,7 +83,7 @@ const CLoptions = {
         },
         insertOne: {
             roles: role_pder,
-            parseCB: async({ reqBody = {} }) => {
+            parseAfter: async({ reqBody = {} }) => {
                 const { document = {} } = reqBody
                 /** 如果 有父分类 则为二级分类， 否则为1级 */
                 if(document.Cateb_parent) {
@@ -91,10 +92,10 @@ const CLoptions = {
                     if(!parentObj) throw "Cateb Model insertOne execCB: 数据库中没有父分类";
 
                     document.level = 2;
-                    document.is_leaf = true;
+                    document.is_branch = false;
                 } else {
                     document.level = 1;
-                    document.is_leaf = false;
+                    document.is_branch = true;
                 }
             }
         },

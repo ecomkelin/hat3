@@ -11,15 +11,15 @@ const isErr_docObj = (CLobj, docObj, field, index) => {
         _docObj = docObj[field];
         _CLobj = CLobj[field];
     } else {
-        console.log("Array")
         index = parseInt(index);
         _docObj = docObj[field][index];
         _CLobj = CLobj[field][0];
     }
 
     if (_CLobj.type === ObjectId) {
-        if (!isObjectIdAbs(_docObj)) throw `docRegulate [${field}] 字段的的类型为 ObjectId 您输入的信息有误`;
+        if (!isObjectIdAbs(_docObj) && _docObj !== "" ) throw `docRegulate [${field}] 字段的的类型为 ObjectId 您输入的信息有误`;
     } else if (_CLobj.type === String) {
+        if((typeof _docObj) === 'number') docObj[field] = _docObj = String(_docObj);
         if ((typeof _docObj) !== 'string') throw `docRegulate [${field}] 必须为字符串`;
 
         // if(isNaN(index)) docObj[field] = String(_docObj);
@@ -30,13 +30,21 @@ const isErr_docObj = (CLobj, docObj, field, index) => {
         if (_CLobj.MAX && _CLobj.MAX < _docObj.length) throw `docRegulate [${field}] 字段的字符串长度为： [${_CLobj.MIN} ~ ${_CLobj.MAX}]`;
         if (_CLobj.REGEXP) {
             let REGEXP = new RegExp(_CLobj.REGEXP);
-            if (!REGEXP.test(_docObj)) throw `docRegulate [${field}] 的规则： [${_CLobj.regErrMsg}]`;
+            if (!REGEXP.test(_docObj)) throw `docRegulate [${field}] 的值为: [${_docObj}] 不符合规则`;
         }
     } else if (_CLobj.type === Number) {
         if (isNaN(_docObj)) throw `docRegulate [${field}] 字段为 数字`;;
 
         if (isNaN(index)) docObj[field] = parseInt(_docObj);
         else docObj[field][index] = parseInt(_docObj);
+
+        if (_CLobj.MIN && _CLobj.MIN > _docObj) throw `docRegulate [${field}] 字段的取值范围为： [${_CLobj.MIN}, ${_CLobj.MAX}]`;
+        if (_CLobj.MAX && _CLobj.MAX < _docObj) throw `docRegulate [${field}] 字段的取值范围为： [${_CLobj.MIN}, ${_CLobj.MAX}]`;
+    } else if (_CLobj.type === "Float") {
+        if (isNaN(_docObj)) throw `docRegulate [${field}] 字段为 数字`;;
+
+        if (isNaN(index)) docObj[field] = parseFloat(_docObj);
+        else docObj[field][index] = parseFloat(_docObj);
 
         if (_CLobj.MIN && _CLobj.MIN > _docObj) throw `docRegulate [${field}] 字段的取值范围为： [${_CLobj.MIN}, ${_CLobj.MAX}]`;
         if (_CLobj.MAX && _CLobj.MAX < _docObj) throw `docRegulate [${field}] 字段的取值范围为： [${_CLobj.MIN}, ${_CLobj.MAX}]`;
@@ -81,7 +89,6 @@ const recu = (docObj, CLobj, field, is_upd, index) => {
     } else {
 
         if (!_CLobj.type) throw ` ${field} 数据与模型没有对应 #4 doc为基本类型 模型还不是`
-
         /** 修改数据时 不能修改模型中固定的值 */
         if (is_upd && _CLobj.IS_fixed) throw ` ${field} 不能修改模型中固定的值`;
         /** 前端不可以传递 模型中自动生成的值 */

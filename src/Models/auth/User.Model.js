@@ -71,7 +71,8 @@ const CLoptions = {
         },
         updateOne: {
             roles: [10],
-            parseAfter: ({ match, update }, payload) => {
+            parseAfter: (ctxObj) => {
+                const {reqBody: {match, update}, Koptions:{ payload}} = ctxObj;
                 if (update["$set"].role && (update["$set"].role <= payload.role)) throw "您无权为用户更新 这个角色";
                 match.role = { "$gte": payload.role };
             },

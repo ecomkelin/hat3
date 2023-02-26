@@ -35,5 +35,4 @@ const recuReadFiles = (dirPath, paths, n) => {
  module.exports = (_addRoute) => {
     addRoute = _addRoute;
     recuReadFiles(pathAbsolute, ['src'], 0);
-
  }

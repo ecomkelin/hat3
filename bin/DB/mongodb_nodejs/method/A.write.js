@@ -18,7 +18,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
                 /** 是否要加载 find */
                 if (CLoptions.optFiles || _CLoptions.findAfter || _CLoptions.execCB) {
@@ -47,6 +47,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 if (_CLoptions.findAfter) _CLoptions.findAfter(Koptions);
                 /**  execCB 回调 则执行 回调方法 */
                 if (_CLoptions.execCB) await _CLoptions.execCB(ctxObj)
+
                 let deletedResult = await COLLECTION.deleteMany(reqBody.match, options);
                 if (deletedResult.deletedCount > 0) Koptions.handleFiles = Koptions.will_handleFiles;
 
@@ -69,7 +70,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
                 /**  是否要加载 findOne*/
                 if (CLoptions.optFiles || _CLoptions.findAfter || _CLoptions.execCB) {
@@ -113,7 +114,8 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 const { documents } = reqBody;
                 if (!(documents instanceof Array)) return reject("mgWrite: insertMany: ctx.reqBody.documents 必须是数组 [] ");
                 for (let i in documents) {
-                    documents[i]._id = newObjectId();
+                    if(!documents[i]._id) documents[i]._id = newObjectId();
+                    else break;
                 }
 
                 /** 调整 reqBody 中的 documents*/
@@ -121,7 +123,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
                 /** 是否能够批量添加 000000
                  * 比如是否 有相同的 code 判断
@@ -144,20 +146,21 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
         insertOne: (ctxObj = {}, _CLoptions = {}) => new Promise(async (resolve, reject) => {
             try {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
+
                 /** 根据前端数据 获取 [插入一个] 方法 所需要的document*/
                 const { document } = reqBody;
                 if (!isObject(document)) return reject("mgWrite: insertOne: ctx.reqBody.document 必须是： object对象 即 {} ");
                 /** 在这加入 _id 是因为 可能在数据调整的时候 要用的 _id
                  * 比如 添加 Pd 时 自动加入 Sku 要吧 Pd的_id 传给 Sku
                  */
-                document._id = newObjectId();
+                if(!document._id) document._id = newObjectId();
 
                 /** 调整 reqBody 中的 document*/
                 MToptions.regulates = ["insert"] // "insert" 调整 document
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
                 /** 是否能够添加 如果没有就通过 有就不通过 */
                 MToptions.COLLECTION = COLLECTION;  // 加入 原生方法调用 以便在下游方法中调用
@@ -194,6 +197,21 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 MToptions.regulates = ["filter", "update"]
                 regulateReq(ctxObj, MToptions);
 
+                /** 000000 弥补 regCLdoc的缺陷
+                 * 把空的 数组和字符串删除掉， 但会随之带来另外一个缺陷 前端不能直接 set 空数组或空对象
+                 */
+                const { update = {} } = reqBody;
+                if (update["$set"]) {
+                    for (let key in update["$set"]) {
+                        const setKey = update["$set"][key]
+                        if (setKey instanceof Array) {
+                            if (setKey.length === 0) delete update["$set"][key]
+                        } else if (isObject(setKey)) {
+                            if (Object.keys(setKey).length === 0) delete update["$set"][key]
+                        }
+                    }
+                }
+
                 /** 如果 update 中存在 $set 如果update中没有$.. update方法 前面的 regulate 默改装成 $set方法*/
                 if (reqBody.update["$set"]) {
                     /** 加密: 如果模型配置中有此相 则进行加密 */
@@ -204,7 +222,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 }
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
                 if (_CLoptions.findAfter) {
                     const cursor = COLLECTION.find(reqBody.match, options);
@@ -237,7 +255,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                     // ])
                     // const objects = await cursor.toArray();
                     // await cursor.close();
-                    // console.log(objects)
                     // return resolve(objects);
                 }
             } catch (e) {
@@ -262,8 +279,22 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 MToptions.regulates = ["filter", "update"]
                 regulateReq(ctxObj, MToptions);
 
+                /** 000000 弥补 regCLdoc的缺陷
+                 * 把空的 数组和字符串删除掉， 但会随之带来另外一个缺陷 前端不能直接 set 空数组或空对象
+                 */
+                if (updateSet) {
+                    for (let key in updateSet) {
+                        const setKey = updateSet[key]
+                        if (setKey instanceof Array) {
+                            if (setKey.length === 0) delete updateSet[key]
+                        } else if (isObject(setKey)) {
+                            if (Object.keys(setKey).length === 0) delete updateSet[key]
+                        }
+                    }
+                }
+
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
                 /** 是否能更新 这些字段 */
                 MToptions.COLLECTION = COLLECTION;

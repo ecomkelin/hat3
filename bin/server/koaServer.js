@@ -23,7 +23,6 @@ const { koaBody } = require('koa-body');
 server.use(koaBody());
 
 
-
 /** 配置静态文件夹 */
 const koaStatic = require('koa-static');
 server.use(koaStatic(DIR_PUBLIC));

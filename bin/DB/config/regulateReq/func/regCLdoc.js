@@ -41,8 +41,8 @@ const recu = (CLdoc, doc, MToptions, n) => {
                     regCLobj(CLdoc, doc, key, payload)
                 }
             } else {
-                if (CLobj.default || CLobj.default == 0) {
-                    if (!doc[key] && doc[key] !== 0) doc[key] = CLobj.default;
+                if (CLobj.default || CLobj.default === 0 || CLobj.default === false) {
+                    if (!doc[key] && doc[key] !== 0 && doc[key] !== false) doc[key] = CLobj.default;
                 } if ((CLobj.required === true) && (doc[key] === null || doc[key] === undefined)) {
                     throw `docRegulate 创建时 必须添加 [doc.${key}] 字段`;
                 }
@@ -53,6 +53,11 @@ const recu = (CLdoc, doc, MToptions, n) => {
                 if (!isObject(doc[key])) doc[key] = {};
                 recu(CLobj, doc[key], MToptions, n);
             } else if (CLobj instanceof Array) {
+                /** 00000 这里会出现一个问题 如果没有更新这个字段 也会出现这个字段变为 空数组
+                 * 解决办法1 在update那块再删除 暂时用这个
+                 * 解决办法2 只要没有 doc[key] 则跳过此判断 缺点 无法判断 [ 里面的 Auto requied default ]
+                 * 如果有更好的方法
+                 */
                 if (!(doc[key] instanceof Array)) doc[key] = [];
                 for (let i in CLobj) {
                     recu(CLobj[0], doc[key][i], MToptions, n)

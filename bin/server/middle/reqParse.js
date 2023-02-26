@@ -31,7 +31,6 @@ module.exports = async (ctx, next) => {
     }
 
 
-
     if(ctx.reqBody.update) {
         const update = ctx.reqBody.update;
         if (!isObject(update)) return ctx.fail = "reqParse reqBody如果有update 那么 update 要为对象"

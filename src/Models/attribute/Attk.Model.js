@@ -38,7 +38,6 @@ const CLoptions = {
                 if (Object.keys(AttvCL).length < 1) AttvCL = require("./Attv.Model");
                 if (reqBody.find) {
                     const { object } = Koptions;
-
                     const cursor = AttvCL.COLLECTION.find({ Attk: object._id });
                     const Attvs = await cursor.toArray();
                     await cursor.close();
@@ -48,20 +47,13 @@ const CLoptions = {
             }
         },
         insertOne: { roles: role_pder },
-        insertMany: { roles: role_pder },
         updateOne: { roles: role_pder },
-        updateMany: { roles: role_pder },
         deleteOne: {
             roles: role_pder,
-            execCB: async (ctxObj) => {
-
-            }
-        },
-
-        deleteMany: {
-            roles: role_pder,
-            execCB: async (ctxObj) => {
-
+            execCB: async ({Koptions: {object}}) => {
+                if(Object.keys(AttvCL).length < 1) AttvCL = require("./Attv.Model");
+                const existObj = await AttvCL.COLLECTION.findOne({Attk: object._id});
+                if(existObj) throw "此属性下 还有属性值 不能被删除， 除非把所有属性值删除掉"
             }
         },
     }

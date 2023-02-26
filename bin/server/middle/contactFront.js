@@ -42,7 +42,7 @@ module.exports = async (ctx, next) => {
         /** 执行完毕中间件 路由执行函数 会给ctx 挂载返回值 */
 
         /** 根据ctx挂载的返回值 生成 ctx.body */
-        request = (ctx.reqQuery.request == 1) ? getRequest(ctx) : undefined;                  // 开发环境 返回前端 请求数据
+        request = (ctx.reqQuery && ctx.reqQuery.request == 1) ? getRequest(ctx) : undefined;                  // 开发环境 返回前端 请求数据
 
         if (ctx.fail) failHandle(ctx);                                // 收到错误信息
         else if (ctx.success) successHandle(ctx);                     // 成功从后端获得数据

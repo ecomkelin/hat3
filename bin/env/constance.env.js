@@ -48,6 +48,7 @@ docBasic = {
     is_usable: {type: Boolean, default: true},
 
     sort: {type: Number, default: 0},
+
     at_crt: {
         type: Date,
         AUTO_Date: true,

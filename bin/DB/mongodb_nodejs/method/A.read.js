@@ -14,7 +14,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
                 /** 开始执行 */
                 let count = await COLLECTION.countDocuments(reqBody.match, options);
@@ -40,12 +40,12 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
                 /** 转义为 aggregate */
-                const piplines = getPiplines(reqBody, {});
+                const pipelines = getPiplines(reqBody, {});
                 /** 开始执行 */
-                let cursor = COLLECTION.aggregate(piplines)
+                let cursor = COLLECTION.aggregate(pipelines)
                 let docs = await cursor.toArray();
                 await cursor.close();
 
@@ -77,17 +77,15 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 regulateReq(ctxObj, MToptions);
 
                 /** 根据 payload 限制访问 / 文件限制 */
-                if (_CLoptions.parseAfter) _CLoptions.parseAfter(reqBody, Koptions.payload);
+                if (_CLoptions.parseAfter) await _CLoptions.parseAfter(ctxObj);
 
-                // console.log(111, reqBody);
                 /** 开始执行 */
-                const piplines = getPiplines(reqBody, { is_Many: true });
-                const cursor = COLLECTION.aggregate(piplines);
+                const pipelines = getPiplines(reqBody, { is_Many: true });
+                const cursor = COLLECTION.aggregate(pipelines);
                 const objects = await cursor.toArray();
                 await cursor.close();
 
                 Koptions.objects = objects;
-                // console.log(222, objects)
 
                 // // reqBody.lookup
                 // cursor = COLLECTION
@@ -113,32 +111,32 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
 const getPiplines = (reqBody, { is_Many = false }) => {
     const { match, projection, skip, limit, sort, lookups, unwinds } = reqBody;
     /** project 要在 lookup 下面 */
-    const piplines = [];
-    piplines.push({ "$match": match })
+    const pipelines = [];
+    pipelines.push({ "$match": match })
 
     /** find元素   注意 limit：1 其实就是 findOne */
     if (is_Many) {
-        if (skip) piplines.push({ "$skip": skip })
-        if (limit) piplines.push({ "$limit": limit })
-        if (sort) piplines.push({ "$sort": sort })
+        if (skip) pipelines.push({ "$skip": skip })
+        if (limit) pipelines.push({ "$limit": limit })
+        if (sort) pipelines.push({ "$sort": sort })
     } else {
-        piplines.push({ "$limit": 1 })
+        pipelines.push({ "$limit": 1 })
     }
 
     if (lookups instanceof Array) {
         for (let i in lookups) {
-            piplines.push({ "$lookup": lookups[i] });
+            pipelines.push({ "$lookup": lookups[i] });
         }
     }
 
     /** 把数组编程对象 */
     if (unwinds instanceof Array) {
         for (let i in unwinds) {
-            piplines.push({ "$unwind": unwinds[i] });
+            pipelines.push({ "$unwind": unwinds[i] });
         }
     }
 
-    if (projection && Object.keys(projection).length > 0) piplines.push({ "$project": projection })
+    if (projection && Object.keys(projection).length > 0) pipelines.push({ "$project": projection })
 
-    return piplines;
+    return pipelines;
 }

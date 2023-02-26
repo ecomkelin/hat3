@@ -81,15 +81,6 @@ const get_paths = ctx => {
         })
     }
 
-    /** 缩略图的位置 */
-    const abbrDir = DIR_PUBLIC + ABBR + rel_path;
-    /** 如果没有文件夹 则自动创建 */
-    if (!fs.existsSync(abbrDir)) {
-        fs.mkdirSync(abbrDir, {
-            recursive: true // 如果是深度文件夹 则循环创建
-        })
-    }
-
     return { rel_path, uploadDir };
 }
 

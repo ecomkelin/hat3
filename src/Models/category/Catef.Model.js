@@ -14,10 +14,6 @@ const CLdoc = {
         type: ObjectId,
         ref: 'Pd'
     }],
-    poster: {
-        type: String,
-        ALLOW_upload: true
-    },
     icon: {
         type: String,
         ALLOW_upload: true

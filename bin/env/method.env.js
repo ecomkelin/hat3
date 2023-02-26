@@ -5,8 +5,14 @@ const { ObjectId } = require("mongodb");
 
 
 isObjectId = id => {
-    if(id.length === 12) return false;
-    return ObjectId.isValid(id);
+    try {
+        if(!isNaN(id)) id = String(id);
+        if(((typeof id) === 'string') && id.length === 12) return false;
+        return ObjectId.isValid(id);
+    } catch(e) {
+        // 000000 at isNaN (<anonymous>) 为什么会出现这个错误 有点不明白
+        // console.log(" @@@ eeeee ", e)
+    }
 }
 isObjectIdAbs = id => ObjectId.isValid(id) ? (typeof id) !== 'string' : false;
 

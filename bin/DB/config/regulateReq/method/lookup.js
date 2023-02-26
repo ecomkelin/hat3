@@ -69,7 +69,7 @@ const lookupParseString = (reqBody, str, CLdoc) => {
 const lookupParse = (reqBody, CLobj, lookup) => {
     const {localField} = lookup;
 
-    /** 关于 关联到哪个集合 */
+    /** 关于 关联到哪个集合 用当前集合字段代表 外部链接 下划线最后一个单词是外链 */
     let fms = localField.split("_");                    // 以下两个条件都没有 则自动生成
     let from = fms[fms.length -1];                                      // 等于下划线最后的字符串
     if(from[from.length-1] === 's') from = from.slice(0,from.length-1)  // 如果该字符串的最后一个字母为s 则去掉s
@@ -84,7 +84,8 @@ const lookupParse = (reqBody, CLobj, lookup) => {
 
     if(IS_lookupOne) {
         /** 如果只查询一个的话 要limit 1 */
-        lookup.pipeline = [{"$limit": 1}];          
+        if(!lookup.pipeline) lookup.pipeline = []
+        lookup.pipeline.push({"$limit": 1});
 
         /** 把数组编程对象 */
         if(!reqBody.unwinds) reqBody.unwinds = []; 

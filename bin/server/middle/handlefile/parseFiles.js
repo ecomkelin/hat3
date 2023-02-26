@@ -1,4 +1,4 @@
-const thumbnail = require("./thumbnail");
+const thumbnail = require(path.resolve(process.cwd(), 'core/image/thumbnail'));
 
 /** 整理文件
  * 1 压缩图片
@@ -10,7 +10,7 @@ const collationFile = (ctx, file, field, obj, rel_path) => new Promise(async (re
         let rel_file = rel_path + file.newFilename;
 
         /** 生成 缩略图 */
-        await thumbnail(rel_file);
+        await thumbnail(rel_file, rel_path);
 
         /** 根据前端描述 确定字段是数组还是字符串 */
         if (ctx.Koptions.flagArrs.includes(field)) {
