@@ -19,6 +19,7 @@ const CLdoc = {
 
     Brand: { type: ObjectId, ref: "Brand" },
     Cateb: { type: ObjectId, ref: "Cateb" },
+    Catefs: [{ type: ObjectId, ref: "Catef" }],
 
     // kvs_attrs: [{
     //     Attk: { type: ObjectId, ref: "Attk" },
@@ -101,9 +102,12 @@ const CLoptions = {
                         let document = documents[i]
                         document._id = newObjectId();
 
+                        /** 查找新上传的产品 编号是否相同 */
+                        // const code = document.code;
                         // let REGEXP = new RegExp(CLdoc.code.REGEXP);
-                        // if (!REGEXP.test(document.code)) throw `docRegulate [${field}] 的值为: [${_docObj}] 不符合规则`;
-                        // codes.push(document.code);
+                        // if (!REGEXP.test(code)) throw `code的值为: [${code}] 不符合规则`;
+                        // if(codes.includes(code)) throw `新增产品编号有多个 [${code}]`;
+                        // codes.push(code);
 
                         /** 制作缩略图 */
                         document.imgs = Pd_insertMany(document.number);
@@ -122,9 +126,10 @@ const CLoptions = {
 
                         Skus.push(Sku);
                     }
-                    /** 查找是否有相同的 code */
-                    // const exist = PdCL.COLLECTION.findOne({_id: {"$in": codes}});
-                    // if(exist) throw "存在相同的 编号"
+                    // /** 查找数据库中 是否有相同的 code */
+                    // const exist = await PdCL.COLLECTION.findOne({_id: {"$in": codes}});
+                    // console.log(exist);
+                    // if(exist) throw `数据库中存在相同的 编号 [${exist.code}]`
 
                     Koptions.Skus = Skus;
                 } catch (e) {

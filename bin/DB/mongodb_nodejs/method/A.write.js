@@ -149,7 +149,10 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
 
                 /** 根据前端数据 获取 [插入一个] 方法 所需要的document*/
                 const { document } = reqBody;
-                if (!isObject(document)) return reject("mgWrite: insertOne: ctx.reqBody.document 必须是： object对象 即 {} ");
+                let errMsg = "mgWrite: insertOne: ctx.reqBody.document 必须是： object对象 即 {}, ";
+                errMsg += "可能错误的原因 1: 如果您传输图片 忘记加 query.passUpload = 1. ";
+                errMsg += "可能错误的原因 2: 传输body对象 要把document 打包成 req: {document: {}}";
+                if (!isObject(document)) return reject(errMsg);
                 /** 在这加入 _id 是因为 可能在数据调整的时候 要用的 _id
                  * 比如 添加 Pd 时 自动加入 Sku 要吧 Pd的_id 传给 Sku
                  */
@@ -369,9 +372,11 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 } else {
                     /** 如果此集合有文件相关的字段 要检查是否被修改 被替换的 集合字段的文件路径 放到待处理文件缓存中 */
                     for (let key in updateSet) {
+                        console.log(1111, key);
                         if ((updateSet[key] instanceof Array) && updateSet[key].length > 0) {
                             for (let i in updateSet[key]) {
                                 let j = 0;
+                                if(!object[key]) object[key] = [];
                                 for (; j < object[key].length; j++) {
                                     if (isObject(object[key][i])) {
                                         if (String(updateSet[key][i]._id) === String(object[key][j]._id)) break;

@@ -1,3 +1,4 @@
+const fs = require("fs");
 const moment = require('moment');
 
 const { tokenParse, acTokenPayload } = require(path.join(process.cwd(), "core/crypto/jwt"));
@@ -5,6 +6,7 @@ const { tokenParse, acTokenPayload } = require(path.join(process.cwd(), "core/cr
 module.exports = async (ctx, next) => {
     let start = Date.now();
     try {
+
         /** 程序开始 第一次进入中间件 
          * 本次执行程序的开始时间 并记录开始的时间
         */
@@ -20,7 +22,7 @@ module.exports = async (ctx, next) => {
 
         let payload;
         /** 包含有 login 的url 不用检查 token 因为肯定没有带 */
-        if(ctx.url.includes("/login")) payload = {};
+        if (ctx.url.includes("/login")) payload = {};
         else payload = await acTokenPayload(ctx.request.headers['authorization']);
         ctx.Koptions.payload = payload;
 
@@ -77,7 +79,7 @@ const failHandle = ctx => {
         ctx.body = { status: 500, server_error: fail.stack, request }
     }
 
-    else if(fail.status === 401) {
+    else if (fail.status === 401) {
         // ctx.status = 401;
         ctx.status = 200; // 为了前端验证方便
         ctx.body = { ...fail, request };
