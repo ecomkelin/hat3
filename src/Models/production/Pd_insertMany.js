@@ -1,3 +1,5 @@
+/** Pd.Model.js 的图片函数 */
+
 const fs = require('fs');
 const pathPublic = path.join(process.cwd(), "public/")
 const manuale = 'manuale/'

@@ -372,7 +372,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
                 } else {
                     /** 如果此集合有文件相关的字段 要检查是否被修改 被替换的 集合字段的文件路径 放到待处理文件缓存中 */
                     for (let key in updateSet) {
-                        console.log(1111, key);
                         if ((updateSet[key] instanceof Array) && updateSet[key].length > 0) {
                             for (let i in updateSet[key]) {
                                 let j = 0;

@@ -11,15 +11,15 @@ module.exports = async (ctx, next) => {
          * 本次执行程序的开始时间 并记录开始的时间
         */
         console.info(moment(start).format("YYYY-MM-DD HH:mm:ss "), `[ ${ctx.method} ] ${ctx.url}`);
-        /** 挂载 Koptions 
-         * 并把 payload 挂载到 Koptions 上
-        */
+    
+        /** 挂载 Koptions */
         ctx.Koptions = {};
         /** 把将要被删除文件的路径 挂载到 Koptions 上去 */
         ctx.Koptions.handleFiles = [];
         ctx.Koptions.will_handleFiles = [];
+        
+        // console.log( " @@ contactFront ", ctx.headers);
         /** 把payload挂载到 Koptions上去 */
-
         let payload;
         /** 包含有 login 的url 不用检查 token 因为肯定没有带 */
         if (ctx.url.includes("/login")) payload = {};

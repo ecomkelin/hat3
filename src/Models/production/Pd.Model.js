@@ -45,7 +45,9 @@ const CLoptions = {
     Routes: {
         countDocuments: {},
         find: {},
-        findOne: {},
+        findOne: {
+
+        },
         insertOne: {
             roles: role_pder,
             parseCB: async ({ reqBody: { document }, Koptions }) => {
@@ -94,10 +96,12 @@ const CLoptions = {
             roles: role_pder,
             parseCB: async ({ reqBody: { documents }, Koptions }) => {
                 try {
-                    if(!Pd_insertMany) Pd_insertMany = require("./Pd_insertMany");
-                    if (!(documents instanceof Array)) {throw " 批量添加 Pd documents 必须是数组"};
+                    if (!Pd_insertMany) Pd_insertMany = require("./Pd_insertMany");
+                    if (!(documents instanceof Array)) { throw " 批量添加 Pd documents 必须是数组" };
                     let Skus = [];
                     // let codes = [];
+                    const User_id = Koptions.payload._id;
+                    const Datenow = Date.now();
                     for (let i in documents) {
                         let document = documents[i]
                         document._id = newObjectId();
@@ -116,11 +120,17 @@ const CLoptions = {
                         let Sku = document.Skus[0];
                         if (isNaN(Sku.price_sale)) throw "Sku.price_sale 必须为数字"
                         if (isNaN(Sku.price_retail)) Sku.price_retail = Sku.price_sale;
-                        if (Sku.price_cost) {
-                            if (isNaN(Sku.price_cost)) throw "Sku.price_cost 必须为数字";
-                        }
+                        if (Sku.price_cost && isNaN(Sku.price_cost)) throw "Sku.price_cost 必须为数字";
+
                         Sku.Pd = document._id;
                         if (!isObjectIdAbs(Sku.Pd)) throw "Sku.Pd 必须为 ObjectId";
+                        Sku.is_usable = true;
+                        Sku.sort = 0;
+                        Sku.at_crt = Datenow;
+                        Sku.at_upd = Datenow;
+                        Sku.User_crt = User_id;
+                        Sku.User_upd = User_id;
+
                         Sku._id = newObjectId();
                         document.Skus = [Sku._id];
 
@@ -146,7 +156,26 @@ const CLoptions = {
                 }
             }
         },
-        updateOne: { roles: role_pder },
+        updateOne: {
+            roles: role_pder,
+            parseCB: async (ctx) => {
+                try {
+                    const { reqBody: { filter, update } } = ctx;
+                    if (update["$set"]) {
+                        const { Catefs } = update["$set"];
+                        if (Catefs instanceof Array) {
+                            for (let i in Catefs) {
+                                if (!isObjectIdAbs(Catefs[i])) throw "Catefs 必须是 ObjectId";
+                            }
+                            await PdCL.COLLECTION.updateOne(filter, { "$set": { Catefs } })
+                            return ctx.success = "更新完成"
+                        }
+                    }
+                } catch (e) {
+                    throw e;
+                }
+            }
+        },
         updateMany: {
             roles: role_pder,
         },

@@ -59,8 +59,11 @@ exports.genReToken = (object)=> generateToken(object, true);
  */
 exports.parsePayload = (obj)=> {
 	let payload = {};
-	if(obj._id) payload._id = obj._id;
+	if(!obj._id) throw "payload 必须要有_id"
+	payload._id = obj._id;
+
 	if(obj.code) payload.code = obj.code;
+	if(obj.name) payload.name = obj.name;
 	if(obj.role) payload.role = obj.role;
 	// if(obj.Firm) payload.Firm = obj.Firm;
 

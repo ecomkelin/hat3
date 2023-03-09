@@ -31,8 +31,8 @@ server.use(koaStatic(DIR_PUBLIC));
 server.use(require("./middle/contactFront"));
 
 /** 跨域问题 如果需要就打开 */
-// const cors = require('@koa/cors');
-// server.use(cors());
+const cors = require('@koa/cors');
+server.use(cors());
 
 /** 传输压缩 */
 const compress = require('koa-compress');

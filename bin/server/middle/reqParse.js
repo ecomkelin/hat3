@@ -39,12 +39,8 @@ module.exports = async (ctx, next) => {
         let hasMethod = [0, 0]; // hasMethod[0] 为包含update方法  hasMthod[1] 不包含
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i];
-            if (key[0] === "$" && !updateKeys.includes(key)) return ctx.fail = `middle reqParse update 暂不支持此 ${key} 更新方式`
-            if (updateKeys.includes(key)) {
-                hasMethod[0] = 1;   // 如果是 update 方法 则为1
-            } else {
-                hasMethod[1] = 1;   // 如果不是update的方法 则为1
-            }
+            /** 如果用了规定的 update 方法 update下的第一层不能是普通字段 只能是 update方法 */
+            updateKeys.includes(key) ? hasMethod[0] = 1:  hasMethod[1] = 1;
             if (hasMethod[0] + hasMethod[1] === 2) return ctx.fail = "middle reqParse update 请写入正确的 update 的更新方式"
         }
         /** 如果前端没有给update方法 updateKeys 则默认 update对象为 update的 set方法 */

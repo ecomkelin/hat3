@@ -1,4 +1,5 @@
 const regulateReq = require("../../config/regulateReq");
+const getPiplines = require("../../config/getPiplines");
 
 module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
     const MToptions = { CLdoc };
@@ -71,7 +72,6 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
             try {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 if (!isObject(reqBody)) return reject("CLmodel find reqBody 要为 对象");
-
                 /** 调整 reqBody */
                 MToptions.regulates = ["filter", "lookup", "projection", "find"];
                 regulateReq(ctxObj, MToptions);
@@ -108,35 +108,3 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
     }
 }
 
-const getPiplines = (reqBody, { is_Many = false }) => {
-    const { match, projection, skip, limit, sort, lookups, unwinds } = reqBody;
-    /** project 要在 lookup 下面 */
-    const pipelines = [];
-    pipelines.push({ "$match": match })
-
-    /** find元素   注意 limit：1 其实就是 findOne */
-    if (is_Many) {
-        if (skip) pipelines.push({ "$skip": skip })
-        if (limit) pipelines.push({ "$limit": limit })
-        if (sort) pipelines.push({ "$sort": sort })
-    } else {
-        pipelines.push({ "$limit": 1 })
-    }
-
-    if (lookups instanceof Array) {
-        for (let i in lookups) {
-            pipelines.push({ "$lookup": lookups[i] });
-        }
-    }
-
-    /** 把数组编程对象 */
-    if (unwinds instanceof Array) {
-        for (let i in unwinds) {
-            pipelines.push({ "$unwind": unwinds[i] });
-        }
-    }
-
-    if (projection && Object.keys(projection).length > 0) pipelines.push({ "$project": projection })
-
-    return pipelines;
-}
