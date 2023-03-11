@@ -160,7 +160,7 @@ const CLoptions = {
             roles: role_pder,
             parseCB: async (ctx) => {
                 try {
-                    const { reqBody: { filter, update } } = ctx;
+                    const { reqBody: { filter, update = {} } } = ctx;
                     if (update["$set"]) {
                         const { Catefs } = update["$set"];
                         if (Catefs instanceof Array) {

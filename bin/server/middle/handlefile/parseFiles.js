@@ -43,6 +43,7 @@ module.exports = (ctx, form, rel_path) => new Promise(async (resolve, reject) =>
             if (err) return reject(err);
             let errMsg = null;
             try {
+                /** 先处理 body */
                 ctx.request.body = JSON.parse(fields.body);
             } catch (error) {
                 ctx.request.body = {};

@@ -63,7 +63,7 @@ const recu = (CLdoc, doc, MToptions, n) => {
                     recu(CLobj[0], doc[key][i], MToptions, n)
                 }
             } else {
-                throw "CLdoc 错误"
+                // throw "CLdoc 错误"
             }
         }
     }

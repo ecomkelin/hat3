@@ -74,23 +74,26 @@ const CLoptions = {
     Routes: {
         countDocuments: {},
         find: {
-
+            roles: [10],
+            parseCB: async ({ reqBody }) => {
+                reqBody.sort = {at_crt: -1}
+            }
         },
         findOne: {
-
+            roles: [10],
         },
         updateOne: {
-            roles: role_pder,
+            roles: [10],
         },
         updateMany: {
-            roles: role_pder,
+            roles: [10],
         },
         deleteOne: {
-            roles: role_pder,
+            roles: [10],
         },
 
         deleteMany: {
-            roles: role_pder,
+            roles: [10],
         },
     }
 }

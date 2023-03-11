@@ -271,6 +271,7 @@ module.exports = (COLLECTION, CLdoc, CLoptions, CLname, options) => {
             try {
                 const { reqBody = {}, Koptions = {} } = ctxObj;
                 const { filter = {}, update } = reqBody;
+                console.log("A.write: ", reqBody);
                 if (!isObjectIdAbs(filter._id)) return reject("CLmodel updateOne filter _id 必须为 ObjectId");
                 if (!isObject(update)) return reject("CLmodel updateOne 请传递 update 对象参数");
                 if (!update["$set"]) update["$set"] = {};
