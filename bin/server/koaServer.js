@@ -30,27 +30,11 @@ server.use(koaStatic(DIR_PUBLIC));
  */
 server.use(require("./middle/contactFront"));
 
-server.use(async (ctx, next) => {
-    // 设置跨域请求的响应头
-    ctx.set('Access-Control-Allow-Origin', '*')
-    ctx.set('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS')
-    ctx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-
-    // 处理跨域预检请求
-    if (ctx.method === 'OPTIONS') {
-        console.log(11111, "use middle")
-        ctx.status = 204
-        return
-    }
-
-    // 处理业务逻辑
-    await next()
-})
 /** 跨域问题 如果需要就打开 */
 const cors = require('@koa/cors');
 server.use(cors({
     origin: function (ctx) {
-        console.log(2222, 'coresssssss')
+        console.log(1111, 'coresssssss')
         // 允许的源地址，例如：http://example.com
         return 'http://manage.yiqi.it'
     },
