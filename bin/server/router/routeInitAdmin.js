@@ -1,3 +1,4 @@
+const UserCL = require("../../../src/Models/auth/User.Model");
 module.exports = (router) => {
     router.get('/initAdmin', async ctx => {
         try {

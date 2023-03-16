@@ -21,6 +21,11 @@ const CLdoc = {
 
     desc: { type: String },
 
+    show_list: {type: Boolean},
+    show_home: {type: Boolean},
+    show_cart: {type: Boolean},
+    show_profile: {type: Boolean},
+
     ...docBasic
 }
 
@@ -29,7 +34,17 @@ const CLoptions = {
 
     Routes: {
         countDocuments: {},
-        find: {},
+        find: {
+            parseAfter: ({reqBody, Koptions: {payload = {}}}) => {
+                reqBody.sort = {sort: -1};
+                if(!payload.role) {
+                    if(reqBody.match)reqBody.match.is_usable = true;
+                    else reqBody.match = {is_usable: true};
+
+                    console.log(1111, reqBody)
+                }
+            },
+        },
         findOne: {},
         insertOne: { roles: role_pder },
         insertMany: { roles: role_pder },
