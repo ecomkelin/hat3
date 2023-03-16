@@ -38,6 +38,7 @@ server.use(async (ctx, next) => {
 
     // 处理跨域预检请求
     if (ctx.method === 'OPTIONS') {
+        console.log(11111, "use middle")
         ctx.status = 204
         return
     }
@@ -49,6 +50,7 @@ server.use(async (ctx, next) => {
 const cors = require('@koa/cors');
 server.use(cors({
     origin: function (ctx) {
+        console.log(2222, 'coresssssss')
         // 允许的源地址，例如：http://example.com
         return 'http://manage.yiqi.it'
     },
