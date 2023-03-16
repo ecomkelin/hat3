@@ -32,7 +32,9 @@ server.use(require("./middle/contactFront"));
 
 /** 跨域问题 如果需要就打开 */
 const cors = require('@koa/cors');
-server.use(cors());
+server.use(cors({
+    credentials: true,
+}));
 
 
 /** 传输压缩 */
