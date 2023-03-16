@@ -33,7 +33,10 @@ server.use(require("./middle/contactFront"));
 /** 跨域问题 如果需要就打开 */
 const cors = require('@koa/cors');
 server.use(cors({
-    credentials: true
+    origin: 'http://manage.yiqi.it',
+    credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowHeaders: ['Content-Type', 'Authorization'],
 }));
 
 /** 传输压缩 */
