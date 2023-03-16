@@ -30,6 +30,21 @@ server.use(koaStatic(DIR_PUBLIC));
  */
 server.use(require("./middle/contactFront"));
 
+server.use(async (ctx, next) => {
+    // 设置跨域请求的响应头
+    ctx.set('Access-Control-Allow-Origin', '*')
+    ctx.set('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS')
+    ctx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
+    // 处理跨域预检请求
+    if (ctx.method === 'OPTIONS') {
+        ctx.status = 204
+        return
+    }
+
+    // 处理业务逻辑
+    await next()
+})
 /** 跨域问题 如果需要就打开 */
 const cors = require('@koa/cors');
 server.use(cors({
@@ -41,6 +56,7 @@ server.use(cors({
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowHeaders: ['Content-Type', 'Authorization']
 }));
+
 
 /** 传输压缩 */
 const compress = require('koa-compress');
