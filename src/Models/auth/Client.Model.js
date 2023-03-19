@@ -35,6 +35,9 @@ const CLdoc = {
 
         city: { type: String },
         addr: { type: String },
+
+        bell: {type: String},   // 门铃
+        note: {type: String},   // 备注
     }],
     // addrs: [{type: String}],
 

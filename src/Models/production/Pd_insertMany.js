@@ -8,7 +8,7 @@ let imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
 const thumbnail = require(path.resolve(process.cwd(), 'core/image/thumbnail'));
 
-module.exports = (code, manuName = 'omilan') => {
+module.exports = (code, manuName = 'tm1') => {
     try {
 
         const manuPathAbs = pathPublic + manuale + manuName + '/';

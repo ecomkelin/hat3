@@ -42,7 +42,7 @@ const CLdoc = {
     // order_retail: {type: Number},
     // order_price: {type: Number}, // = goods_sale - for(itemCupons.price)
 
-    freight_info: {
+    ship: {
         city: {type: String},
         addr: {type: String},
         name: {type: String},

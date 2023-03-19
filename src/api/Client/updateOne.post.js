@@ -42,6 +42,8 @@ const updateParse = (update) => {
             if (update["$set"].tel) updSet.tel = update["$set"].tel;
             if (update["$set"].city) updSet.city = update["$set"].city;
             if (update["$set"].addr) updSet.addr = update["$set"].addr;
+            if (update["$set"].bell) updSet.bell = update["$set"].bell;
+            if (update["$set"].note) updSet.note = update["$set"].note;
 
             if (Object.keys(updSet).length === 0) throw "请传递要修改的值";
             update = { "$set": updSet };
@@ -60,6 +62,8 @@ const updateParse = (update) => {
             if (!ship.city) throw "请传递 收货人城市"
             ship.addr = shipsPush.addr;
             if (!ship.addr) throw "请传递 收货人地址"
+            ship.bell = shipsPush.bell;
+            ship.note = shipsPush.note;
 
             update = { "$push": { ships: { "$each": [ship], "$position": 0, "$slice": 5 } } };
         }

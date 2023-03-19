@@ -12,7 +12,7 @@ module.exports = async (ctx) => {
         if(step && !isNaN(step)) match.step = parseInt(step);
 
         /** 开始执行 */
-        const cursor = OrdertCL.COLLECTION.find(match);
+        const cursor = OrdertCL.COLLECTION.find(match).sort({at_crt: -1});
         const objects = await cursor.toArray();
         await cursor.close();
 
